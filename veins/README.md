@@ -1,5 +1,7 @@
 # Veins 5.3.1：车辆映射与 V2V 应用
 
+本目录的网络适配源码采用 GPL-3.0-or-later，许可范围及上游说明见 [第三方许可说明](../lisence/THIRD_PARTY_NOTICES.md)。
+
 本目录保存车辆应用和 SUMO 同步管理器，使用已有 Veins 安装中的 veins_inet 连接 INET 4.5。
 
 | 文件 / 类 | 功能 |

@@ -93,3 +93,7 @@ RViz 的 `V2V communication` 显示实际收发时间、无线延迟、制动命
 - [SUMO 独立基线](sumo/README2.md)
 - [Gazebo 模型与视角](gazebo/README.md)
 - [RViz2 显示功能与视角](rviz/README.md)
+
+## License
+
+除明确标注的文件和第三方材料外，本项目原创部分采用 [Apache License 2.0](LICENSE)。Veins 网络适配文件采用 GPL-3.0-or-later。许可范围、第三方组件及其原始许可文本见 [lisence/THIRD_PARTY_NOTICES.md](lisence/THIRD_PARTY_NOTICES.md)。

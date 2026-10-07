@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// See lisence/THIRD_PARTY_NOTICES.md and lisence/GPL-3.0.txt.
 import org.car2x.veins.modules.mobility.traci.TraCIScenarioManager;
 import org.car2x.veins.subprojects.veins_inet.VeinsInetApplicationBase;
 import org.car2x.veins.subprojects.veins_inet.VeinsInetCar;

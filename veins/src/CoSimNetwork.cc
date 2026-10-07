@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// See lisence/THIRD_PARTY_NOTICES.md and lisence/GPL-3.0.txt.
 // Demo adapter: Veins is the only SUMO step owner; INET delivers warning packets.
 #include <omnetpp.h>
 #include <nlohmann/json.hpp>
