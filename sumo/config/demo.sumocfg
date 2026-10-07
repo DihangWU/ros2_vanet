@@ -1,0 +1,18 @@
+<configuration>
+    <input>
+        <net-file value="../network/straight.net.xml"/>
+        <additional-files value="../network/road_markings.add.xml"/>
+        <route-files value="../routes/two_cars.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="15"/>
+        <step-length value="0.01"/>
+    </time>
+    <gui_only>
+        <gui-settings-file value="viewsettings.xml"/>
+    </gui_only>
+    <processing>
+        <time-to-teleport value="-1"/>
+    </processing>
+</configuration>

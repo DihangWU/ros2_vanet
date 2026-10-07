@@ -1,0 +1,12 @@
+<routes>
+    <!-- 固定速度因子和 sigma，避免每次运行出现随机驾驶差异。 -->
+    <vType id="car" guiShape="passenger" width="1.8" carFollowModel="Krauss" length="5" minGap="2.5"
+           accel="2.6" decel="8" emergencyDecel="9" tau="1"
+           sigma="0" maxSpeed="15" speedFactor="1" speedDev="0"/>
+    <route id="straight" edges="road"/>
+    <!-- departPos 是车头位置：车头相距 45 m，初始净间距 40 m。 -->
+    <vehicle id="car_a" type="car" route="straight" depart="0"
+             departPos="100" departSpeed="15" color="1,0.2,0.2"/>
+    <vehicle id="car_b" type="car" route="straight" depart="0"
+             departPos="55" departSpeed="15" color="0.2,0.4,1"/>
+</routes>

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# ROS2 workspace
+ros/build/
+ros/install/
+ros/log/
+
+# Simulation output
+omnet/results/
+sumo/output/
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store

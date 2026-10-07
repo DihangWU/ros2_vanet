@@ -1,0 +1,11 @@
+<viewsettings>
+    <!-- 聚焦两车从出发到停车的区域，而不是整条 1000 m 道路。 -->
+    <viewport zoom="1000" x="77.5" y="-1.6"/>
+    <scheme name="learning_demo">
+        <background backgroundColor="245,247,250"/>
+        <vehicles vehicleMode="0" vehicleQuality="2"
+                  vehicle_minSize="3" vehicle_exaggeration="1"
+                  vehicleName_show="1" vehicleName_size="12"
+                  vehicleName_color="30,30,30" showBlinker="1"/>
+    </scheme>
+</viewsettings>
