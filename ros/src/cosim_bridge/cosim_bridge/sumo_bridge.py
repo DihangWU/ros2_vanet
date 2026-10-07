@@ -24,6 +24,9 @@ class SumoBridge(Node):
         super().__init__('sumo_bridge')
         self.declare_parameter('project_root', '')
         self.declare_parameter('sumo_gui', True)
+        self.declare_parameter('network_mode', False)
+        self.declare_parameter('network_gui', False)
+        self.network_mode = self.get_parameter('network_mode').value
         self.declare_parameter('duration', 15.0)
         self.declare_parameter('playback_rate', 1.0)
         self.root = Path(self.get_parameter('project_root').value).resolve()
@@ -54,6 +57,7 @@ class SumoBridge(Node):
         self.clock_pub = self.create_publisher(ClockMessage, '/clock', 10)
         self.tf = TransformBroadcaster(self)
         self.log = EventLog(self.root, 'sumo_bridge')
+        self.real_warning_pub = self.create_publisher(V2VWarning, '/v2v_warning', 10)
         self.front_event_pub = self.create_publisher(V2VWarning, '/demo/front_brake', 10)
         self.warning_sub = self.create_subscription(V2VWarning, '/v2v_warning', self.on_warning, 10)
         self.command_sub = self.create_subscription(BrakeCommand, '/brake_cmd', self.on_command, 10)
@@ -78,9 +82,16 @@ class SumoBridge(Node):
                '--end', str(self.duration), '--seed', '42', '--no-step-log', 'true']
         if self.gui:
             cmd += ['--delay', '0', '--quit-on-end']
-        if self.gui:
-            self.get_logger().info('SUMO 窗口准备好后，请点击绿色“开始”；演示时间从开始运行计算。')
-        self.traci.start(cmd)
+        if self.network_mode:
+            if self.duration != 15.0:
+                raise ValueError('当前网络场景时长固定为 15 秒')
+            from .network_backend import NetworkBackend
+            self.get_logger().info('连接真实 Veins + INET 网络；SUMO 打开后请点击开始。')
+            self.network_backend = NetworkBackend(self)
+        else:
+            if self.gui:
+                self.get_logger().info('SUMO 窗口准备好后，请点击绿色“开始”；演示时间从开始运行计算。')
+            self.traci.start(cmd)
         self.started = time.monotonic()
         # 独立于 /clock 的稳态定时器；每个回调推进 0.05 仿真秒。
         self.timer = self.create_timer(0.05 / self.rate, self.tick,
@@ -112,6 +123,9 @@ class SumoBridge(Node):
                        published_time_s=seconds(command.header.stamp))
 
     def tick(self):
+        if self.network_mode:
+            self.network_backend.tick()
+            return
         advanced = not self.finished
         if not self.finished:
             if self.now >= 5.0 - 1e-8 and not self.braked:
@@ -284,6 +298,9 @@ class SumoBridge(Node):
             self.closed = True
             if not self.trajectory.closed:
                 self.trajectory.close()
+            if self.network_mode:
+                self.network_backend.close()
+                return
             # launch 的 SIGINT 也会发给 SUMO，关闭时避免重复中断输出堆栈。
             try:
                 self.traci.close()

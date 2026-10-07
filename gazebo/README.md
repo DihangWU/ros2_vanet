@@ -59,6 +59,6 @@ RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo
 
 ## ROS2 制动闭环
 
-默认运行已加入测试警告与 ROS2 制动控制：前车急刹后，控制器通过 SUMO 桥接节点控制后车减速。Gazebo 继续订阅同一份车辆状态，不直接执行制动。测试警告、制动事件和日志说明见 [ROS2 README](../ros/README.md)。`test_warning:=false` 可以运行普通跟车对照场景。
+默认运行已接入 Veins + INET 实际收包与 ROS2 制动控制：前车急刹后发送无线警告，后车收包后由控制器生成停车目标，经 Veins 执行到 SUMO。Gazebo 继续订阅同一份车辆状态，不直接执行制动。事件和日志见 [ROS2 README](../ros/README.md)。`network:=false` 切换人工警告，再加 `test_warning:=false` 运行普通跟车对照场景。
 
 当前后车按目标净间距 2.5 m 靠近停车，实测最终两车停止、净间距约 2.55 m；模型继续同步 SUMO 状态。

@@ -16,3 +16,8 @@ sumo/output/
 .vscode/
 .idea/
 .DS_Store
+
+# Network adapter build and run artifacts
+omnet/build/
+veins/src/*_m.cc
+veins/src/*_m.h

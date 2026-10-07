@@ -1,86 +1,22 @@
 # ROS2-VANET 协同紧急制动学习 Demo
 
-本项目以学习和可读性为优先：按组件组织文件，逐层跑通，最后连接闭环。
+前车急刹并通过 Veins + INET 无线网络发送警告；后车实际收包后，ROS2 生成制动命令。SUMO 是车辆运动唯一真值源，Gazebo 和 RViz2 同步三维展示。目录按组件划分，优先保持学习时的可读性。
 
-## 环境基线
-
-以下版本由当前使用环境提供。已验证本机 ROS2 Jazzy、SUMO 1.22.0 和 RViz2 的当前桥接场景；网络组件尚未在本项目中验证集成。
-
-| 组件 | 版本 | 职责 |
+| 目录 | 版本 | 功能 |
 | --- | --- | --- |
-| ROS2 | Jazzy | 警告接收、制动决策、SUMO 桥接与状态发布 |
-| Gazebo | Harmonic / Sim 8.15.0 | 同步展示 SUMO 车辆的 3D 运动 |
-| RViz2 | 随 ROS2 Jazzy 环境，具体版本待确认 | 展示 TF、轨迹及通信和制动状态 |
-| SUMO | 1.22.0 | 交通仿真、车辆运动与制动执行 |
-| Veins | 5.3.1 | TraCI 车辆映射、V2V 应用逻辑 |
-| OMNeT++ | 6.1 | 离散事件调度、网络拓扑和仿真运行 |
-| INET Framework | 4.5 | 网络协议和无线通信模型 |
+| sumo/ | SUMO 1.22.0 | 道路、车辆和运动计算 |
+| veins/ | Veins 5.3.1 + veins_inet | 车辆映射、唯一 TraCI 步进者、V2V 应用 |
+| omnet/ | OMNeT++ 6.1 | 网络拓扑、调度、构建与运行 |
+| inet/ | INET 4.5 | UDP/IP、802.11p 和无线介质 |
+| ros/ | ROS2 Jazzy | 收包事件桥接、制动决策、状态发布 |
+| gazebo/ | Harmonic / Sim 8.15.0 | 三维模型和道路展示 |
+| rviz/ | ROS2 Jazzy RViz2 | 三维 Marker、TF、轨迹与通信状态 |
 
-## 目录
+这些目录保存项目自己的文件，第三方安装不复制到项目中。Veins、INET 和车辆应用运行在同一个 OMNeT++ 进程中。
 
-```text
-CoSimDemo/
-├── gazebo/   # 世界、车辆模型和可视化配置
-├── rviz/     # RViz 配置与显示约定
-├── ros/      # ROS2 工作空间、节点和接口
-├── sumo/     # 道路、车辆路线和交通配置
-├── veins/    # V2V 应用、车辆映射和 TraCI 相关配置
-├── omnet/    # 联合网络拓扑、omnetpp.ini 和运行配置
-└── inet/     # 本项目使用的 INET 协议和无线模型配置
-```
+## 构建与启动
 
-这些目录存放 Demo 自己的文件，不要求复制第三方软件源码或安装文件。
-已实现并验证 SUMO 两车直路独立场景，运行方法见 `sumo/README2.md`。已实现 ROS2 两车状态桥接和 RViz2 配置，构建运行方法见 `ros/README.md`。已实现 Gazebo 三维姿态同步，网络组件目前只有目录说明。
-跨组件的文件通过明确的路径引用连接，避免复制相同配置。
-
-## 第一版约定
-
-1. SUMO 是车辆位置和速度的唯一真值源，负责推进车辆运动和执行制动。
-2. Gazebo 只同步 SUMO 状态，不计算另一套车辆运动结果。
-3. ROS2 接收 V2V 警告，生成后车制动命令，再交给 SUMO 桥接节点。
-4. RViz2 展示 ROS2 发布的状态，不直接控制车辆。
-5. 联合运行时必须明确唯一的 SUMO 启动者和仿真步进者。由 Veins 管理步进时，ROS2 Bridge 不得自行调用 simulationStep；桥接方式在接入阶段确定。
-6. 仿真时间、坐标系和跨进程消息格式在接入前统一，所有事件记录使用同一仿真时间基准。
-
-## 目标数据流
-
-```text
-SUMO ──TraCI──> Veins / OMNeT++ / INET
-                         │
-                    后车收到 V2V 警告
-                         │ 跨进程接口（待实现）
-                         ▼
-                ROS2 v2v_receiver
-                         │ /v2v_warning
-                         ▼
-                ROS2 brake_controller
-                         │ /brake_cmd
-                         ▼
-                ROS2 sumo_bridge ──控制请求──> SUMO
-                         │
-                   车辆状态 / TF / Path
-                         ├──> Gazebo 同步展示
-                         └──> RViz2 状态展示
-```
-
-OMNeT++、Veins 和 INET 在同一个网络仿真体系中协作；目录分开是为了分清学习职责，不表示三个独立运行进程。INET 与 Veins 的具体集成方式需结合已有工程确认。
-
-## 当前进度
-
-| 阶段 | 状态 | 已完成内容 |
-| --- | --- | --- |
-| SUMO 独立场景 | 已完成 | 单车道直路、两车、道路虚线、实时播放、前车急刹、轨迹日志 |
-| SUMO → ROS2 | 已完成 | `cosim_bridge` 包、真实车辆状态、Odometry、TF、Path 和 `/clock` |
-| RViz2 展示 | 已完成 | 三维红蓝小车、自由 Orbit 视角、速度文字、道路虚线、轨迹及 TF |
-| Gazebo 展示 | 已完成 | 本地三维小车、道路虚线、ROS2 姿态同步和自由视角 |
-| ROS2 制动控制 | 已完成（测试警告） | 自定义消息、控制器、TraCI 执行、响应日志、RViz 警告线 |
-| VANET 接入 | 待实现 | Veins / OMNeT++ / INET 后车收包事件传入 ROS2 |
-
-当前使用真实 SUMO 车辆状态，已实现测试警告驱动的 ROS2 后车制动闭环。SUMO 安全跟车规则仍启用，真实 VANET 收包事件尚未接入。
-
-## 快速开始：SUMO + ROS2 + Gazebo + RViz2
-
-在项目根目录执行，首次运行需构建工作空间：
+在项目根目录执行：
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -91,80 +27,61 @@ export ROS_LOG_DIR="$PWD/log/runtime"
 ros2 launch cosim_bridge demo.launch.py
 ```
 
-Gazebo 和 RViz2 先启动，8 秒后启动 SUMO GUI（`startup_delay` 可调整）。车辆开始运动后按现实时间播放，仿真第 5 秒前车急刹，第 15 秒结束；最终画面持续保留，按 Ctrl+C 退出。默认双窗口运行实测约 15.8 秒，机器渲染负载可能使播放略慢。
+默认启用无线闭环。Gazebo 和 RViz2 先打开，8 秒后打开 SUMO；点击 SUMO 的绿色 Play 才开始运动。默认约 1 秒现实时间对应 1 秒仿真，5 秒急刹，15 秒结束并保留画面，Ctrl+C 退出。启动等待不计入演示，高负载时播放可能变慢。三维窗口可自由旋转、平移、缩放；不要单独点击 Gazebo Play 推进时间。
 
-常用启动参数：
+首次运行自动构建网络应用，需要 clang++、nlohmann/json.hpp，以及已编译的 OMNeT++、Veins、INET、veins_inet release 库。安装路径与覆盖方法见 [OMNeT++ 说明](omnet/README.md)。SUMO、netconvert 需在 PATH 中。
 
 ```bash
-# 只显示 RViz2，SUMO 在后台运行
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false
+# 无 SUMO 窗口，自动开始，保留三维窗口
+ros2 launch cosim_bridge demo.launch.py sumo_gui:=false
 
-# 半速播放，15 秒仿真约需 30 秒
+# 可选 Qtenv 窗口；必要时先在 Qtenv 点击 Run，再在 SUMO 点击 Play
+ros2 launch cosim_bridge demo.launch.py network_gui:=true
+
+# 半速，15 秒仿真约需 30 秒
 ros2 launch cosim_bridge demo.launch.py playback_rate:=0.5
 
-# 不开窗口，验证 ROS2 消息（仍按实时节拍运行）
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false rviz:=false
+# 原有人工警告闭环
+ros2 launch cosim_bridge demo.launch.py network:=false
+
+# 普通安全跟车基线
+ros2 launch cosim_bridge demo.launch.py network:=false test_warning:=false
 ```
 
-SUMO 可执行文件需在 PATH 中；TraCI 加载方式见 [SUMO 说明](sumo/README2.md)。从项目根目录或 `ros/` 启动可自动定位资源，其他目录需指定 `project_root`。
+运行前关闭上一组演示，避免端口冲突和多个 /clock。从项目根目录或 ros/ 启动可自动定位资源，其他目录需指定 project_root。
 
 ## 当前数据流
 
 ```text
-SUMO（车辆运动真值）
-  ↕ TraCI：ROS2 sumo_bridge 统一启动和推进仿真
-ROS2
-  ├── /car_a/odom、/car_b/odom
-  ├── /car_a/path、/car_b/path
-  ├── /tf：map → car_a/base_link、car_b/base_link
-  ├── /clock：SUMO 仿真时间
-  └── /demo/markers：车体、道路、速度与状态
-        ↓
-      RViz2（三维车体 / TF / Path）
+SUMO ↔ TraCI ↔ Veins（唯一 SUMO 步进者）
+                 ↓ 前车应用
+          INET UDP/IP + 802.11p
+                 ↓ 后车实际收包
+          JSONL/TCP → ROS2 sumo_bridge
+                 ↓ /v2v_warning
+          brake_controller
+                 ↓ /brake_cmd
+          JSONL/TCP → Veins → TraCI → SUMO 后车
 
-/car_a/odom、/car_b/odom
-        ↓
-ROS2 gazebo_sync → ros_gz_bridge 姿态服务
-        ↓
-      Gazebo（三维车辆同步）
+SUMO 状态 → ROS2 /clock、Odom、TF、Path、Marker → Gazebo / RViz2
 ```
 
-ROS2 桥接和独立 SUMO 脚本是两种运行入口。运行桥接节点时，不再运行独立脚本推进同一仿真。
+收包桥接目前放在 network_backend.py，没有单独的 v2v_receiver 节点。网络模式下 ROS2 不调用 simulationStep。TCP 9998 传状态与控制，TraCI 9999 连接 SUMO；TCP 不是车间无线链路。Gazebo 从暂停状态按 SUMO 时间定步展示，不计算另一套动力学或发布另一个 ROS2 时钟。
 
-## 学习入口与下一步
+## 验证结果与边界
 
-- [SUMO 场景和独立运行](sumo/README2.md)
-- [ROS2 构建、节点、Topic、时间与坐标转换](ros/README.md)
-- [Gazebo 三维场景、同步与视角操作](gazebo/README.md)
-- [RViz2 三维显示与视角操作](rviz/README.md)
-- [RViz2 显示配置使用方法](rviz/USAGE.md)
-- [RViz2 配置文件](rviz/two_cars.rviz)
+当前配置实测：5.000 秒急刹，5.001 秒发包，5.001152 秒收包，5.05 秒执行 ROS2 制动。无线仿真延迟约 0.152 ms，ROS2 桥接周期为 0.05 秒。15 秒两车均为零速，最终净间距约 2.548 m。
 
-Gazebo 和 RViz2 现均支持三维展示及自由旋转、平移、缩放，操作见各模块 README。ROS2 制动命令闭环已完成；下一步将测试警告替换为 VANET 中后车实际收包事件。
+极低发射功率对照没有收包，也没有执行 ROS2 制动；SUMO 自带安全跟车仍会减速，不能只凭停车判断通信生效。停车策略让后车收拢到约 2.5 m，服务于学习演示，不作为道路安全算法验证。
 
-最终演示目标为 15 秒，前车在约 5 秒急刹。具体消息延迟和制动响应时间以实际仿真日志为准。
+网络模式当前固定两车、单条直路、15 秒和单次警告。Cmdenv 无线闭环与两个三维窗口已联调；Qtenv 界面操作尚未验证。日志见 omnet/results/network_events.jsonl、OMNeT++ .sca/.vec 和 ros/log/events/summary.json，生成结果不纳入 Git。
 
-## 手动开始与时间同步
+## 模块入口
 
-三个窗口准备完成后，SUMO 默认保持等待，请点击 SUMO 工具栏的绿色“开始 / Play”按钮。点击开始后才推进演示：约 5 秒时前车急刹，15 秒时结束。启动等待时间不计入车辆演示。
-
-RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
-
-`startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
-
-## 当前制动闭环
-
-```text
-SUMO 前车急刹 /demo/front_brake
-  → test_warning_publisher（测试输入，默认延迟 0.1 仿真秒）
-  → /v2v_warning
-  → brake_controller
-  → /brake_cmd
-  → sumo_bridge / TraCI
-  → SUMO 后车制动
-  → Gazebo + RViz2 同步展示
-```
-
-默认运行启用测试警告，RViz 显示 `TEST WARNING` 和 `ROS BRAKING`。用 `test_warning:=false` 关闭测试输入，可观察普通跟车基线。详细消息字段、事件日志和验证方法见 [ROS2 README](ros/README.md)。
-
-当前采用靠近停车策略：目标净间距 2.5 m，实测两车最终停止、净间距约 2.548 m，接近跟车基线约 2.521 m。人工警告延迟不代表无线传播延迟，真实 VANET 网络尚未接入。
+- [ROS2 节点、接口与日志](ros/README.md)
+- [Veins 应用与同步](veins/README.md)
+- [INET 无线配置](inet/README.md)
+- [OMNeT++ 构建与运行](omnet/README.md)
+- [SUMO 独立基线](sumo/README2.md)
+- [Gazebo 模型与视角](gazebo/README.md)
+- [RViz2 显示功能与视角](rviz/README.md)

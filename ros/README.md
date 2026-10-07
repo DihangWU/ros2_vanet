@@ -1,6 +1,6 @@
 # ROS2 Jazzy：车辆状态与制动闭环
 
-SUMO 是车辆运动真值源。ROS2 读取车辆状态、接收警告并发出后车制动命令，Gazebo 和 RViz2 同步展示。当前警告来自测试节点，尚未接入 Veins / OMNeT++ / INET 的无线收包事件。
+SUMO 是车辆运动真值源。ROS2 读取车辆状态、接收警告并发出后车制动命令，Gazebo 和 RViz2 同步展示。默认接入 Veins / OMNeT++ / INET 后车实际收包事件；人工警告保留为可选学习入口。
 
 ## 构建与运行
 
@@ -26,13 +26,19 @@ ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false rviz:=fals
 关闭测试警告，观察普通跟车基线：
 
 ```bash
-ros2 launch cosim_bridge demo.launch.py test_warning:=false
+ros2 launch cosim_bridge demo.launch.py network:=false test_warning:=false
 ```
 
-`warning_delay:=0.1` 默认延迟 0.1 仿真秒发布测试警告，可取 0 到 0.4 秒。`playback_rate:=0.5` 为半速；`duration` 默认 15 秒；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
+`network:=false` 恢复人工警告模式，此时 `warning_delay:=0.1` 控制测试警告延迟，可取 0 到 0.4 秒。网络模式不启动测试节点，`test_warning` 和 `warning_delay` 不影响实际收包。`network_gui:=true` 可打开 Qtenv，必要时先点击 Run；界面操作尚未验证。`playback_rate:=0.5` 为半速；`duration` 默认 15 秒，网络模式目前必须为 15 秒；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
 每次启动前关闭上一组演示，避免同时发布两个 `/clock`。
 
-## 节点与数据流
+## 默认网络闭环
+
+Veins 是唯一 SUMO 步进者。`network_backend.py` 在 TCP 9998 接收车辆状态和 INET 实际收包事件，经 `sumo_bridge` 发布 `/v2v_warning`，`simulated=false`。控制器发布 `/brake_cmd` 后，ROS2 在下一次应答中把停车目标交给 Veins 执行。ROS2 在此模式不调用 TraCI `simulationStep()`。
+
+收包桥接当前集成在 `sumo_bridge`，没有独立的 `v2v_receiver` 节点。每步 JSONL 应答用于同步进程，不替代车辆间无线网络。网络构建依赖与安装路径见 [OMNeT++ README](../omnet/README.md)。
+
+## 可选人工警告数据流（network:=false）
 
 ```text
 sumo_bridge：前车在 t=5 急刹
@@ -50,7 +56,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
   └──> gazebo_sync → Gazebo
 ```
 
-测试输入显示为 `TEST WARNING`，其延迟不等于无线网络延迟。未来替换测试节点，让真实后车收包事件发布 `/v2v_warning` 即可复用控制接口。
+测试输入显示为 `TEST WARNING`，其延迟不等于无线网络延迟。默认实际收包输入显示为 `V2V WARNING`，复用相同控制接口。
 
 ## 文件阅读顺序
 
@@ -59,6 +65,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
 | `src/cosim_interfaces/msg/V2VWarning.msg` | 事件 ID、发送车、接收车、事件时间、位置、速度和模拟标记 |
 | `src/cosim_interfaces/msg/BrakeCommand.msg` | 命令时间、关联事件 ID、目标车、目标速度和目标停车净间距 |
 | `src/cosim_bridge/cosim_bridge/test_warning_publisher.py` | 真实交通事件如何变成测试警告 |
+| `src/cosim_bridge/cosim_bridge/network_backend.py` | 实际收包事件、锁步 JSONL 接口、网络进程管理 |
 | `src/cosim_bridge/cosim_bridge/brake_controller.py` | 警告校验、去重和生成命令 |
 | `src/cosim_bridge/cosim_bridge/sumo_bridge.py` | SUMO 步进、执行命令、响应记录和状态发布 |
 | `src/cosim_bridge/cosim_bridge/event_log.py` | 各节点独立 JSONL 日志 |
@@ -72,8 +79,8 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
 
 | Topic | 类型 | 含义 |
 | --- | --- | --- |
-| `/demo/front_brake` | `cosim_interfaces/msg/V2VWarning` | 前车交通急刹事件 |
-| `/v2v_warning` | `cosim_interfaces/msg/V2VWarning` | 后车收到的警告；当前由测试节点模拟 |
+| `/demo/front_brake` | `cosim_interfaces/msg/V2VWarning` | 人工警告模式的前车交通急刹事件；网络模式记入日志 |
+| `/v2v_warning` | `cosim_interfaces/msg/V2VWarning` | 默认为后车 INET 实际收包警告；可选人工测试输入 |
 | `/brake_cmd` | `cosim_interfaces/msg/BrakeCommand` | 后车最终降至 0 m/s，目标停车净间距 2.5 m |
 | `/car_a/odom`、`/car_b/odom` | `nav_msgs/msg/Odometry` | 车辆中心位置、朝向和前进速度 |
 | `/car_a/path`、`/car_b/path` | `nav_msgs/msg/Path` | 行驶轨迹 |
@@ -95,9 +102,9 @@ ros2 topic echo /brake_cmd
 
 SUMO 内部步长 0.01 秒，ROS2 每 0.05 仿真秒取样，默认 20 Hz。控制器和测试发布器使用 `/clock`；步进定时器使用稳态时钟。事件记录精度受 0.05 秒取样周期及 ROS2 调度影响。
 
-`map` 保留 SUMO 平面坐标。SUMO 车头位置减去半个车长后作为 ROS 车体中心；SUMO 从正北顺时针的角度转换为 ROS 从正东逆时针的 yaw。车体 x 轴朝前。
+`map` 保留 SUMO 平面坐标。SUMO 车头位置减去半个车长后作为 ROS 车体中心；车体 x 轴朝前。人工警告模式把 SUMO 角度转换为 ROS yaw；当前网络适配器只支持单条直路，使用 y=-1.6、yaw=0，不可直接套用到任意道路。
 
-SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合 `brake_command_applied` 事件和关闭测试警告的基线判断。当前场景比较的是固定测试输入下的行为，不是无线网络效果评估。
+SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合收包和 `brake_command_applied` 事件，以及普通跟车或无收包基线判断。当前为单次警告学习演示，不是统计性的无线性能评估。
 
 Gazebo 从暂停状态按 SUMO 时间定步推进，不发布另一个 ROS2 时钟。两个三维窗口不自动重置相机；操作见 [Gazebo](../gazebo/README.md) 和 [RViz2](../rviz/README.md)。
 
@@ -110,10 +117,13 @@ Gazebo 从暂停状态按 SUMO 时间定步推进，不发布另一个 ROS2 时�
 - `sumo_bridge.jsonl`：前车急刹、命令接收与执行、首次后车速度响应及结束摘要。
 - `trajectory.csv`：两车中心位置、速度和净间距。
 - `summary.json`：是否执行 ROS2 制动、最小间距和最终速度。
+- `network_process.log`：默认模式的 SUMO / OMNeT++ 进程输出；网络失败时优先查看。
+
+网络精确发包、收包与控制应用时间另存于 `omnet/results/network_events.jsonl`，统计量为同目录 `.sca/.vec`。日志中的 `network_delay_s` 是无线发送到接收延迟，不能与 0.05 秒的 ROS2 桥接周期混为一谈。
 
 JSONL 同时记录 SUMO 仿真时间和本机单调时钟。测试节点关闭时，不会生成新的测试警告日志；旧文件不代表本轮事件。
 
-已验证：5.00 秒前车急刹，5.10 秒发布警告及执行后车制动，6.60 秒首次记录到后车降速；最终两车均停止，净间距约 2.548 m。关闭测试警告时，未执行 ROS2 制动，最小净间距约 2.521 m。这些结果对应当前初始间距和驾驶参数。
+默认网络模式已验证：5.00 秒急刹、5.001 秒发包、5.001152 秒实际收包、5.05 秒执行制动；15 秒两车均停止，净间距约 2.548 m。极低发射功率对照无警告、无 ROS2 制动，最终间距约 2.521 m。原人工警告模式仍保留，其警告及命令约在 5.10 秒出现。这些结果对应当前初始间距和驾驶参数。
 
 控制器边界检查（从项目根目录执行，先 source 环境）：
 
@@ -121,7 +131,7 @@ JSONL 同时记录 SUMO 仿真时间和本机单调时钟。测试节点关闭�
 python3 ros/tests/test_brake_controller.py
 ```
 
-已验证有效警告、重复警告、过期警告、错误目标车辆和非法速度的处理。当前闭环由测试警告驱动，下一步接入真实 VANET 收包事件。
+已验证有效警告、重复警告、过期警告、错误目标车辆和非法速度的处理。实际 INET 收包闭环也已完成联调。
 
 ## 靠近停车策略
 

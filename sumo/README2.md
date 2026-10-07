@@ -1,6 +1,6 @@
 # SUMO 1.22.0：两车直路学习场景
 
-这是独立的 SUMO 跟车基线，尚未接入 ROS2、Veins 或 V2V。
+本文先说明独立 SUMO 跟车基线；联合运行已接入 ROS2、Veins 与 INET，入口和步进者见文末。
 
 ## 运行
 
@@ -59,15 +59,17 @@ TraCI 速度控制仍受默认安全及减速度规则约束，具体行为见 [
 
 ## 与后续联合仿真的边界
 
-当前脚本是唯一启动 SUMO 并调用 `simulationStep()` 的客户端。接入 Veins 后需要明确新的步进者，不能同时运行本脚本推进同一仿真。
+独立运行时当前脚本是唯一启动 SUMO 并调用 `simulationStep()` 的客户端。默认联合运行时由 Veins 唯一步进，不能同时运行本脚本推进同一仿真。
 当前后车减速证明的是 SUMO 跟车模型的行为，不证明 V2V 协同制动效果。后续应记录后车收包时间与 ROS2 控制命令，并与这份基线比较。
 
 ## 车辆显示
 
-GUI 自动加载 `config/viewsettings.xml`，聚焦车辆活动区域，并显示俯视车辆外形、红蓝颜色和车辆 ID。可以用鼠标滚轮继续放大。SUMO 此处显示的是二维车辆图形；三维车辆模型将在 Gazebo 阶段添加。
+GUI 自动加载 `config/viewsettings.xml`，聚焦车辆活动区域，并显示俯视车辆外形、红蓝颜色和车辆 ID。可以用鼠标滚轮继续放大。SUMO 显示二维车辆，联合运行的 Gazebo 和 RViz2 展示三维车辆。
 
 道路两侧增加固定白色虚线：每段 3 m，间隔 5 m，文件为 `network/road_markings.add.xml`。镜头跟随车辆时，虚线向后移动，提供速度参照；这些图形只影响显示。形状配置参见 [SUMO Shapes](https://sumo.dlr.de/docs/Simulation/Shapes.html)。
 
 ## ROS2 制动入口
 
-独立脚本仍是普通跟车基线。通过 `ros2 launch cosim_bridge demo.launch.py` 运行时，默认接收测试警告并执行 ROS2 后车制动命令。两种入口不要同时控制同一仿真；闭环日志在 `ros/log/events/`，使用 `test_warning:=false` 可关闭测试警告。接口和对照结果见 [ROS2 README](../ros/README.md)。
+独立脚本仍是普通跟车基线。`ros2 launch cosim_bridge demo.launch.py` 默认启用 Veins + INET：Veins 通过 TraCI 9999 唯一步进 SUMO，后车实际收包后 ROS2 生成命令，再交给 Veins 执行。SUMO GUI 等待点击 Play，默认现实时间播放 15 秒。两种入口不要同时控制同一仿真。
+
+`network:=false` 恢复 ROS2 直接步进及人工警告；再加 `test_warning:=false` 关闭测试输入。闭环日志在 `ros/log/events/`，精确网络事件在 `omnet/results/`。接口与结果见 [ROS2 README](../ros/README.md)。

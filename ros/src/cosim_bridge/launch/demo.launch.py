@@ -3,7 +3,7 @@ from pathlib import Path
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
@@ -28,12 +28,14 @@ def generate_launch_description():
              condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
         Node(package='cosim_bridge', executable='gazebo_sync',
              condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
+        DeclareLaunchArgument('network', default_value='true'),
+        DeclareLaunchArgument('network_gui', default_value='false'),
         DeclareLaunchArgument('test_warning', default_value='true'),
         DeclareLaunchArgument('warning_delay', default_value='0.1'),
         Node(package='cosim_bridge', executable='brake_controller', output='screen',
              parameters=[{'project_root': LaunchConfiguration('project_root'), 'use_sim_time': True}]),
         Node(package='cosim_bridge', executable='test_warning_publisher', output='screen',
-             condition=IfCondition(LaunchConfiguration('test_warning')),
+             condition=IfCondition(PythonExpression(["'", LaunchConfiguration('network'), "' == 'false' and '", LaunchConfiguration('test_warning'), "' == 'true'"])),
              parameters=[{'project_root': LaunchConfiguration('project_root'), 'use_sim_time': True,
                           'warning_delay': ParameterValue(LaunchConfiguration('warning_delay'), value_type=float)}]),
         DeclareLaunchArgument('duration', default_value='15.0'),
@@ -45,6 +47,8 @@ def generate_launch_description():
         TimerAction(period=LaunchConfiguration('startup_delay'), actions=[
             Node(package='cosim_bridge', executable='sumo_bridge', output='screen',
                  parameters=[{
+                     'network_mode': ParameterValue(LaunchConfiguration('network'), value_type=bool),
+                     'network_gui': ParameterValue(LaunchConfiguration('network_gui'), value_type=bool),
                      'project_root': LaunchConfiguration('project_root'),
                      'sumo_gui': ParameterValue(LaunchConfiguration('sumo_gui'), value_type=bool),
                      'duration': ParameterValue(LaunchConfiguration('duration'), value_type=float),
