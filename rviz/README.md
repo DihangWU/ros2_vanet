@@ -17,7 +17,7 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 固定坐标系为 `map`，启用 `use_sim_time=true`。车辆由三维车身、座舱、车窗、四个车轮和前后灯的 Marker 组成，每辆车 13 个部件，轨迹随运动增长。仿真结束后，数据发布节点继续发布最终状态，方便观察停车位置。
 
-当前状态文字反映 SUMO 跟车基线；V2V 警告和通信线尚未接入。
+当前支持警告连线和 ROS2 制动状态。默认警告来自测试节点，显示为 `TEST WARNING`，尚未接入真实 VANET 收包事件。
 
 ## 启动
 
@@ -67,3 +67,11 @@ rviz2 -d rviz/two_cars.rviz --ros-args -p use_sim_time:=true
 RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
 
 `startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
+
+## 警告与后车制动
+
+正常时显示绿色参照连线与 `READY (no warning)`。收到警告后连线变成橙色，默认显示 `TEST WARNING`；后车执行 ROS2 命令后，速度标签显示 `ROS BRAKING`，近似停车后显示 `STOPPED`。连线是状态展示，不代表已经模拟了无线传播。
+
+车辆、道路及警告均通过 `/demo/markers` 显示，无需新增 RViz 插件。`test_warning:=false` 可关闭测试输入，查看普通跟车基线。命令和时间记录见 [ROS2 README](../ros/README.md)。
+
+后车现采用靠近停车策略，最终净间距约 2.55 m。`ROS BRAKING` 表示已执行 ROS2 停车目标，减速程度随实时距离调整，不意味着收到警告时立即停车。

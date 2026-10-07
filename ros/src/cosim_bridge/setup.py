@@ -12,5 +12,7 @@ setup(
     maintainer='CoSimDemo learner', maintainer_email='learner@example.com',
     description='SUMO to ROS2 state bridge', license='Apache-2.0',
     entry_points={'console_scripts': ['sumo_bridge = cosim_bridge.sumo_bridge:main',
-                                         'gazebo_sync = cosim_bridge.gazebo_sync:main']},
+                                         'gazebo_sync = cosim_bridge.gazebo_sync:main',
+                                         'brake_controller = cosim_bridge.brake_controller:main',
+                                         'test_warning_publisher = cosim_bridge.test_warning_publisher:main']},
 )

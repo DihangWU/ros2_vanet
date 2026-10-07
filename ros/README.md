@@ -1,8 +1,8 @@
-# ROS2 Jazzy：接口和状态发布
+# ROS2 Jazzy：车辆状态与制动闭环
 
-当前实现 `cosim_bridge` Python 包。`sumo_bridge` 启动并推进 SUMO，读取两车真值，发布 ROS2 消息供 RViz2 使用。尚未实现 V2V 接收和 ROS2 制动控制。
+SUMO 是车辆运动真值源。ROS2 读取车辆状态、接收警告并发出后车制动命令，Gazebo 和 RViz2 同步展示。当前警告来自测试节点，尚未接入 Veins / OMNeT++ / INET 的无线收包事件。
 
-## 构建和运行
+## 构建与运行
 
 从项目根目录执行：
 
@@ -15,73 +15,116 @@ export ROS_LOG_DIR="$PWD/log/runtime"
 ros2 launch cosim_bridge demo.launch.py
 ```
 
-默认打开 Gazebo 和 RViz2，等待 8 秒后启动 SUMO GUI；可用 `startup_delay` 调整等待时间。车辆运动开始后，仿真 1 秒约等于现实 1 秒，第 5 秒前车急刹，第 15 秒停止推进。最终状态持续发布，窗口保留，按 Ctrl+C 退出。
+默认先打开 Gazebo 和 RViz2，8 秒后打开 SUMO。点击 SUMO 的绿色“开始 / Play”按钮才开始运行；约第 5 秒前车急刹，15 秒结束后保留最终画面，Ctrl+C 退出。不要单独点击 Gazebo 的播放按钮。
 
-只开 RViz2，不开 Gazebo 和 SUMO 窗口：
-
-```bash
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false
-```
-
-无界面验证或半速观看：
+无界面运行时无需点击按钮，会自动实时运行：
 
 ```bash
 ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false rviz:=false
-ros2 launch cosim_bridge demo.launch.py playback_rate:=0.5
 ```
 
-从项目根目录或 `ros/` 启动可以自动找到项目资源。从其他目录启动时，传入 `project_root:=/home/maple/Desktop/CoSimDemo`。
-SUMO 工具需在 PATH 中；TraCI 加载规则与 `../sumo/scripts/run_demo.py` 相同。
+关闭测试警告，观察普通跟车基线：
 
-## 阅读顺序
+```bash
+ros2 launch cosim_bridge demo.launch.py test_warning:=false
+```
 
-1. `src/cosim_bridge/launch/demo.launch.py`：参数、RViz 配置路径和启动顺序。
-2. `src/cosim_bridge/cosim_bridge/sumo_bridge.py` 的 `tick()`：实时定时器、SUMO 步进、前车制动和状态读取。
-3. `publish_state()`：里程计、TF、Path、仿真时钟和 Marker 的构造。
-4. `../rviz/two_cars.rviz`：Topic 与 RViz 显示项的对应关系。
+`warning_delay:=0.1` 默认延迟 0.1 仿真秒发布测试警告，可取 0 到 0.4 秒。`playback_rate:=0.5` 为半速；`duration` 默认 15 秒；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
+每次启动前关闭上一组演示，避免同时发布两个 `/clock`。
 
-## Topic
+## 节点与数据流
 
-| Topic | 消息类型 | 内容 |
+```text
+sumo_bridge：前车在 t=5 急刹
+  │ /demo/front_brake（真实交通事件，不是收包事件）
+  ▼
+test_warning_publisher（可关闭，人工延迟 0.1 秒）
+  │ /v2v_warning，simulated=true
+  ▼
+brake_controller
+  │ /brake_cmd
+  ▼
+sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间距调整速度
+  │ 车辆状态、TF、Path、/clock、Marker
+  ├──> RViz2
+  └──> gazebo_sync → Gazebo
+```
+
+测试输入显示为 `TEST WARNING`，其延迟不等于无线网络延迟。未来替换测试节点，让真实后车收包事件发布 `/v2v_warning` 即可复用控制接口。
+
+## 文件阅读顺序
+
+| 文件 | 学习内容 |
+| --- | --- |
+| `src/cosim_interfaces/msg/V2VWarning.msg` | 事件 ID、发送车、接收车、事件时间、位置、速度和模拟标记 |
+| `src/cosim_interfaces/msg/BrakeCommand.msg` | 命令时间、关联事件 ID、目标车、目标速度和目标停车净间距 |
+| `src/cosim_bridge/cosim_bridge/test_warning_publisher.py` | 真实交通事件如何变成测试警告 |
+| `src/cosim_bridge/cosim_bridge/brake_controller.py` | 警告校验、去重和生成命令 |
+| `src/cosim_bridge/cosim_bridge/sumo_bridge.py` | SUMO 步进、执行命令、响应记录和状态发布 |
+| `src/cosim_bridge/cosim_bridge/event_log.py` | 各节点独立 JSONL 日志 |
+| `src/cosim_bridge/cosim_bridge/gazebo_sync.py` | 姿态服务和 Gazebo 定步时间同步 |
+| `src/cosim_bridge/cosim_bridge/car_visuals.py` | RViz 三维车体部件 |
+| `src/cosim_bridge/launch/demo.launch.py` | 启动顺序和参数 |
+
+自定义消息放在独立的 `ament_cmake` 包，Python 节点放在 `ament_python` 包。
+
+## Topic 与接口
+
+| Topic | 类型 | 含义 |
 | --- | --- | --- |
-| `/car_a/odom`、`/car_b/odom` | `nav_msgs/msg/Odometry` | 车辆中心位置、朝向和车体前进速度 |
-| `/car_a/path`、`/car_b/path` | `nav_msgs/msg/Path` | 从开始到当前时刻的轨迹 |
-| `/tf` | `tf2_msgs/msg/TFMessage` | `map` 到各车 `base_link` 的变换 |
+| `/demo/front_brake` | `cosim_interfaces/msg/V2VWarning` | 前车交通急刹事件 |
+| `/v2v_warning` | `cosim_interfaces/msg/V2VWarning` | 后车收到的警告；当前由测试节点模拟 |
+| `/brake_cmd` | `cosim_interfaces/msg/BrakeCommand` | 后车最终降至 0 m/s，目标停车净间距 2.5 m |
+| `/car_a/odom`、`/car_b/odom` | `nav_msgs/msg/Odometry` | 车辆中心位置、朝向和前进速度 |
+| `/car_a/path`、`/car_b/path` | `nav_msgs/msg/Path` | 行驶轨迹 |
+| `/tf` | `tf2_msgs/msg/TFMessage` | `map` 到车辆 `base_link` |
 | `/clock` | `rosgraph_msgs/msg/Clock` | SUMO 仿真时间 |
-| `/demo/markers` | `visualization_msgs/msg/MarkerArray` | 红蓝车体、速度文字、道路、虚线和时间状态 |
+| `/demo/markers` | `visualization_msgs/msg/MarkerArray` | 三维小车、道路、警告线、速度与状态 |
 
-可在另一个终端 source 相同环境后，用 `ros2 topic list` 和 `ros2 topic echo /car_b/odom --once` 观察数据。
+查看字段和消息：
 
-## 时间与坐标
+```bash
+ros2 interface show cosim_interfaces/msg/V2VWarning
+ros2 interface show cosim_interfaces/msg/BrakeCommand
+ros2 topic echo /brake_cmd
+```
 
-SUMO 内部步长仍为 0.01 秒，节点每 0.05 仿真秒读取一次，默认以 20 Hz 发布。稳态定时器不依赖 `/clock`；RViz 使用 `use_sim_time=true`。机器负载过高时，播放可能比现实时间慢。
+控制器接受 `car_a → car_b` 的 `EMERGENCY_BRAKE`，检查坐标系、速度和事件时效，并按事件 ID 去重；当前最大警告年龄 0.5 仿真秒。桥接节点再次检查目标车、时间和停车净间距，只接受一次停车命令。订阅回调先保存命令，由唯一 SUMO 步进者在下一步前执行。收到停车目标后，每步根据前车速度和实时净间距更新后车目标速度；靠近目标且两车速度足够低时保持后车零速。
 
-`map` 保留 SUMO 平面坐标，单位为米。SUMO 角度从正北顺时针计量，转换为 ROS 从正东逆时针的 yaw。SUMO 位置是车头中心，减去半个车长后作为 ROS 车体中心。`base_link` 的 x 轴沿车头方向，Odometry 的 `twist.linear.x` 为前进速度。
+## 时间、坐标与控制边界
 
-当前后车由 SUMO 自身跟车模型控制。前车制动剧情仍在桥接节点内触发，不属于 ROS2 制动命令闭环。
+SUMO 内部步长 0.01 秒，ROS2 每 0.05 仿真秒取样，默认 20 Hz。控制器和测试发布器使用 `/clock`；步进定时器使用稳态时钟。事件记录精度受 0.05 秒取样周期及 ROS2 调度影响。
 
-## 验证与边界
+`map` 保留 SUMO 平面坐标。SUMO 车头位置减去半个车长后作为 ROS 车体中心；SUMO 从正北顺时针的角度转换为 ROS 从正东逆时针的 yaw。车体 x 轴朝前。
 
-已通过 colcon 构建和实际 Topic 订阅检查；实测急刹约发生在现实 5.05 秒，仿真结束约在现实 15.00 秒。默认 SUMO GUI + RViz2 双窗口启动也已验证：前车急刹约在现实 5.35 秒，结束约在现实 15.80 秒，渲染开销会使播放略慢。最终每车保留 300 个轨迹点。
+SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合 `brake_command_applied` 事件和关闭测试警告的基线判断。当前场景比较的是固定测试输入下的行为，不是无线网络效果评估。
 
-此节点是当前唯一 SUMO 启动者和步进者。运行它时不要再启动独立 SUMO 演示脚本控制同一仿真。Veins 接入后必须重新明确步进所有权。
+Gazebo 从暂停状态按 SUMO 时间定步推进，不发布另一个 ROS2 时钟。两个三维窗口不自动重置相机；操作见 [Gazebo](../gazebo/README.md) 和 [RViz2](../rviz/README.md)。
 
-参考：[ROS2 Marker 消息](https://docs.ros.org/en/jazzy/p/visualization_msgs/msg/Marker.html)。
+## 日志与验证
 
-## Gazebo 同步与三维显示
+输出到 `ros/log/events/`，每次运行覆盖相应节点文件，已被 Git 忽略：
 
-新增 `gazebo_sync` 节点，将两车 Odometry 中的中心位姿通过 `ros_gz_interfaces/srv/SetEntityPose` 写入 Gazebo。`ros_gz_bridge` 桥接姿态和世界控制服务，不桥接 Gazebo 时钟。SUMO 仍由 `sumo_bridge` 单独推进。
+- `test_warning_publisher.jsonl`：测试警告发布。
+- `brake_controller.jsonl`：警告接收、命令发布和拒绝原因。
+- `sumo_bridge.jsonl`：前车急刹、命令接收与执行、首次后车速度响应及结束摘要。
+- `trajectory.csv`：两车中心位置、速度和净间距。
+- `summary.json`：是否执行 ROS2 制动、最小间距和最终速度。
 
-`car_visuals.py` 负责 RViz 小车的 13 个几何部件，`sumo_bridge` 发布的 Marker 总数为 31（两车 26 个部件、两个速度标签、道路、虚线、时间文字）。该实现不需要 URDF 或外部网格下载。Gazebo 资源在 `../gazebo/`，RViz 视角配置在 `../rviz/`。
+JSONL 同时记录 SUMO 仿真时间和本机单调时钟。测试节点关闭时，不会生成新的测试警告日志；旧文件不代表本轮事件。
 
-Gazebo 和 RViz 相机均只设置初始视角，不持续跟随或重置。操作分别见 [Gazebo README](../gazebo/README.md) 和 [RViz README](../rviz/README.md)。
+已验证：5.00 秒前车急刹，5.10 秒发布警告及执行后车制动，6.60 秒首次记录到后车降速；最终两车均停止，净间距约 2.548 m。关闭测试警告时，未执行 ROS2 制动，最小净间距约 2.521 m。这些结果对应当前初始间距和驾驶参数。
 
-已验证三维 Marker 序列化、Gazebo 姿态服务响应以及最终模型位置与 ROS2 位置一致。双三维窗口、SUMO 无界面运行时，15 秒仿真实测约需 15 秒。
+控制器边界检查（从项目根目录执行，先 source 环境）：
 
-## 手动开始与时间同步
+```bash
+python3 ros/tests/test_brake_controller.py
+```
 
-三个窗口准备完成后，SUMO 默认保持等待，请点击 SUMO 工具栏的绿色“开始 / Play”按钮。点击开始后才推进演示：约 5 秒时前车急刹，15 秒时结束。启动等待时间不计入车辆演示。
+已验证有效警告、重复警告、过期警告、错误目标车辆和非法速度的处理。当前闭环由测试警告驱动，下一步接入真实 VANET 收包事件。
 
-RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
+## 靠近停车策略
 
-`startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
+`BrakeCommand.desired_gap_m` 默认 2.5 m，替代原来的固定减速时长字段。净间距为前车车尾到后车车头的距离。桥接节点用“前车速度 + 净间距误差”计算后车目标速度，限制在 0 到 15 m/s，并保留 SUMO 安全跟车约束。当前比例系数为 1/s。当前车基本停下、净间距不超过 2.55 m 且后车速度低于 0.05 m/s 时，保持后车零速。
+
+这使车辆收到警告后可以继续收拢间距，而非立即在远处停下。该策略用于当前低规模学习场景，不代表高速紧急制动系统的安全设计。接口字段已修改，重新运行前需构建并重新 source 工作空间。

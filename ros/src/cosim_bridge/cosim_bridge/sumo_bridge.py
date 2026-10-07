@@ -1,4 +1,5 @@
-"""读取 SUMO 真值，发布 ROS2 状态；暂不接收 ROS2 制动命令。"""
+"""读取 SUMO 真值，发布 ROS2 状态；执行 ROS2 后车制动命令。"""
+import json
 import math
 from pathlib import Path
 import shutil
@@ -14,6 +15,8 @@ from rosgraph_msgs.msg import Clock as ClockMessage
 from visualization_msgs.msg import Marker, MarkerArray
 from tf2_ros import TransformBroadcaster
 from .car_visuals import car_markers
+from cosim_interfaces.msg import V2VWarning, BrakeCommand
+from .event_log import EventLog, seconds
 
 
 class SumoBridge(Node):
@@ -50,6 +53,21 @@ class SumoBridge(Node):
         self.markers = self.create_publisher(MarkerArray, '/demo/markers', 10)
         self.clock_pub = self.create_publisher(ClockMessage, '/clock', 10)
         self.tf = TransformBroadcaster(self)
+        self.log = EventLog(self.root, 'sumo_bridge')
+        self.front_event_pub = self.create_publisher(V2VWarning, '/demo/front_brake', 10)
+        self.warning_sub = self.create_subscription(V2VWarning, '/v2v_warning', self.on_warning, 10)
+        self.command_sub = self.create_subscription(BrakeCommand, '/brake_cmd', self.on_command, 10)
+        self.warning_seen = False
+        self.simulated_warning = False
+        self.pending_command = None
+        self.applied_command = None
+        self.command_ids = set()
+        self.rear_held = False
+        self.response_recorded = False
+        self.minimum_gap = float('inf')
+        self.trajectory_dir = self.root / 'ros/log/events'
+        self.trajectory = (self.trajectory_dir / 'trajectory.csv').open('w')
+        self.trajectory.write('time_s,car_a_x_m,car_a_speed_mps,car_b_x_m,car_b_speed_mps,gap_m\n')
         self.braked = False
         self.holding = False
         self.finished = False
@@ -69,17 +87,71 @@ class SumoBridge(Node):
                                       clock=Clock(clock_type=ClockType.STEADY_TIME))
         self.get_logger().info(f'开始 {self.rate:g} 倍实时播放；{self.duration:g} 秒后保留画面，Ctrl+C 退出。')
 
+    def on_warning(self, warning):
+        if warning.source_vehicle == 'car_a' and warning.target_vehicle == 'car_b' and warning.event_type == 'EMERGENCY_BRAKE':
+            self.warning_seen = True
+            self.simulated_warning = warning.simulated
+
+    def on_command(self, command):
+        age = self.now - seconds(command.header.stamp)
+        valid = (not self.finished and bool(command.event_id)
+                 and command.header.frame_id == 'map' and command.target_vehicle == 'car_b'
+                 and command.target_speed_mps == 0.0
+                 and math.isfinite(command.desired_gap_m) and 2.5 <= command.desired_gap_m <= 10.0
+                 and -0.05 <= age <= 0.5)
+        if not valid or command.event_id in self.command_ids:
+            self.log.write('command_rejected', self.now, event_id=command.event_id,
+                           reason='invalid_stale_duplicate_or_finished')
+            return
+        self.command_ids.add(command.event_id)
+        if self.applied_command is not None or self.pending_command is not None:
+            self.log.write('command_rejected', self.now, event_id=command.event_id, reason='already_braking')
+            return
+        self.pending_command = command
+        self.log.write('brake_command_received', self.now, event_id=command.event_id,
+                       published_time_s=seconds(command.header.stamp))
+
     def tick(self):
         advanced = not self.finished
         if not self.finished:
             if self.now >= 5.0 - 1e-8 and not self.braked:
                 self.traci.vehicle.slowDown('car_a', 0.0, 2.0)
                 self.braked = True
+                event = V2VWarning()
+                event.header.stamp = rclpy.time.Time(seconds=self.now).to_msg()
+                event.header.frame_id = 'map'
+                event.event_id = 'front_brake_1'
+                event.source_vehicle, event.target_vehicle = 'car_a', 'car_b'
+                event.event_type = 'EMERGENCY_BRAKE'
+                x, y, _, speed = self.states['car_a']
+                event.position = Point(x=x, y=y, z=0.0)
+                event.speed_mps = speed
+                self.front_event_pub.publish(event)
+                self.log.write('front_brake', self.now, event_id=event.event_id)
                 self.get_logger().info(
                     f'前车急刹：仿真 {self.now:.2f}s / 现实 {time.monotonic()-self.started:.2f}s')
             if self.now >= 7.0 - 1e-8 and not self.holding:
                 self.traci.vehicle.setSpeed('car_a', 0.0)
                 self.holding = True
+            if self.pending_command is not None:
+                command = self.pending_command
+                self.applied_command = command
+                self.pending_command = None
+                self.response_start_speed = self.traci.vehicle.getSpeed('car_b')
+                self.log.write('brake_command_applied', self.now, event_id=command.event_id,
+                               speed_before_mps=self.response_start_speed, simulated=command.simulated)
+            if self.applied_command is not None:
+                # 根据实时净间距收拢停车位置，SUMO 原有安全跟车约束仍生效。
+                front_speed = self.traci.vehicle.getSpeed('car_a')
+                rear_speed = self.traci.vehicle.getSpeed('car_b')
+                gap = (self.traci.vehicle.getLanePosition('car_a')
+                       - self.traci.vehicle.getLength('car_a')
+                       - self.traci.vehicle.getLanePosition('car_b'))
+                desired_gap = self.applied_command.desired_gap_m
+                if front_speed < 0.01 and rear_speed < 0.05 and gap <= desired_gap + 0.05:
+                    self.rear_held = True
+                target = 0.0 if self.rear_held else min(15.0, max(0.0, front_speed + (gap - desired_gap)))
+                self.traci.vehicle.setSpeed('car_b', target)
             # SUMO 内部仍以 0.01 秒步长计算，ROS2 每 0.05 秒取样。
             self.traci.simulationStep(min(round(self.now + 0.05, 8), self.duration))
             self.now = self.traci.simulation.getTime()
@@ -96,11 +168,28 @@ class SumoBridge(Node):
                 x -= length / 2 * math.cos(yaw)
                 y -= length / 2 * math.sin(yaw)
                 self.states[vehicle] = (x, y, yaw, self.traci.vehicle.getSpeed(vehicle))
+            a, b = self.states.values()
+            gap = a[0] - b[0] - 5.0
+            self.minimum_gap = min(self.minimum_gap, gap)
+            self.trajectory.write(f'{self.now:.2f},{a[0]:.4f},{a[3]:.4f},{b[0]:.4f},{b[3]:.4f},{gap:.4f}\n')
+            self.trajectory.flush()
+            if self.applied_command is not None and not self.response_recorded and b[3] < self.response_start_speed - 0.01:
+                self.response_recorded = True
+                self.log.write('rear_speed_response', self.now, event_id=self.applied_command.event_id,
+                               speed_mps=b[3])
             if self.gui:
                 a, b = self.states.values()
                 self.traci.gui.setOffset('View #0', (a[0]+b[0])/2, (a[1]+b[1])/2)
             if self.now >= self.duration - 1e-8:
                 self.finished = True
+                self.trajectory.close()
+                summary = dict(end_time_s=self.now, minimum_gap_m=self.minimum_gap,
+                               ros_brake_applied=self.applied_command is not None,
+                               warning_seen=self.warning_seen, simulated_warning=self.simulated_warning,
+                               final_gap_m=gap,
+                               final_speed_mps={v: state[3] for v, state in self.states.items()})
+                (self.trajectory_dir / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+                self.log.write('simulation_finished', self.now, **summary)
                 self.get_logger().info(
                     f'仿真结束：{self.now:.2f}s，现实 {time.monotonic()-self.started:.2f}s；保留最终状态。')
         self.publish_state(append_path=advanced)
@@ -141,7 +230,7 @@ class SumoBridge(Node):
             label = self.marker(vehicle, 1, Marker.TEXT_VIEW_FACING, stamp)
             label.pose.position = Point(x=x, y=y, z=3.0)
             label.scale.z = 1.2
-            state = 'STOPPED' if speed < 0.05 else (('BRAKING' if vehicle == 'car_a' else 'FOLLOWING') if self.braked else 'DRIVING')
+            state = 'STOPPED' if speed < 0.05 else (('BRAKING' if vehicle == 'car_a' else ('ROS BRAKING' if self.applied_command is not None else 'FOLLOWING')) if self.braked else 'DRIVING')
             label.text = f'{vehicle}: {speed:.2f} m/s  {state}'
             label.color.r = label.color.g = label.color.b = 1.0
             markers.markers.append(label)
@@ -161,7 +250,21 @@ class SumoBridge(Node):
         status.pose.position = Point(x=125.0, y=10.0, z=2.0)
         status.scale.z = 2.0
         status.color.r = status.color.g = status.color.b = 1.0
-        status.text = f'SUMO time: {self.now:.2f} s | following baseline (no V2V)'
+        mode = 'TEST WARNING -> ROS BRAKE' if self.simulated_warning else ('WARNING -> ROS BRAKE' if self.warning_seen else 'following baseline')
+        status.text = f'SUMO time: {self.now:.2f} s | {mode}'
+        if len(self.states) == 2:
+            a, b = self.states.values()
+            line = self.marker('communication', 0, Marker.ARROW, stamp)
+            line.points = [Point(x=a[0], y=a[1], z=2.1), Point(x=b[0], y=b[1], z=2.1)]
+            line.scale.x, line.scale.y, line.scale.z = 0.15, 0.5, 0.8
+            line.color.r, line.color.g, line.color.b = (1.0, 0.6, 0.0) if self.warning_seen else (0.1, 0.8, 0.2)
+            markers.markers.append(line)
+            text = self.marker('communication', 1, Marker.TEXT_VIEW_FACING, stamp)
+            text.pose.position = Point(x=(a[0]+b[0])/2, y=-1.6, z=4.5)
+            text.scale.z = 1.0
+            text.color.r = text.color.g = text.color.b = 1.0
+            text.text = ('TEST WARNING' if self.simulated_warning else 'V2V WARNING') if self.warning_seen else 'READY (no warning)'
+            markers.markers.append(text)
         markers.markers.append(status)
         self.markers.publish(markers)
 
@@ -179,6 +282,8 @@ class SumoBridge(Node):
     def close(self):
         if not self.closed:
             self.closed = True
+            if not self.trajectory.closed:
+                self.trajectory.close()
             # launch 的 SIGINT 也会发给 SUMO，关闭时避免重复中断输出堆栈。
             try:
                 self.traci.close()

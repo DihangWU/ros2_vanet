@@ -73,10 +73,10 @@ OMNeT++、Veins 和 INET 在同一个网络仿真体系中协作；目录分开�
 | SUMO → ROS2 | 已完成 | `cosim_bridge` 包、真实车辆状态、Odometry、TF、Path 和 `/clock` |
 | RViz2 展示 | 已完成 | 三维红蓝小车、自由 Orbit 视角、速度文字、道路虚线、轨迹及 TF |
 | Gazebo 展示 | 已完成 | 本地三维小车、道路虚线、ROS2 姿态同步和自由视角 |
-| ROS2 制动控制 | 待实现 | 接收警告、生成后车制动命令、通过桥接节点执行 |
+| ROS2 制动控制 | 已完成（测试警告） | 自定义消息、控制器、TraCI 执行、响应日志、RViz 警告线 |
 | VANET 接入 | 待实现 | Veins / OMNeT++ / INET 后车收包事件传入 ROS2 |
 
-当前使用真实 SUMO 数据，不使用假车状态发布器。后车仍由 SUMO 跟车模型控制，尚未接入 V2V 警告和 ROS2 制动命令。
+当前使用真实 SUMO 车辆状态，已实现测试警告驱动的 ROS2 后车制动闭环。SUMO 安全跟车规则仍启用，真实 VANET 收包事件尚未接入。
 
 ## 快速开始：SUMO + ROS2 + Gazebo + RViz2
 
@@ -140,7 +140,7 @@ ROS2 桥接和独立 SUMO 脚本是两种运行入口。运行桥接节点时，
 - [RViz2 显示配置使用方法](rviz/USAGE.md)
 - [RViz2 配置文件](rviz/two_cars.rviz)
 
-Gazebo 和 RViz2 现均支持三维展示及自由旋转、平移、缩放，操作见各模块 README。下一步实现 ROS2 制动命令，再接入 VANET 通信和完整闭环。
+Gazebo 和 RViz2 现均支持三维展示及自由旋转、平移、缩放，操作见各模块 README。ROS2 制动命令闭环已完成；下一步将测试警告替换为 VANET 中后车实际收包事件。
 
 最终演示目标为 15 秒，前车在约 5 秒急刹。具体消息延迟和制动响应时间以实际仿真日志为准。
 
@@ -151,3 +151,20 @@ Gazebo 和 RViz2 现均支持三维展示及自由旋转、平移、缩放，操
 RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
 
 `startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
+
+## 当前制动闭环
+
+```text
+SUMO 前车急刹 /demo/front_brake
+  → test_warning_publisher（测试输入，默认延迟 0.1 仿真秒）
+  → /v2v_warning
+  → brake_controller
+  → /brake_cmd
+  → sumo_bridge / TraCI
+  → SUMO 后车制动
+  → Gazebo + RViz2 同步展示
+```
+
+默认运行启用测试警告，RViz 显示 `TEST WARNING` 和 `ROS BRAKING`。用 `test_warning:=false` 关闭测试输入，可观察普通跟车基线。详细消息字段、事件日志和验证方法见 [ROS2 README](ros/README.md)。
+
+当前采用靠近停车策略：目标净间距 2.5 m，实测两车最终停止、净间距约 2.548 m，接近跟车基线约 2.521 m。人工警告延迟不代表无线传播延迟，真实 VANET 网络尚未接入。

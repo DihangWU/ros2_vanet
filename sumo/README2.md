@@ -67,3 +67,7 @@ TraCI 速度控制仍受默认安全及减速度规则约束，具体行为见 [
 GUI 自动加载 `config/viewsettings.xml`，聚焦车辆活动区域，并显示俯视车辆外形、红蓝颜色和车辆 ID。可以用鼠标滚轮继续放大。SUMO 此处显示的是二维车辆图形；三维车辆模型将在 Gazebo 阶段添加。
 
 道路两侧增加固定白色虚线：每段 3 m，间隔 5 m，文件为 `network/road_markings.add.xml`。镜头跟随车辆时，虚线向后移动，提供速度参照；这些图形只影响显示。形状配置参见 [SUMO Shapes](https://sumo.dlr.de/docs/Simulation/Shapes.html)。
+
+## ROS2 制动入口
+
+独立脚本仍是普通跟车基线。通过 `ros2 launch cosim_bridge demo.launch.py` 运行时，默认接收测试警告并执行 ROS2 后车制动命令。两种入口不要同时控制同一仿真；闭环日志在 `ros/log/events/`，使用 `test_warning:=false` 可关闭测试警告。接口和对照结果见 [ROS2 README](../ros/README.md)。

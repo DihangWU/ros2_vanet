@@ -56,3 +56,9 @@ SUMO 是车辆运动唯一真值源。模型设为静态、无碰撞体，用姿
 RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
 
 `startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
+
+## ROS2 制动闭环
+
+默认运行已加入测试警告与 ROS2 制动控制：前车急刹后，控制器通过 SUMO 桥接节点控制后车减速。Gazebo 继续订阅同一份车辆状态，不直接执行制动。测试警告、制动事件和日志说明见 [ROS2 README](../ros/README.md)。`test_warning:=false` 可以运行普通跟车对照场景。
+
+当前后车按目标净间距 2.5 m 靠近停车，实测最终两车停止、净间距约 2.55 m；模型继续同步 SUMO 状态。
