@@ -17,6 +17,7 @@ from tf2_ros import TransformBroadcaster
 from .car_visuals import car_markers
 from cosim_interfaces.msg import V2VWarning, BrakeCommand
 from .event_log import EventLog, seconds
+from .communication_visuals import CommunicationVisuals
 
 
 class SumoBridge(Node):
@@ -27,6 +28,13 @@ class SumoBridge(Node):
         self.declare_parameter('network_mode', False)
         self.declare_parameter('network_gui', False)
         self.network_mode = self.get_parameter('network_mode').value
+        self.declare_parameter('communication_range_m', 100.0)
+        radius = float(self.get_parameter('communication_range_m').value)
+        if not math.isfinite(radius) or radius <= 0:
+            raise ValueError('communication_range_m 必须为有限正数')
+        self.communication = CommunicationVisuals(radius)
+        self.communication.simulated = not self.network_mode
+        self.communication_pub = self.create_publisher(MarkerArray, '/v2v/markers', 10)
         self.declare_parameter('duration', 15.0)
         self.declare_parameter('playback_rate', 1.0)
         self.root = Path(self.get_parameter('project_root').value).resolve()
@@ -102,6 +110,14 @@ class SumoBridge(Node):
         if warning.source_vehicle == 'car_a' and warning.target_vehicle == 'car_b' and warning.event_type == 'EMERGENCY_BRAKE':
             self.warning_seen = True
             self.simulated_warning = warning.simulated
+            if warning.simulated:
+                self.communication.event_id = warning.event_id
+                self.communication.simulated = True
+                self.communication.received = self.now
+                self.communication.send_position = (warning.position.x, warning.position.y)
+                if 'car_b' in self.states:
+                    self.communication.receive_position = self.states['car_b'][:2]
+                    self.communication.animation_started = time.monotonic()
 
     def on_command(self, command):
         age = self.now - seconds(command.header.stamp)
@@ -119,12 +135,21 @@ class SumoBridge(Node):
             self.log.write('command_rejected', self.now, event_id=command.event_id, reason='already_braking')
             return
         self.pending_command = command
+        self.communication.published = seconds(command.header.stamp)
         self.log.write('brake_command_received', self.now, event_id=command.event_id,
                        published_time_s=seconds(command.header.stamp))
 
     def tick(self):
         if self.network_mode:
-            self.network_backend.tick()
+            if self.communication.failed:
+                self.publish_state(False)
+                return
+            try:
+                self.network_backend.tick()
+            except (OSError, RuntimeError) as error:
+                self.communication.failed = True
+                self.get_logger().error(str(error))
+                self.publish_state(False)
             return
         advanced = not self.finished
         if not self.finished:
@@ -150,6 +175,7 @@ class SumoBridge(Node):
             if self.pending_command is not None:
                 command = self.pending_command
                 self.applied_command = command
+                self.communication.applied = self.now
                 self.pending_command = None
                 self.response_start_speed = self.traci.vehicle.getSpeed('car_b')
                 self.log.write('brake_command_applied', self.now, event_id=command.event_id,
@@ -169,6 +195,7 @@ class SumoBridge(Node):
             # SUMO 内部仍以 0.01 秒步长计算，ROS2 每 0.05 秒取样。
             self.traci.simulationStep(min(round(self.now + 0.05, 8), self.duration))
             self.now = self.traci.simulation.getTime()
+            self.communication.connected = True
             if set(self.traci.vehicle.getIDList()) != set(self.odom):
                 raise RuntimeError('两辆车未按预期存在于 SUMO 中')
             if self.traci.simulation.getCollidingVehiclesIDList():
@@ -266,21 +293,10 @@ class SumoBridge(Node):
         status.color.r = status.color.g = status.color.b = 1.0
         mode = 'TEST WARNING -> ROS BRAKE' if self.simulated_warning else ('WARNING -> ROS BRAKE' if self.warning_seen else 'following baseline')
         status.text = f'SUMO time: {self.now:.2f} s | {mode}'
-        if len(self.states) == 2:
-            a, b = self.states.values()
-            line = self.marker('communication', 0, Marker.ARROW, stamp)
-            line.points = [Point(x=a[0], y=a[1], z=2.1), Point(x=b[0], y=b[1], z=2.1)]
-            line.scale.x, line.scale.y, line.scale.z = 0.15, 0.5, 0.8
-            line.color.r, line.color.g, line.color.b = (1.0, 0.6, 0.0) if self.warning_seen else (0.1, 0.8, 0.2)
-            markers.markers.append(line)
-            text = self.marker('communication', 1, Marker.TEXT_VIEW_FACING, stamp)
-            text.pose.position = Point(x=(a[0]+b[0])/2, y=-1.6, z=4.5)
-            text.scale.z = 1.0
-            text.color.r = text.color.g = text.color.b = 1.0
-            text.text = ('TEST WARNING' if self.simulated_warning else 'V2V WARNING') if self.warning_seen else 'READY (no warning)'
-            markers.markers.append(text)
         markers.markers.append(status)
         self.markers.publish(markers)
+        self.communication_pub.publish(self.communication.markers(
+            self.states, self.now, stamp, self.marker))
 
     @staticmethod
     def marker(namespace, identifier, kind, stamp):

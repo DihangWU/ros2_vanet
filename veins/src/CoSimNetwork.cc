@@ -17,12 +17,17 @@ class CoSimManager : public veins::VeinsInetManagerBase {
     double desiredGap = 2.5, appliedAt = -1;
     std::string eventId;
     Json warnings = Json::array();
+    Json networkEvents = Json::array();
     std::ofstream events;
 public:
     static CoSimManager* instance;
-    void record(const Json& event) { events << event.dump() << std::endl; }
+    void record(const Json& event) {
+        events << event.dump() << std::endl;
+        networkEvents.push_back(event);
+    }
     void received(const inet::Ptr<const EmergencyWarning>& payload, double received) {
-        Json event = {{"event", "packet_received"}, {"source_time_s",payload->getSourceTime()},{"send_time_s",payload->getSendTime()}, {"receive_time_s",received}, {"event_id",payload->getEventId()},{"x",payload->getX()},{"y",payload->getY()},{"speed",payload->getSpeed()}};
+        auto receiver = getCommandInterface()->vehicle("car_b");
+        Json event = {{"event", "packet_received"}, {"source_time_s",payload->getSourceTime()},{"send_time_s",payload->getSendTime()}, {"receive_time_s",received}, {"event_id",payload->getEventId()},{"x",payload->getX()},{"y",payload->getY()},{"speed",payload->getSpeed()}, {"receive_x",receiver.getLanePosition()-receiver.getLength()/2}, {"receive_y",-1.6}};
         record(event); warnings.push_back(event);
     }
     ~CoSimManager() override { if(fd >= 0) ::close(fd); instance = nullptr; }
@@ -67,8 +72,9 @@ protected:
             auto v=getCommandInterface()->vehicle(id);
             cars[id]={{"x",v.getLanePosition()-v.getLength()/2},{"y",-1.6},{"yaw",0.0},{"speed",v.getSpeed()}};
         }
-        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"command_active",braking},{"applied_time",appliedAt}};
+        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"command_active",braking},{"applied_time",appliedAt}};
         warnings=Json::array();
+        networkEvents=Json::array();
         Json reply=exchange(state);
         if(reply.contains("command") && !reply["command"].is_null() && !braking) {
             desiredGap=reply["command"]["desired_gap_m"]; eventId=reply["command"]["event_id"];
@@ -92,7 +98,7 @@ protected:
                 payload->setChunkLength(inet::B(100)); payload->setEventId("front_brake_1"); payload->setSourceTime(5.0); payload->setSendTime(simTime().dbl());
                 payload->setX(traciVehicle->getLanePosition()-traciVehicle->getLength()/2); payload->setY(-1.6); payload->setSpeed(traciVehicle->getSpeed()); timestampPayload(payload);
                 auto packet=createPacket("EMERGENCY_BRAKE"); packet->insertAtBack(payload); sendPacket(std::move(packet));
-                CoSimManager::instance->record({{"event","packet_sent"},{"send_time_s",simTime().dbl()},{"event_id","front_brake_1"}});
+                CoSimManager::instance->record({{"event","packet_sent"},{"send_time_s",simTime().dbl()},{"event_id","front_brake_1"},{"x",payload->getX()},{"y",payload->getY()}});
             }).oneshotAt(SimTime(5.001)));
         }
         return true;

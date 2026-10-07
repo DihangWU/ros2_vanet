@@ -10,7 +10,7 @@
 
 管理器每 0.05 仿真秒推进 SUMO，5 秒急刹，7 秒起保持前车停止。前车在 5.001 秒发送 100 字节 UDP 组播警告；只有后车 processPacket() 实际收到包，才将警告送给 ROS2。
 
-每步通过本机 TCP 9998 发送一行 JSON，包含 time、cars、warnings、command_active、applied_time；等待 ROS2 回复 command 后继续。收到停车目标后，在后续步进前更新后车目标速度，并保留 SUMO 安全跟车约束。
+每步通过本机 TCP 9998 发送一行 JSON，包含 time、cars、warnings、network_events、command_active、applied_time；等待 ROS2 回复 command 后继续。network_events 导出实际发包、收包与位置，用于 RViz 通信显示；位置取自最近一次 SUMO 状态。收到停车目标后，在后续步进前更新后车目标速度，并保留 SUMO 安全跟车约束。
 
 坐标转换当前专用于单条直路：中心 x 为车头车道位置减半车长，y=-1.6、yaw=0。固定 car_a、car_b 和 15 秒；扩展路网需修改坐标和事件逻辑。
 

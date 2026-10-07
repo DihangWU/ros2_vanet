@@ -22,6 +22,15 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Depth: 10
+    - Class: rviz_default_plugins/MarkerArray
+      Name: V2V communication
+      Enabled: true
+      Topic:
+        Value: /v2v/markers
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 10
     - Class: rviz_default_plugins/Path
       Name: Car A path
       Enabled: true

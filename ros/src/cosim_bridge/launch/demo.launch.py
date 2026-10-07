@@ -30,6 +30,7 @@ def generate_launch_description():
              condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
         DeclareLaunchArgument('network', default_value='true'),
         DeclareLaunchArgument('network_gui', default_value='false'),
+        DeclareLaunchArgument('communication_range_m', default_value='100.0'),
         DeclareLaunchArgument('test_warning', default_value='true'),
         DeclareLaunchArgument('warning_delay', default_value='0.1'),
         Node(package='cosim_bridge', executable='brake_controller', output='screen',
@@ -49,6 +50,7 @@ def generate_launch_description():
                  parameters=[{
                      'network_mode': ParameterValue(LaunchConfiguration('network'), value_type=bool),
                      'network_gui': ParameterValue(LaunchConfiguration('network_gui'), value_type=bool),
+                     'communication_range_m': ParameterValue(LaunchConfiguration('communication_range_m'), value_type=float),
                      'project_root': LaunchConfiguration('project_root'),
                      'sumo_gui': ParameterValue(LaunchConfiguration('sumo_gui'), value_type=bool),
                      'duration': ParameterValue(LaunchConfiguration('duration'), value_type=float),

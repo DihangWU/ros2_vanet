@@ -66,6 +66,9 @@ class NetworkBackend:
         frame = json.loads(line)
         self.needs_ack = True
         o.now = float(frame['time'])
+        o.communication.connected = True
+        for event in frame['network_events']:
+            o.communication.event(event)
         if self.first_frame:
             o.started = time.monotonic() - o.now / o.rate
             self.first_frame = False
@@ -76,6 +79,7 @@ class NetworkBackend:
             o.log.write('front_brake', 5.0, event_id='front_brake_1', backend='veins_inet')
         if frame['command_active'] and o.applied_command is None:
             o.applied_command = self.sent_command
+            o.communication.applied = float(frame['applied_time'])
             o.response_start_speed = 15.0
             o.log.write('brake_command_applied', frame['applied_time'], event_id=o.applied_command.event_id,
                         simulated=False, backend='veins_inet')

@@ -56,7 +56,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
   └──> gazebo_sync → Gazebo
 ```
 
-测试输入显示为 `TEST WARNING`，其延迟不等于无线网络延迟。默认实际收包输入显示为 `V2V WARNING`，复用相同控制接口。
+测试输入显示为 `TEST WARNING`，其延迟不等于无线网络延迟。默认实际收包输入显示为 `WARNING RECEIVED`，复用相同控制接口。
 
 ## 文件阅读顺序
 
@@ -66,6 +66,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
 | `src/cosim_interfaces/msg/BrakeCommand.msg` | 命令时间、关联事件 ID、目标车、目标速度和目标停车净间距 |
 | `src/cosim_bridge/cosim_bridge/test_warning_publisher.py` | 真实交通事件如何变成测试警告 |
 | `src/cosim_bridge/cosim_bridge/network_backend.py` | 实际收包事件、锁步 JSONL 接口、网络进程管理 |
+| `src/cosim_bridge/cosim_bridge/communication_visuals.py` | 通信状态、文本、范围圆、收发位置与包回放 |
 | `src/cosim_bridge/cosim_bridge/brake_controller.py` | 警告校验、去重和生成命令 |
 | `src/cosim_bridge/cosim_bridge/sumo_bridge.py` | SUMO 步进、执行命令、响应记录和状态发布 |
 | `src/cosim_bridge/cosim_bridge/event_log.py` | 各节点独立 JSONL 日志 |
@@ -87,6 +88,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
 | `/tf` | `tf2_msgs/msg/TFMessage` | `map` 到车辆 `base_link` |
 | `/clock` | `rosgraph_msgs/msg/Clock` | SUMO 仿真时间 |
 | `/demo/markers` | `visualization_msgs/msg/MarkerArray` | 三维小车、道路、警告线、速度与状态 |
+| `/v2v/markers` | `visualization_msgs/msg/MarkerArray` | 收发时间、无线延迟、制动时间与通信示意 |
 
 查看字段和消息：
 
@@ -107,6 +109,8 @@ SUMO 内部步长 0.01 秒，ROS2 每 0.05 仿真秒取样，默认 20 Hz。控�
 SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合收包和 `brake_command_applied` 事件，以及普通跟车或无收包基线判断。当前为单次警告学习演示，不是统计性的无线性能评估。
 
 Gazebo 从暂停状态按 SUMO 时间定步推进，不发布另一个 ROS2 时钟。两个三维窗口不自动重置相机；操作见 [Gazebo](../gazebo/README.md) 和 [RViz2](../rviz/README.md)。
+
+通信显示独立发布到 `/v2v/markers`，发包/收包来自网络帧中的 `network_events`，命令发布时间来自 `/brake_cmd` 时间戳，执行时间来自 Veins 确认。范围圆可通过 `communication_range_m` 调整，仅作距离参照；动画使用现实时间播放 1.5 秒，不影响 `/clock`。网络连接断开后停止步进，继续发布最后状态及红色断连提示。详见 [RViz2 通信显示](../rviz/README.md)。
 
 ## 日志与验证
 
