@@ -67,6 +67,21 @@ protected:
             record({{"event","front_brake"},{"sim_time_s",now}});
         }
         if(now>=7)getCommandInterface()->vehicle("car_a").setSpeed(0);
+        if (par("followSumoVehicles").boolValue()) {
+            // setBoundary converts these Veins coordinates back to SUMO coordinates.
+            auto a = getConnection()->traci2omnet(veins::TraCICoord(
+                getCommandInterface()->vehicle("car_a").getLanePosition() - 2.5, -1.6));
+            auto b = getConnection()->traci2omnet(veins::TraCICoord(
+                getCommandInterface()->vehicle("car_b").getLanePosition() - 2.5, -1.6));
+            double centerX = (a.x + b.x) / 2;
+            double centerY = (a.y + b.y) / 2;
+            double halfWidth = std::max(50.0, std::abs(a.x - b.x) / 2 + 25.0);
+            for (const auto& view : getCommandInterface()->getGuiViewIds()) {
+                getCommandInterface()->guiView(view).setBoundary(
+                    veins::Coord(centerX - halfWidth, centerY + 25.0),
+                    veins::Coord(centerX + halfWidth, centerY - 25.0));
+            }
+        }
         Json cars=Json::object();
         for(auto id : {"car_a","car_b"}) {
             auto v=getCommandInterface()->vehicle(id);

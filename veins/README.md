@@ -14,4 +14,6 @@
 
 坐标转换当前专用于单条直路：中心 x 为车头车道位置减半车长，y=-1.6、yaw=0。固定 car_a、car_b 和 15 秒；扩展路网需修改坐标和事件逻辑。
 
+SUMO GUI 启用时，管理器每步更新视野边界，镜头以两车中点为中心，横向至少 100 m。启动脚本启用 followSumoVehicles 并关闭 ignoreGuiCommands；无界面运行保持 GUI 命令禁用。
+
 [OMNeT++ 模块](../omnet/README.md)提供构建与启动，[INET 模块](../inet/README.md)提供无线参数。EmergencyWarning_m.cc/.h 自动生成，不纳入 Git；第三方源码不复制到本目录。

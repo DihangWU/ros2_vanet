@@ -55,6 +55,8 @@ def main():
             '-l', str(veins_inet / 'src/veins_inet'),
             '-l', str(root / 'omnet/build/cosim_network'),
             '-f', 'omnetpp.ini',
+            '--*.manager.followSumoVehicles=' + ('true' if args.gui else 'false'),
+            '--*.manager.ignoreGuiCommands=' + ('false' if args.gui else 'true'),
             '--*.node[*].wlan[0].radio.transmitter.power=' +
             os.environ.get('COSIM_RADIO_POWER', '20mW'),
         ]

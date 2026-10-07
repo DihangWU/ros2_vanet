@@ -7,6 +7,7 @@ import inet.visualizer.common.IntegratedVisualizer;
 simple CoSimManager extends TraCIScenarioManager {
     parameters:
         int rosPort = default(9998);
+        bool followSumoVehicles = default(false);
         @class(CoSimManager);
 }
 simple EmergencyWarningApp extends VeinsInetApplicationBase {
