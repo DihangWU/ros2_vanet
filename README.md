@@ -1,4 +1,10 @@
 # ROS2-VANET 协同紧急制动学习 Demo
+Demo Video:
+
+https://github.com/user-attachments/assets/8d6f57a3-4b61-4725-bc9e-d6f320ae1481
+
+
+
 
 前车急刹并通过 Veins + INET 无线网络发送警告；后车实际收包后，ROS2 生成制动命令。SUMO 是车辆运动唯一真值源，Gazebo 和 RViz2 同步三维展示。目录按组件划分，优先保持学习时的可读性。
 
