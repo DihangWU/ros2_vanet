@@ -11,5 +11,6 @@ setup(
     install_requires=['setuptools'], zip_safe=True,
     maintainer='CoSimDemo learner', maintainer_email='learner@example.com',
     description='SUMO to ROS2 state bridge', license='Apache-2.0',
-    entry_points={'console_scripts': ['sumo_bridge = cosim_bridge.sumo_bridge:main']},
+    entry_points={'console_scripts': ['sumo_bridge = cosim_bridge.sumo_bridge:main',
+                                         'gazebo_sync = cosim_bridge.gazebo_sync:main']},
 )

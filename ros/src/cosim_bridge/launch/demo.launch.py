@@ -1,7 +1,7 @@
-"""在项目根目录或 ros 工作空间执行，先开 RViz，再启动交通仿真。"""
+"""在项目根目录或 ros 工作空间执行，先开三维窗口，再启动交通仿真。"""
 from pathlib import Path
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction
+from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -15,13 +15,26 @@ def generate_launch_description():
         DeclareLaunchArgument('project_root', default_value=str(root)),
         DeclareLaunchArgument('sumo_gui', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='true'),
+        DeclareLaunchArgument('gazebo', default_value='true'),
+        DeclareLaunchArgument('startup_delay', default_value='8.0'),
+        SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'models'])),
+        ExecuteProcess(cmd=['gz', 'sim',
+            PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'worlds', 'two_cars.sdf']),
+            '--gui-config', PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'config', 'gui.config'])],
+            condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
+        Node(package='ros_gz_bridge', executable='parameter_bridge',
+             arguments=['/world/cosim_demo/set_pose@ros_gz_interfaces/srv/SetEntityPose',
+                        '/world/cosim_demo/control@ros_gz_interfaces/srv/ControlWorld'],
+             condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
+        Node(package='cosim_bridge', executable='gazebo_sync',
+             condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
         DeclareLaunchArgument('duration', default_value='15.0'),
         DeclareLaunchArgument('playback_rate', default_value='1.0'),
         Node(package='rviz2', executable='rviz2', name='rviz2',
              condition=IfCondition(LaunchConfiguration('rviz')),
              arguments=['-d', PathJoinSubstitution([LaunchConfiguration('project_root'), 'rviz', 'two_cars.rviz'])],
              parameters=[{'use_sim_time': True}]),
-        TimerAction(period=3.0, actions=[
+        TimerAction(period=LaunchConfiguration('startup_delay'), actions=[
             Node(package='cosim_bridge', executable='sumo_bridge', output='screen',
                  parameters=[{
                      'project_root': LaunchConfiguration('project_root'),

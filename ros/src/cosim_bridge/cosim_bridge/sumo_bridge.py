@@ -1,5 +1,4 @@
 """读取 SUMO 真值，发布 ROS2 状态；暂不接收 ROS2 制动命令。"""
-import copy
 import math
 from pathlib import Path
 import shutil
@@ -14,6 +13,7 @@ from nav_msgs.msg import Odometry, Path as RosPath
 from rosgraph_msgs.msg import Clock as ClockMessage
 from visualization_msgs.msg import Marker, MarkerArray
 from tf2_ros import TransformBroadcaster
+from .car_visuals import car_markers
 
 
 class SumoBridge(Node):
@@ -59,7 +59,9 @@ class SumoBridge(Node):
         cmd = [binary, '-c', str(self.root / 'sumo/config/demo.sumocfg'),
                '--end', str(self.duration), '--seed', '42', '--no-step-log', 'true']
         if self.gui:
-            cmd += ['--start', '--delay', '0', '--quit-on-end']
+            cmd += ['--delay', '0', '--quit-on-end']
+        if self.gui:
+            self.get_logger().info('SUMO 窗口准备好后，请点击绿色“开始”；演示时间从开始运行计算。')
         self.traci.start(cmd)
         self.started = time.monotonic()
         # 独立于 /clock 的稳态定时器；每个回调推进 0.05 仿真秒。
@@ -135,12 +137,7 @@ class SumoBridge(Node):
                 pose.pose = odom.pose.pose
                 path.poses.append(pose)
             self.path_pub[vehicle].publish(path)
-            body = self.marker(vehicle, 0, Marker.CUBE, stamp)
-            body.pose = copy.deepcopy(odom.pose.pose)
-            body.pose.position.z = 0.6
-            body.scale.x, body.scale.y, body.scale.z = 5.0, 1.8, 1.2
-            body.color.r, body.color.g, body.color.b = ((1.0, 0.2, 0.2) if vehicle == 'car_a' else (0.2, 0.4, 1.0))
-            markers.markers.append(body)
+            markers.markers.extend(car_markers(vehicle, stamp, x, y, yaw))
             label = self.marker(vehicle, 1, Marker.TEXT_VIEW_FACING, stamp)
             label.pose.position = Point(x=x, y=y, z=3.0)
             label.scale.z = 1.2

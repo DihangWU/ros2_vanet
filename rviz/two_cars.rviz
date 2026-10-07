@@ -43,12 +43,15 @@ Visualization Manager:
       Show Axes: true
       Show Arrows: false
       Marker Scale: 2
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
       Name: Current View
       Distance: 150
-      Pitch: 1.15
+      Pitch: 0.55
       Yaw: 4.71
       Focal Point:
         X: 125

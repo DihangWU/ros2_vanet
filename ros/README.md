@@ -15,18 +15,18 @@ export ROS_LOG_DIR="$PWD/log/runtime"
 ros2 launch cosim_bridge demo.launch.py
 ```
 
-默认打开 RViz2，等待 3 秒后启动 SUMO GUI。车辆运动开始后，仿真 1 秒约等于现实 1 秒，第 5 秒前车急刹，第 15 秒停止推进。最终状态持续发布，窗口保留，按 Ctrl+C 退出。
+默认打开 Gazebo 和 RViz2，等待 8 秒后启动 SUMO GUI；可用 `startup_delay` 调整等待时间。车辆运动开始后，仿真 1 秒约等于现实 1 秒，第 5 秒前车急刹，第 15 秒停止推进。最终状态持续发布，窗口保留，按 Ctrl+C 退出。
 
-只开 RViz2，不开 SUMO 窗口：
+只开 RViz2，不开 Gazebo 和 SUMO 窗口：
 
 ```bash
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false
+ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false
 ```
 
 无界面验证或半速观看：
 
 ```bash
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false rviz:=false
+ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false rviz:=false
 ros2 launch cosim_bridge demo.launch.py playback_rate:=0.5
 ```
 
@@ -67,3 +67,21 @@ SUMO 内部步长仍为 0.01 秒，节点每 0.05 仿真秒读取一次，默认
 此节点是当前唯一 SUMO 启动者和步进者。运行它时不要再启动独立 SUMO 演示脚本控制同一仿真。Veins 接入后必须重新明确步进所有权。
 
 参考：[ROS2 Marker 消息](https://docs.ros.org/en/jazzy/p/visualization_msgs/msg/Marker.html)。
+
+## Gazebo 同步与三维显示
+
+新增 `gazebo_sync` 节点，将两车 Odometry 中的中心位姿通过 `ros_gz_interfaces/srv/SetEntityPose` 写入 Gazebo。`ros_gz_bridge` 桥接姿态和世界控制服务，不桥接 Gazebo 时钟。SUMO 仍由 `sumo_bridge` 单独推进。
+
+`car_visuals.py` 负责 RViz 小车的 13 个几何部件，`sumo_bridge` 发布的 Marker 总数为 31（两车 26 个部件、两个速度标签、道路、虚线、时间文字）。该实现不需要 URDF 或外部网格下载。Gazebo 资源在 `../gazebo/`，RViz 视角配置在 `../rviz/`。
+
+Gazebo 和 RViz 相机均只设置初始视角，不持续跟随或重置。操作分别见 [Gazebo README](../gazebo/README.md) 和 [RViz README](../rviz/README.md)。
+
+已验证三维 Marker 序列化、Gazebo 姿态服务响应以及最终模型位置与 ROS2 位置一致。双三维窗口、SUMO 无界面运行时，15 秒仿真实测约需 15 秒。
+
+## 手动开始与时间同步
+
+三个窗口准备完成后，SUMO 默认保持等待，请点击 SUMO 工具栏的绿色“开始 / Play”按钮。点击开始后才推进演示：约 5 秒时前车急刹，15 秒时结束。启动等待时间不计入车辆演示。
+
+RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
+
+`startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
