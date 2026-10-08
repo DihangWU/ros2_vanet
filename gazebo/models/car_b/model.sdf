@@ -3,6 +3,7 @@
   <model name="car_b">
     <static>true</static>
     <include merge="true"><uri>model://perception_rig</uri></include>
+    <include merge="true"><uri>model://corner_radar_rig</uri></include>
     <link name="body">
       <visual name="chassis">
         <pose>0 0 0.65 0 0 0</pose>

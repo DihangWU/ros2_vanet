@@ -20,7 +20,7 @@ CAMERAS = ('wide', 'standard', 'tele')
 PREVIEW_ORDER = ('tele', 'standard', 'wide')
 
 
-def colored_cloud(message, lidar_height):
+def colored_cloud(message, lidar_height, obstacle_rgb=0x00FFFF):
     """仅着色真实雷达回波；高度阈值不是障碍物语义识别。"""
     points = point_cloud2.read_points(message, field_names=('x', 'y', 'z'), skip_nans=True)
     xyz = np.column_stack([points[name] for name in ('x', 'y', 'z')])
@@ -29,7 +29,7 @@ def colored_cloud(message, lidar_height):
     for i, name in enumerate(('x', 'y', 'z')):
         output[name] = xyz[:, i]
     # 亮绿色地面、亮青色高于地面的回波，直接叠在 RViz 车体表面。
-    output['rgb'] = np.where(xyz[:, 2] + lidar_height > 0.15, 0x00FFFF, 0x80FF20)
+    output['rgb'] = np.where(xyz[:, 2] + lidar_height > 0.15, obstacle_rgb, 0x80FF20)
     cloud = PointCloud2(header=copy.deepcopy(message.header), height=1, width=len(output),
                         is_bigendian=False, point_step=16, row_step=len(output)*16, is_dense=True)
     cloud.fields = [PointField(name=name, offset=i*4, datatype=PointField.FLOAT32, count=1)

@@ -7,13 +7,13 @@ from visualization_msgs.msg import Marker
 
 
 @lru_cache(maxsize=32)
-def rig_visuals(project_root, vehicle):
+def rig_visuals(project_root, vehicle, rig_name='perception_rig'):
     root = Path(project_root)
-    model_name = vehicle if vehicle in ('car_a', 'car_b') else 'background_car'
+    model_name = vehicle if (root/f'gazebo/models/{vehicle}/model.sdf').is_file() else 'background_car'
     model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
-    if not any(i.findtext('uri') == 'model://perception_rig' for i in model.findall('.//include')):
+    if not any(i.findtext('uri') == f'model://{rig_name}' for i in model.findall('.//include')):
         return ()
-    rig = ET.parse(root / 'gazebo/models/perception_rig/model.sdf')
+    rig = ET.parse(root / f'gazebo/models/{rig_name}/model.sdf')
     parts = []
     for visual in rig.findall('.//visual'):
         pose = tuple(map(float, visual.findtext('pose').split()))
@@ -33,11 +33,18 @@ def rig_visuals(project_root, vehicle):
 
 def sensor_markers(vehicle, stamp, x, y, yaw, project_root):
     result = []
-    for index, (offset, shape, size, color) in enumerate(rig_visuals(str(project_root), vehicle)):
+    for rig_name, namespace in (('perception_rig', 'sensors'), ('corner_radar_rig', 'radars')):
+        result.extend(rig_markers(vehicle, stamp, x, y, yaw, project_root, rig_name, namespace))
+    return result
+
+
+def rig_markers(vehicle, stamp, x, y, yaw, project_root, rig_name, namespace):
+    result = []
+    for index, (offset, shape, size, color) in enumerate(rig_visuals(str(project_root), vehicle, rig_name)):
         marker = Marker()
         marker.header.frame_id = 'map'
         marker.header.stamp = stamp
-        marker.ns, marker.id = vehicle+'/sensors', index
+        marker.ns, marker.id = vehicle+'/'+namespace, index
         marker.type, marker.action = shape, Marker.ADD
         dx, dy, dz = offset
         marker.pose.position.x = x+dx*math.cos(yaw)-dy*math.sin(yaw)

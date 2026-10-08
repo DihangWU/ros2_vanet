@@ -50,7 +50,8 @@ def main():
     for vehicle in vehicles(ROOT, 'traffic'):
         item = ET.SubElement(world, 'include')
         name = vehicle['id']
-        ET.SubElement(item, 'uri').text = f'model://{name if name in ("car_a", "car_b") else "background_car"}'
+        model_name = name if (ROOT/f'gazebo/models/{name}/model.sdf').is_file() else 'background_car'
+        ET.SubElement(item, 'uri').text = f'model://{model_name}'
         ET.SubElement(item, 'name').text = name
         y = -8.0 + 3.2*int(vehicle['departLane'])
         ET.SubElement(item, 'pose').text = f'{float(vehicle["departPos"])-2.5} {y} 0 0 0 0'

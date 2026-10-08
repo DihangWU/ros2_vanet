@@ -41,7 +41,10 @@ deadline = time.monotonic()+40
 try:
     while time.monotonic() < deadline:
         rclpy.spin_once(node, timeout_sec=.2)
-        if len(received) == 8 and buffer.can_transform('map', 'car_b/lidar_link', rclpy.time.Time()):
+        montage = received.get('triple')
+        key = None if montage is None else (montage.header.stamp.sec, montage.header.stamp.nanosec)
+        complete_preview = key in camera_frames and all(name in camera_frames[key] for name in ('tele', 'standard', 'wide'))
+        if len(received) == 8 and complete_preview and buffer.can_transform('map', 'car_b/lidar_link', rclpy.time.Time()):
             break
     assert len(received) == 8, f'Missing streams: {received.keys()}'
     for name, degrees in [('wide',120), ('standard',60), ('tele',15)]:

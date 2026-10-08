@@ -418,6 +418,74 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /lidar_brake/markers
       Value: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Corner radar - front left
+      Enabled: true
+      Topic:
+        Value: /car_b/radar/front_left/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 4
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Corner radar - front right
+      Enabled: true
+      Topic:
+        Value: /car_b/radar/front_right/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 4
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Corner radar - rear left
+      Enabled: true
+      Topic:
+        Value: /car_b/radar/rear_left/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 4
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Corner radar - rear right
+      Enabled: true
+      Topic:
+        Value: /car_b/radar/rear_right/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 4
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""

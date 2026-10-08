@@ -6,7 +6,7 @@
 <include merge="true"><uri>model://perception_rig</uri></include>
 ```
 
-Gazebo 为各车辆自动生成独立作用域的话题。ROS2 的 `sensors.launch.py` 扫描当前 SUMO 场景中的车辆模型，自动建立桥接、TF 和预览节点，不需要复制桥接配置。引用 `background_car` 会为所有共用该模型的背景车安装；只给某一背景车安装时，需先使用独立车辆模型并在启动扫描中指定该模型。
+Gazebo 为各车辆自动生成独立作用域的话题。ROS2 的 `sensors.launch.py` 扫描当前 SUMO 场景中的车辆模型，自动建立桥接、TF 和预览节点，不需要复制桥接配置。优先使用 `gazebo/models/<车辆ID>/model.sdf`，不存在时复用 `background_car`。引用 `background_car` 会为所有共用该模型的背景车安装；只给某一背景车安装时，建立以该车辆 ID 命名的独立模型目录，并执行 `python3 gazebo/scripts/build_traffic_world.py` 重新生成交通世界。车顶模组与 [四角雷达模组](../corner_radar_rig/README.md) 可以分别引用或同时安装。
 
 | 传感器 | 安装位置（m） | 视场与输出 |
 | --- | --- | --- |

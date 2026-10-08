@@ -1,4 +1,4 @@
-"""自动识别引用 perception_rig 的车辆，逐车建立独立话题与展示节点。"""
+"""自动识别车顶与四角传感器模组，逐车建立独立话题与展示节点。"""
 import importlib.util
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -17,8 +17,10 @@ def sensor_nodes(context):
     actions = []
     for vehicle in scene.vehicles(root, scenario):
         name = vehicle['id']
-        model_name = name if name in ('car_a', 'car_b') else 'background_car'
+        model_name = name if (root/f'gazebo/models/{name}/model.sdf').is_file() else 'background_car'
         model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
+        if any(i.findtext('uri') == 'model://corner_radar_rig' for i in model.findall('.//include')):
+            actions.extend(corner_radar_nodes(root, name))
         if not any(i.findtext('uri') == 'model://perception_rig' for i in model.findall('.//include')):
             continue
         base = f'/world/cosim_demo/model/{name}/link/sensor_mount/sensor'
@@ -38,6 +40,23 @@ def sensor_nodes(context):
                  parameters=[{'project_root': str(root), 'vehicle': name, 'use_sim_time': True}], output='screen'),
         ])
     return actions
+
+
+def corner_radar_nodes(root, vehicle):
+    rig = ET.parse(root/'gazebo/models/corner_radar_rig/model.sdf')
+    arguments, remappings = [], []
+    for link in rig.findall('.//link'):
+        for sensor in link.findall('sensor'):
+            name = sensor.get('name')
+            topic = f"/world/cosim_demo/model/{vehicle}/link/{link.get('name')}/sensor/{name}/scan/points"
+            arguments.append(f'{topic}@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked')
+            remappings.append((topic, f'/{vehicle}/radar/raw/{name}/points'))
+    return [
+        Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_radar_bridge',
+             arguments=arguments, remappings=remappings, output='screen'),
+        Node(package='cosim_bridge', executable='corner_radar_display', name=f'{vehicle}_corner_radar_display',
+             parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
+    ]
 
 
 def generate_launch_description():

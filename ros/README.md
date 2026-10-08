@@ -77,6 +77,8 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 
 `sensors.launch.py` 扫描引用 `model://perception_rig` 的车辆，自动建立独立桥接和 TF，当前只安装于 car_b。安装配置见 [传感器说明](../gazebo/models/perception_rig/README.md)。
 
+同时自动识别 `model://corner_radar_rig`，逐车启动 `corner_radar_display`。四路原始点云与各自彩色点云独立发布，安装 TF 和颜色读取独立 SDF；当前仅 car_b 装备。侧后方点云用于观察，尚未接入制动或目标跟踪。安装与复用方式见 [四角雷达说明](../gazebo/models/corner_radar_rig/README.md)。
+
 | Topic | 功能 |
 | --- | --- |
 | `/v2v_warning` | 实际收包警告，或标记 simulated 的人工输入 |
@@ -91,6 +93,8 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `/v2v/markers` | 收发时间、无线延迟、V2V 命令时间、范围圆和包回放 |
 | `/car_b/lidar/points` | 原始三维点云，算法输入 |
 | `/car_b/lidar/points_colored` | 地面绿、其他有效回波青，仅用于 RViz 显示 |
+| `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points` | 四路独立三维距离回波点云，20 Hz |
+| `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored` | 四路有效点云，障碍表面按雷达着色、地面绿色 |
 | `/car_b/camera/{wide,standard,tele}/image_raw` | 独立三路图像，640×360、15 Hz |
 | `/car_b/camera/{wide,standard,tele}/camera_info` | 三套独立标定 |
 | `/car_b/camera/triple/image_raw` | 640×1176 同时间戳竖排拼图：上长焦、中主摄、下广角 |
@@ -109,6 +113,7 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `src/cosim_bridge/cosim_bridge/brake_controller.py` | V2V 事件命令校验与去重 |
 | `src/cosim_bridge/cosim_bridge/gazebo_sync.py` | 批量姿态、定步和实际世界时钟确认 |
 | `src/cosim_bridge/cosim_bridge/perception_display.py` | 原始传感器输出、TF、三摄拼图和高度着色 |
+| `src/cosim_bridge/cosim_bridge/corner_radar_display.py` | 四角独立点云输出、安装 TF 和回波着色 |
 | `src/cosim_bridge/cosim_bridge/communication_visuals.py` | 网络通信显示 |
 | `src/cosim_bridge/cosim_bridge/sensor_visuals.py` | 从独立 SDF 读取传感器外观 |
 | `src/cosim_bridge/launch/demo.launch.py` | 启动顺序与参数 |
@@ -140,8 +145,10 @@ python3 ros/tests/test_brake_controller.py
 python3 ros/tests/test_communication_visuals.py
 python3 ros/tests/test_sensor_visuals.py
 python3 ros/tests/test_lidar_adapter.py
+python3 ros/tests/test_corner_radar.py
 # 演示播放时检查真实传感器
 python3 ros/tests/check_sensor_run.py
+python3 ros/tests/check_corner_radar_run.py
 # control_mode:=sumo 的 30 秒三车道对照结束后
 python3 ros/tests/check_traffic_run.py
 # 默认真实雷达网络模式 30 秒三车道演示结束后
