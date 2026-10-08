@@ -21,6 +21,8 @@ def sensor_nodes(context):
         model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
         if any(i.findtext('uri') == 'model://corner_radar_rig' for i in model.findall('.//include')):
             actions.extend(corner_radar_nodes(root, name))
+        if any(i.findtext('uri') == 'model://surround_camera_rig' for i in model.findall('.//include')):
+            actions.extend(surround_camera_nodes(root, name))
         if not any(i.findtext('uri') == 'model://perception_rig' for i in model.findall('.//include')):
             continue
         base = f'/world/cosim_demo/model/{name}/link/sensor_mount/sensor'
@@ -55,6 +57,25 @@ def corner_radar_nodes(root, vehicle):
         Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_radar_bridge',
              arguments=arguments, remappings=remappings, output='screen'),
         Node(package='cosim_bridge', executable='corner_radar_display', name=f'{vehicle}_corner_radar_display',
+             parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
+    ]
+
+
+def surround_camera_nodes(root, vehicle):
+    rig = ET.parse(root/'gazebo/models/surround_camera_rig/model.sdf')
+    arguments, remappings = [], []
+    for link in rig.findall('.//link'):
+        for sensor in link.findall('sensor'):
+            name = sensor.get('name')
+            base = f"/world/cosim_demo/model/{vehicle}/link/{link.get('name')}/sensor/{name}"
+            for suffix, kind in (('image', 'Image'), ('camera_info', 'CameraInfo')):
+                topic = f'{base}/{suffix}'
+                arguments.append(f'{topic}@sensor_msgs/msg/{kind}[gz.msgs.{kind}')
+                remappings.append((topic, f'/{vehicle}/surround/raw/{name}/{suffix}'))
+    return [
+        Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_surround_bridge',
+             arguments=arguments, remappings=remappings, output='screen'),
+        Node(package='cosim_bridge', executable='surround_camera_display', name=f'{vehicle}_surround_camera_display',
              parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
     ]
 

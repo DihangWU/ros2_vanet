@@ -4,6 +4,8 @@
 
 ## 文件
 
+蓝色后车引用独立 [侧后摄像头模组](models/surround_camera_rig/README.md)：左 / 右后视镜附近各一颗，向侧后方观察；车尾上部一颗朝正后方。三颗均为 120° 水平视场、640×360、15 Hz，输出独立图像与标定；模组机身和镜头同时在 Gazebo / RViz 显示，其他车辆一行 merge include 复用。与前向三目合并的六路预览采用两列三行布局，左列长焦 / 主摄 / 广角，右列后 / 左 / 右。
+
 蓝色后车另外引用独立的 [四角短距雷达模组](models/corner_radar_rig/README.md)：四个保险杠角部机身、四路三维回波，水平 180°、垂直 ±15°、0.3～30 m、20 Hz。前角朝侧方，后角朝斜后方，覆盖侧面与后方；采用 GPU 射线作为毫米波雷达距离回波的近似，不包含射频、多普勒或多径模型。其他车辆可以一行 merge include 复用。
 
 车顶模组含与车顶相接的底板、雷达支柱、摄像头支柱及横臂；传感器机身不再悬空。RViz 从相同的独立 SDF 读取这些几何和安装位置，保持两边外观一致。三目预览从上到下为长焦、标准主摄、广角。
@@ -22,6 +24,7 @@
 | `models/background_car/model.sdf` | 背景交通共用的灰色车模型 |
 | `models/perception_rig/model.sdf` | 独立雷达与三目配置，车辆通过 merge include 复用 |
 | `models/corner_radar_rig/model.sdf` | 独立四角短距雷达近似，四路三维点云与彩色机身 |
+| `models/surround_camera_rig/model.sdf` | 独立左、右、后向相机配置，六个机身 / 镜头可视部件 |
 | `models/car_a/model.sdf` | 红色前车的三维几何 |
 | `models/car_b/model.sdf` | 蓝色后车的三维几何 |
 | `config/gui.config` | 初始相机、鼠标视角控制和 GUI 插件 |

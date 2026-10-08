@@ -364,14 +364,14 @@ Visualization Manager:
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Triple camera - tele main wide
+      Name: Six cameras - front and surround
       Normalize Range: true
       Topic:
         Depth: 2
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /car_b/camera/triple/image_raw
+        Value: /car_b/camera/surround/image_raw
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -562,7 +562,7 @@ Window Geometry:
   Hide Left Dock: false
   Hide Right Dock: false
   QMainWindow State: 000000ff00000000fd0000000100000000000001f400000855fc0200000002fb000000100044006900730070006c00610079007301000000700000043c0000018600fffffffb0000003c0054007200690070006c0065002000630061006d0065007200610020002d002000740065006c00650020006d00610069006e0020007700690064006501000004b80000040d0000002800ffffff000009d40000085500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
-  Triple camera - tele main wide:
+  Six cameras - front and surround:
     collapsed: false
   Width: 3028
   X: 1321

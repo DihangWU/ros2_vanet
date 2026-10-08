@@ -15,6 +15,7 @@ setup(
                                          'gazebo_sync = cosim_bridge.gazebo_sync:main',
                                          'perception_display = cosim_bridge.perception_display:main',
                                          'corner_radar_display = cosim_bridge.corner_radar_display:main',
+                                         'surround_camera_display = cosim_bridge.surround_camera_display:main',
                                          'lidar_brake = cosim_bridge.lidar_brake_node:main',
                                          'brake_controller = cosim_bridge.brake_controller:main',
                                          'test_warning_publisher = cosim_bridge.test_warning_publisher:main']},

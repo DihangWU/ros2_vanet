@@ -21,6 +21,8 @@ Gazebo 为各车辆自动生成独立作用域的话题。ROS2 的 `sensors.laun
 
 ROS2 对每台相机分别发布 `/<vehicle>/camera/{wide,standard,tele}/image_raw` 和 `camera_info`，保留各自标定。`camera/triple/image_raw` 只拼接同一时间戳的三帧，从上到下为长焦、标准主摄、广角，带标题栏，640×1176；拼图没有单一相机内参，因此不发布拼图 CameraInfo。
 
+同时引用 [侧后摄像头模组](../surround_camera_rig/README.md) 时，独立的 `surround_camera_display` 订阅三路前向原图并加入后 / 左 / 右图像，生成 `camera/surround/image_raw` 六路预览。默认 RViz 改为显示这个两列三行拼图：第一列仍为长焦 / 主摄 / 广角，第二列为后 / 左 / 右；原三目独立话题和三目拼图继续保留。
+
 安装底板直接接触 z=1.55 m 的车顶，雷达和摄像头分别通过支柱及横臂连接到底板。Gazebo 与 RViz 使用同一份 SDF 可视几何：底板、支柱、雷达机身、摄像头机身及三个镜头。RViz 的 `/<vehicle>/sensors` Marker 命名空间随车辆姿态一起更新，通信提示箭头抬高到 z=3.6 m，避开模组。
 
 雷达原始输出为 `/<vehicle>/lidar/points`；显示输出为 `lidar/points_colored`。高于地面 0.15 m 的有效回波着亮青色，地面回波着亮绿色。这是平坦路面的高度着色，不是车辆识别或障碍物分类。RViz 用真实传感器 TF 将点云叠在车体和路面；无有效回波的位置不补点。默认 `control_mode:=lidar` 的 ROS2 节点使用原始 `/car_b/lidar/points` 反馈车距；高度着色话题只用于显示，不作为算法输入。算法参数独立放在 [Algorithm/LidarBrake](../../../Algorithm/LidarBrake/README.md)。

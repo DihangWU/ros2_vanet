@@ -118,11 +118,11 @@ Visualization Manager:
         Value: /car_b/path
       Value: true
     - Class: rviz_default_plugins/Image
-      Name: Triple camera - tele main wide
+      Name: Six cameras - front and surround
       Enabled: true
       Transport Hint: raw
       Topic:
-        Value: /car_b/camera/triple/image_raw
+        Value: /car_b/camera/surround/image_raw
         Reliability Policy: Reliable
         Durability Policy: Volatile
         History Policy: Keep Last

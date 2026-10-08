@@ -4,6 +4,10 @@
 
 ## 构建与启动
 
+`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立 yaw 安装 TF 和 optical TF。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
+
+运行中可执行 `python3 ros/tests/check_surround_camera_run.py` 检查六路真实图像、独立标定、光轴 TF、同步时间戳和拼图排列。
+
 从项目根目录执行：
 
 ```bash
@@ -98,6 +102,8 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `/car_b/camera/{wide,standard,tele}/image_raw` | 独立三路图像，640×360、15 Hz |
 | `/car_b/camera/{wide,standard,tele}/camera_info` | 三套独立标定 |
 | `/car_b/camera/triple/image_raw` | 640×1176 同时间戳竖排拼图：上长焦、中主摄、下广角 |
+| `/car_b/camera/{rear,left,right}/image_raw`、`camera_info` | 三路独立侧后图像与各自标定 |
+| `/car_b/camera/surround/image_raw` | 默认 RViz 预览，1280×1176 两列三行，左列前向三目、右列后 / 左 / 右 |
 
 `/car_b/sensors/raw/...` 是桥接内部话题。拼图没有统一内参，不发布拼图 CameraInfo。点云高度着色不是障碍物语义分类。通信 Marker 中发布时间与执行时间是 V2V 事件命令；每次连续雷达命令另见雷达日志和网络执行日志。
 
@@ -113,6 +119,7 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `src/cosim_bridge/cosim_bridge/brake_controller.py` | V2V 事件命令校验与去重 |
 | `src/cosim_bridge/cosim_bridge/gazebo_sync.py` | 批量姿态、定步和实际世界时钟确认 |
 | `src/cosim_bridge/cosim_bridge/perception_display.py` | 原始传感器输出、TF、三摄拼图和高度着色 |
+| `src/cosim_bridge/cosim_bridge/surround_camera_display.py` | 独立侧后图像、标定、光轴 TF 与六路同时间戳拼图 |
 | `src/cosim_bridge/cosim_bridge/corner_radar_display.py` | 四角独立点云输出、安装 TF 和回波着色 |
 | `src/cosim_bridge/cosim_bridge/communication_visuals.py` | 网络通信显示 |
 | `src/cosim_bridge/cosim_bridge/sensor_visuals.py` | 从独立 SDF 读取传感器外观 |
