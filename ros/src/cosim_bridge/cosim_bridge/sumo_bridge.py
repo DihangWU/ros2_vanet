@@ -30,6 +30,7 @@ class SumoBridge(Node):
         self.declare_parameter('network_mode', False)
         self.declare_parameter('network_gui', False)
         self.declare_parameter('scenario', 'traffic')
+        self.declare_parameter('show_background_labels', False)
         self.scenario = self.get_parameter('scenario').value
         self.network_mode = self.get_parameter('network_mode').value
         self.declare_parameter('control_mode', 'sumo')
@@ -367,6 +368,8 @@ class SumoBridge(Node):
             state = 'BACKGROUND' if vehicle.startswith('bg_') else ('STOPPED' if speed < 0.05 else (('BRAKING' if vehicle == 'car_a' else ('ROS BRAKING' if self.applied_command is not None else 'FOLLOWING')) if self.braked else 'DRIVING'))
             label.text = f'{vehicle}: {speed:.2f} m/s  {state}'
             label.color.r = label.color.g = label.color.b = 1.0
+            if vehicle.startswith('bg_') and not self.get_parameter('show_background_labels').value:
+                label.color.a = 0.0  # Keep the label and its ID; hide only its rendering.
             markers.markers.append(label)
         road = self.marker('road', 0, Marker.CUBE, stamp)
         road_length = self.road_length if self.scenario == 'traffic' else 250.0

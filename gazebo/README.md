@@ -6,7 +6,7 @@
 
 车顶模组含与车顶相接的底板、雷达支柱、摄像头支柱及横臂；传感器机身不再悬空。RViz 从相同的独立 SDF 读取这些几何和安装位置，保持两边外观一致。三目预览从上到下为长焦、标准主摄、广角。
 
-蓝色后车在车顶前缘装有三维 GPU 激光雷达和三目摄像头，光心均高于车顶。独立配置与一行安装方法见 [perception_rig/README.md](models/perception_rig/README.md)。雷达水平左右各 60°（总 120°）、垂直 −25°～+15°；广角、标准、长焦水平视场为 120°、60°、30°。世界增加 Sensors / Ogre2 插件，从实际渲染场景生成图像和点云。SUMO 仍负责运动，Gazebo 生成制动算法的原始点云输入；制动判断由独立算法和 ROS2 节点完成。
+蓝色后车在车顶前缘装有三维 GPU 激光雷达和三目摄像头，光心均高于车顶。独立配置与一行安装方法见 [perception_rig/README.md](models/perception_rig/README.md)。雷达水平左右各 60°（总 120°）、垂直 −25°～+15°；广角、标准、长焦水平视场为 120°、60°、15°。长焦远裁剪为 300 m，其余相机为 150 m。世界增加 Sensors / Ogre2 插件，从实际渲染场景生成图像和点云。SUMO 仍负责运动，Gazebo 生成制动算法的原始点云输入；制动判断由独立算法和 ROS2 节点完成。
 
 默认 `scenario:=traffic` 使用 `worlds/traffic.sdf`：400 m 三车道、11 辆车，道路宽度 9.6 m；默认运行 30 秒。道路长度读取 SUMO 的 `network/traffic.nod.xml`，停车点后方保留约 210 m 道路。`config/traffic_gui.config` 提供较宽的初始视角。旧资源 `worlds/two_cars.sdf` 通过 `scenario:=two_cars duration:=15.0` 使用。
 

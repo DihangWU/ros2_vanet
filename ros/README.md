@@ -26,6 +26,7 @@ ros2 launch cosim_bridge demo.launch.py
 | `network_gui:=true` | 打开 Qtenv，演示使用 F6 Fast Run |
 | `sumo_gui:=false` | 自动开始，无需点击 SUMO Play |
 | `rviz:=false` | 关闭 RViz |
+| `show_background_labels:=true` | 显示背景车头顶标签，默认透明隐藏，保留标签生成逻辑 |
 | `playback_rate:=0.5` | 半速，渲染负载可能进一步限制实际速度 |
 | `duration:=30.0` | 仿真时长，最少 15 秒 |
 | `startup_delay:=15.0` | 延迟打开 SUMO，不自动开始 |

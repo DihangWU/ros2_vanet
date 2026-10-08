@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 1881
+    Tree Height: 832
 Visualization Manager:
   Class: ""
   Displays:
@@ -21,7 +21,7 @@ Visualization Manager:
       Normal Cell Count: 0
       Offset:
         X: 200
-        Y: -4.8
+        Y: -4.800000190734863
         Z: 0
       Plane: XY
       Plane Cell Count: 100
@@ -31,13 +31,7 @@ Visualization Manager:
       Enabled: true
       Name: Cars road and status
       Namespaces:
-        car_a: true
-        car_a/model: true
-        car_b: true
-        car_b/model: true
-        car_b/sensors: true
-        road: true
-        status: true
+        {}
       Topic:
         Depth: 10
         Durability Policy: Volatile
@@ -49,7 +43,7 @@ Visualization Manager:
       Enabled: true
       Name: V2V communication
       Namespaces:
-        v2v: true
+        {}
       Topic:
         Depth: 10
         Durability Policy: Volatile
@@ -113,123 +107,317 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /car_b/path
       Value: true
-    - Class: rviz_default_plugins/Path
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_01 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_01/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_02 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_02/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_03 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_03/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_04 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_04/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_05 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_05/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_06 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_06/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_07 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_07/path
-    - Class: rviz_default_plugins/Path
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 153; 166; 178
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.11999999731779099
       Name: bg_08 path
-      Enabled: true
-      Color: 153; 166; 178
-      Alpha: 0.5
-      Line Style: Lines
-      Line Width: 0.12
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_08/path
-    - Class: rviz_default_plugins/Path
-      Name: bg_09 path
-      Enabled: true
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
       Color: 153; 166; 178
-      Alpha: 0.5
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
       Line Style: Lines
-      Line Width: 0.12
+      Line Width: 0.11999999731779099
+      Name: bg_09 path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /bg_09/path
+      Value: true
     - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
       Name: Triple camera - tele main wide
-      Enabled: true
-      Transport Hint: raw
+      Normalize Range: true
       Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
         Value: /car_b/camera/triple/image_raw
-        Reliability Policy: Reliable
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Depth: 2
-    - Class: rviz_default_plugins/PointCloud2
-      Name: Roof lidar - bright surface returns
-      Enabled: true
-      Topic:
-        Value: /car_b/lidar/points_colored
-        Reliability Policy: Best Effort
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Depth: 2
-      Position Transformer: XYZ
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
       Color Transformer: RGB8
-      Style: Points
-      Size (Pixels): 4
-      Size (m): 0.035
-      Alpha: 1
       Decay Time: 0
-      Use Fixed Frame: true
-    - Class: rviz_default_plugins/MarkerArray
-      Name: Lidar distance and brake control
       Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Roof lidar - bright surface returns
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
       Topic:
-        Value: /lidar_brake/markers
-        Reliability Policy: Reliable
+        Depth: 2
         Durability Policy: Volatile
         History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/lidar/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Lidar distance and brake control
+      Namespaces:
+        {}
+      Topic:
         Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /lidar_brake/markers
+      Value: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""
@@ -237,11 +425,21 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        car_a/base_link:
-          Value: true
         car_b/base_link:
           Value: true
-        map:
+        car_b/lidar_link:
+          Value: true
+        car_b/standard_link:
+          Value: true
+        car_b/standard_optical_frame:
+          Value: true
+        car_b/tele_link:
+          Value: true
+        car_b/tele_optical_frame:
+          Value: true
+        car_b/wide_link:
+          Value: true
+        car_b/wide_optical_frame:
           Value: true
       Marker Scale: 2
       Name: TF
@@ -249,11 +447,7 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          car_a/base_link:
-            {}
-          car_b/base_link:
-            {}
+        {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -299,7 +493,9 @@ Window Geometry:
   Height: 2293
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000855fc0200000001fb000000100044006900730070006c0061007900730100000070000008550000018600ffffff000009d40000085500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000855fc0200000002fb000000100044006900730070006c00610079007301000000700000043c0000018600fffffffb0000003c0054007200690070006c0065002000630061006d0065007200610020002d002000740065006c00650020006d00610069006e0020007700690064006501000004b80000040d0000002800ffffff000009d40000085500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Triple camera - tele main wide:
+    collapsed: false
   Width: 3028
   X: 1321
   Y: 79

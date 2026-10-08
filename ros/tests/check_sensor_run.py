@@ -44,7 +44,7 @@ try:
         if len(received) == 8 and buffer.can_transform('map', 'car_b/lidar_link', rclpy.time.Time()):
             break
     assert len(received) == 8, f'Missing streams: {received.keys()}'
-    for name, degrees in [('wide',120), ('standard',60), ('tele',30)]:
+    for name, degrees in [('wide',120), ('standard',60), ('tele',15)]:
         image, info = received[name], received[name+'_info']
         assert (image.width, image.height) == (640,360)
         assert image.header.frame_id == info.header.frame_id == f'car_b/{name}_optical_frame'

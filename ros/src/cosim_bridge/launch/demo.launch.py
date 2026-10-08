@@ -29,6 +29,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('project_root', default_value=str(root)),
         DeclareLaunchArgument('scenario', default_value='traffic'),
+        DeclareLaunchArgument('show_background_labels', default_value='false'),
         DeclareLaunchArgument('sumo_gui', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='true'),
         DeclareLaunchArgument('gazebo', default_value='true'),
@@ -83,6 +84,7 @@ def generate_launch_description():
                      'network_mode': ParameterValue(LaunchConfiguration('network'), value_type=bool),
                      'control_mode': LaunchConfiguration('control_mode'),
                      'scenario': LaunchConfiguration('scenario'),
+                     'show_background_labels': ParameterValue(LaunchConfiguration('show_background_labels'), value_type=bool),
                      'network_gui': ParameterValue(LaunchConfiguration('network_gui'), value_type=bool),
                      'communication_range_m': ParameterValue(LaunchConfiguration('communication_range_m'), value_type=float),
                      'project_root': LaunchConfiguration('project_root'),
