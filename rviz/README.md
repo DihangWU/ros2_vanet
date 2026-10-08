@@ -4,17 +4,17 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 ## 当前显示功能
 
-默认八车配置：[traffic.rviz](traffic.rviz)。旧两车配置：[two_cars.rviz](two_cars.rviz)，通过 `scenario:=two_cars duration:=15.0` 使用。多车场景默认 30 秒。
+默认十一车配置：[traffic.rviz](traffic.rviz)。旧两车配置：[two_cars.rviz](two_cars.rviz)，通过 `scenario:=two_cars duration:=15.0` 使用。多车场景默认 30 秒。
 
-默认显示红色 A、蓝色 B 和六辆灰色背景车，所有车辆均有 Odom、Path 和 TF；背景速度标签为 `BACKGROUND`，不错误标成制动。通信显示仍表示 A → B 的警告闭环。道路长度读取 SUMO 节点定义，当前为 400 m；多车网格中心为 x=200，覆盖整条道路；相机保持自由操作。
+默认显示三车道：中间红色 A、蓝色 B，左侧六辆、右侧三辆灰色背景车，所有车辆均有 Odom、Path 和 TF；背景速度标签为 `BACKGROUND`，不错误标成制动。道路显示两排间断车道线。通信显示仍表示 A → B 的警告闭环。道路长度读取 SUMO 节点定义，当前为 400 m；多车网格中心为 x=200、y=-4.8，覆盖整条道路；相机保持自由操作。
 
 | 显示项 | 数据来源 | 显示内容 |
 | --- | --- | --- |
-| 车体与状态 | `/demo/markers` | 红色 A、蓝色 B、六辆灰色背景车及速度状态 |
+| 车体与状态 | `/demo/markers` | 红色 A、蓝色 B、九辆灰色背景车及速度状态 |
 | 道路参照 | `/demo/markers` | 道路、白色虚线及仿真时间 |
 | 前车轨迹 | `/car_a/path` | 红色行驶轨迹 |
 | 后车轨迹 | `/car_b/path` | 蓝色行驶轨迹 |
-| 背景轨迹 | `/bg_01/path`～`/bg_06/path` | 灰色行驶轨迹（默认多车配置） |
+| 背景轨迹 | `/bg_01/path`～`/bg_09/path` | 左右两侧灰色背景车行驶轨迹 |
 | 坐标系 | `/tf` | `map` 到全部 `<id>/base_link` 的变换 |
 | 仿真时钟 | `/clock` | 为 RViz2 提供统一的仿真时间 |
 | 通信信息 | `/v2v/markers` | 收发时间、无线延迟、车辆 ID、命令时间、范围圆、收发位置与包回放 |

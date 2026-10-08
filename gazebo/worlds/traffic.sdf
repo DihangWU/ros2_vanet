@@ -18,7 +18,7 @@
       <static>true</static>
       <link name="visuals">
         <visual name="grass">
-          <pose>200.0 -3.2 -0.2 0 0 0</pose>
+          <pose>200.0 -4.8 -0.2 0 0 0</pose>
           <geometry>
             <box>
               <size>500 120 0.2</size>
@@ -30,10 +30,10 @@
           </material>
         </visual>
         <visual name="asphalt">
-          <pose>200.0 -3.2 -0.05 0 0 0</pose>
+          <pose>200.0 -4.8 -0.05 0 0 0</pose>
           <geometry>
             <box>
-              <size>400 6.4 0.1</size>
+              <size>400 9.6 0.1</size>
             </box>
           </geometry>
           <material>
@@ -53,8 +53,8 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="edge_-6.25">
-          <pose>200.0 -6.25 0.01 0 0 0</pose>
+        <visual name="edge_-9.45">
+          <pose>200.0 -9.45 0.01 0 0 0</pose>
           <geometry>
             <box>
               <size>400 0.16 0.02</size>
@@ -65,7 +65,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_0">
+        <visual name="dash_-3.2_0">
           <pose>1.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -77,7 +77,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_8">
+        <visual name="dash_-3.2_8">
           <pose>9.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -89,7 +89,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_16">
+        <visual name="dash_-3.2_16">
           <pose>17.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -101,7 +101,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_24">
+        <visual name="dash_-3.2_24">
           <pose>25.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -113,7 +113,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_32">
+        <visual name="dash_-3.2_32">
           <pose>33.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -125,7 +125,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_40">
+        <visual name="dash_-3.2_40">
           <pose>41.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -137,7 +137,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_48">
+        <visual name="dash_-3.2_48">
           <pose>49.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -149,7 +149,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_56">
+        <visual name="dash_-3.2_56">
           <pose>57.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -161,7 +161,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_64">
+        <visual name="dash_-3.2_64">
           <pose>65.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -173,7 +173,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_72">
+        <visual name="dash_-3.2_72">
           <pose>73.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -185,7 +185,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_80">
+        <visual name="dash_-3.2_80">
           <pose>81.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -197,7 +197,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_88">
+        <visual name="dash_-3.2_88">
           <pose>89.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -209,7 +209,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_96">
+        <visual name="dash_-3.2_96">
           <pose>97.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -221,7 +221,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_104">
+        <visual name="dash_-3.2_104">
           <pose>105.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -233,7 +233,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_112">
+        <visual name="dash_-3.2_112">
           <pose>113.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -245,7 +245,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_120">
+        <visual name="dash_-3.2_120">
           <pose>121.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -257,7 +257,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_128">
+        <visual name="dash_-3.2_128">
           <pose>129.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -269,7 +269,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_136">
+        <visual name="dash_-3.2_136">
           <pose>137.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -281,7 +281,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_144">
+        <visual name="dash_-3.2_144">
           <pose>145.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -293,7 +293,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_152">
+        <visual name="dash_-3.2_152">
           <pose>153.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -305,7 +305,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_160">
+        <visual name="dash_-3.2_160">
           <pose>161.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -317,7 +317,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_168">
+        <visual name="dash_-3.2_168">
           <pose>169.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -329,7 +329,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_176">
+        <visual name="dash_-3.2_176">
           <pose>177.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -341,7 +341,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_184">
+        <visual name="dash_-3.2_184">
           <pose>185.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -353,7 +353,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_192">
+        <visual name="dash_-3.2_192">
           <pose>193.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -365,7 +365,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_200">
+        <visual name="dash_-3.2_200">
           <pose>201.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -377,7 +377,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_208">
+        <visual name="dash_-3.2_208">
           <pose>209.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -389,7 +389,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_216">
+        <visual name="dash_-3.2_216">
           <pose>217.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -401,7 +401,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_224">
+        <visual name="dash_-3.2_224">
           <pose>225.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -413,7 +413,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_232">
+        <visual name="dash_-3.2_232">
           <pose>233.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -425,7 +425,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_240">
+        <visual name="dash_-3.2_240">
           <pose>241.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -437,7 +437,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_248">
+        <visual name="dash_-3.2_248">
           <pose>249.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -449,7 +449,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_256">
+        <visual name="dash_-3.2_256">
           <pose>257.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -461,7 +461,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_264">
+        <visual name="dash_-3.2_264">
           <pose>265.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -473,7 +473,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_272">
+        <visual name="dash_-3.2_272">
           <pose>273.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -485,7 +485,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_280">
+        <visual name="dash_-3.2_280">
           <pose>281.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -497,7 +497,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_288">
+        <visual name="dash_-3.2_288">
           <pose>289.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -509,7 +509,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_296">
+        <visual name="dash_-3.2_296">
           <pose>297.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -521,7 +521,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_304">
+        <visual name="dash_-3.2_304">
           <pose>305.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -533,7 +533,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_312">
+        <visual name="dash_-3.2_312">
           <pose>313.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -545,7 +545,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_320">
+        <visual name="dash_-3.2_320">
           <pose>321.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -557,7 +557,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_328">
+        <visual name="dash_-3.2_328">
           <pose>329.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -569,7 +569,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_336">
+        <visual name="dash_-3.2_336">
           <pose>337.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -581,7 +581,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_344">
+        <visual name="dash_-3.2_344">
           <pose>345.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -593,7 +593,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_352">
+        <visual name="dash_-3.2_352">
           <pose>353.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -605,7 +605,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_360">
+        <visual name="dash_-3.2_360">
           <pose>361.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -617,7 +617,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_368">
+        <visual name="dash_-3.2_368">
           <pose>369.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -629,7 +629,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_376">
+        <visual name="dash_-3.2_376">
           <pose>377.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -641,7 +641,7 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_384">
+        <visual name="dash_-3.2_384">
           <pose>385.5 -3.2 0.01 0 0 0</pose>
           <geometry>
             <box>
@@ -653,8 +653,608 @@
             <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
-        <visual name="dash_392">
+        <visual name="dash_-3.2_392">
           <pose>393.5 -3.2 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_0">
+          <pose>1.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_8">
+          <pose>9.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_16">
+          <pose>17.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_24">
+          <pose>25.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_32">
+          <pose>33.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_40">
+          <pose>41.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_48">
+          <pose>49.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_56">
+          <pose>57.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_64">
+          <pose>65.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_72">
+          <pose>73.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_80">
+          <pose>81.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_88">
+          <pose>89.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_96">
+          <pose>97.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_104">
+          <pose>105.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_112">
+          <pose>113.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_120">
+          <pose>121.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_128">
+          <pose>129.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_136">
+          <pose>137.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_144">
+          <pose>145.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_152">
+          <pose>153.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_160">
+          <pose>161.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_168">
+          <pose>169.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_176">
+          <pose>177.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_184">
+          <pose>185.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_192">
+          <pose>193.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_200">
+          <pose>201.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_208">
+          <pose>209.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_216">
+          <pose>217.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_224">
+          <pose>225.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_232">
+          <pose>233.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_240">
+          <pose>241.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_248">
+          <pose>249.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_256">
+          <pose>257.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_264">
+          <pose>265.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_272">
+          <pose>273.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_280">
+          <pose>281.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_288">
+          <pose>289.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_296">
+          <pose>297.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_304">
+          <pose>305.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_312">
+          <pose>313.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_320">
+          <pose>321.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_328">
+          <pose>329.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_336">
+          <pose>337.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_344">
+          <pose>345.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_352">
+          <pose>353.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_360">
+          <pose>361.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_368">
+          <pose>369.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_376">
+          <pose>377.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_384">
+          <pose>385.5 -6.4 0.01 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3 0.16 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="dash_-6.4_392">
+          <pose>393.5 -6.4 0.01 0 0 0</pose>
           <geometry>
             <box>
               <size>3 0.16 0.02</size>
@@ -706,6 +1306,21 @@
       <uri>model://background_car</uri>
       <name>bg_06</name>
       <pose>112.5 -1.5999999999999996 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://background_car</uri>
+      <name>bg_07</name>
+      <pose>22.5 -8.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://background_car</uri>
+      <name>bg_08</name>
+      <pose>62.5 -8.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://background_car</uri>
+      <name>bg_09</name>
+      <pose>102.5 -8.0 0 0 0 0</pose>
     </include>
   </world>
 </sdf>

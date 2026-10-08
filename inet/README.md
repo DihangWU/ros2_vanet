@@ -18,4 +18,4 @@ config/wireless.ini 保存实际参与运行的 INET 参数，由 omnet/omnetpp.
 
 INET 实现来自已有安装，本目录只保存项目配置。路径和启动见 [OMNeT++ README](../omnet/README.md)。
 
-默认双车道交通场景有八个 VeinsInetCar，全部复用本目录的 802.11p/UDP 配置。仅前车 A 发送一次警告；背景车辆拥有网卡，但其应用不触发 A/B 控制。增加车数不改变网络桥接接口。
+默认三车道交通场景有十一个 VeinsInetCar，全部复用本目录的 802.11p/UDP 配置。仅前车 A 发送一次警告；背景车辆拥有网卡，但其应用不触发 A/B 控制。增加车数不改变网络桥接接口。

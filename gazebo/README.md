@@ -1,17 +1,17 @@
 # Gazebo Harmonic：三维车辆展示
 
-当前使用本机 Gazebo Sim 8.15.0（Harmonic）。默认展示双车道直路、白色车道标线、红蓝 A/B 和六辆灰色背景小车。小车包含车身、车窗、四个车轮和前后灯，全部使用本地几何，无需在线下载模型。
+当前使用本机 Gazebo Sim 8.15.0（Harmonic）。默认展示三车道直路、两排白色间断车道线、红蓝 A/B 和九辆灰色背景小车。A/B 位于中间车道，左侧六辆背景车，右侧三辆背景车。小车包含车身、车窗、四个车轮和前后灯，全部使用本地几何，无需在线下载模型。
 
 ## 文件
 
-默认 `scenario:=traffic` 使用 `worlds/traffic.sdf`：400 m 双车道、红色 A、蓝色 B 和六辆灰色背景车；默认运行 30 秒。道路长度读取 SUMO 的 `network/traffic.nod.xml`，停车点后方保留约 210 m 道路。`config/traffic_gui.config` 提供较宽的初始视角。旧资源 `worlds/two_cars.sdf` 通过 `scenario:=two_cars duration:=15.0` 使用。
+默认 `scenario:=traffic` 使用 `worlds/traffic.sdf`：400 m 三车道、11 辆车，道路宽度 9.6 m；默认运行 30 秒。道路长度读取 SUMO 的 `network/traffic.nod.xml`，停车点后方保留约 210 m 道路。`config/traffic_gui.config` 提供较宽的初始视角。旧资源 `worlds/two_cars.sdf` 通过 `scenario:=two_cars duration:=15.0` 使用。
 
 灰车复用 `models/background_car/`。`gazebo_sync` 按 SUMO 路线文件中的全部车辆 ID 订阅 Odom。新增或修改初始车辆后，在项目根目录执行 `python3 gazebo/scripts/build_traffic_world.py` 重新生成世界。目前模型在启动前创建，不实现运行时新增或移除。
 
 | 文件 | 功能 |
 | --- | --- |
 | `worlds/two_cars.sdf` | 道路、地面、灯光和两辆车的初始位置 |
-| `worlds/traffic.sdf` | 默认双车道八车世界，由脚本生成 |
+| `worlds/traffic.sdf` | 默认三车道十一车世界，由脚本生成 |
 | `scripts/build_traffic_world.py` | 根据 SUMO 路线定义生成默认世界 |
 | `models/background_car/model.sdf` | 背景交通共用的灰色车模型 |
 | `models/car_a/model.sdf` | 红色前车的三维几何 |

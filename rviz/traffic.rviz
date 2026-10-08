@@ -21,7 +21,7 @@ Visualization Manager:
       Normal Cell Count: 0
       Offset:
         X: 200
-        Y: -3.2
+        Y: -4.8
         Z: 0
       Plane: XY
       Plane Cell Count: 100
@@ -166,6 +166,33 @@ Visualization Manager:
       Line Width: 0.12
       Topic:
         Value: /bg_06/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_07 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_07/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_08 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_08/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_09 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_09/path
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""

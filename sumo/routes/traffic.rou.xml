@@ -11,12 +11,15 @@
     <vType id="background_5" vClass="passenger" length="5" width="1.8" maxSpeed="8" sigma="0" speedFactor="1" speedDev="0" lcStrategic="0" lcCooperative="0" lcSpeedGain="0" lcKeepRight="0"/>
     <vType id="background_6" vClass="passenger" length="5" width="1.8" maxSpeed="8.5" sigma="0" speedFactor="1" speedDev="0" lcStrategic="0" lcCooperative="0" lcSpeedGain="0" lcKeepRight="0"/>
     <route id="straight" edges="road"/>
-    <vehicle id="car_a" type="car" route="straight" depart="0" departLane="0" departPos="100" departSpeed="15" color="1,0.2,0.2"/>
-    <vehicle id="car_b" type="car" route="straight" depart="0" departLane="0" departPos="55" departSpeed="15" color="0.2,0.4,1"/>
-    <vehicle id="bg_01" type="background_1" route="straight" depart="0" departLane="1" departPos="15" departSpeed="6" color="0.6,0.65,0.7"/>
-    <vehicle id="bg_02" type="background_2" route="straight" depart="0" departLane="1" departPos="35" departSpeed="6.5" color="0.6,0.65,0.7"/>
-    <vehicle id="bg_03" type="background_3" route="straight" depart="0" departLane="1" departPos="55" departSpeed="7" color="0.6,0.65,0.7"/>
-    <vehicle id="bg_04" type="background_4" route="straight" depart="0" departLane="1" departPos="75" departSpeed="7.5" color="0.6,0.65,0.7"/>
-    <vehicle id="bg_05" type="background_5" route="straight" depart="0" departLane="1" departPos="95" departSpeed="8" color="0.6,0.65,0.7"/>
-    <vehicle id="bg_06" type="background_6" route="straight" depart="0" departLane="1" departPos="115" departSpeed="8.5" color="0.6,0.65,0.7"/>
+    <vehicle id="car_a" type="car" route="straight" depart="0" departLane="1" departPos="100" departSpeed="15" color="1,0.2,0.2"/>
+    <vehicle id="car_b" type="car" route="straight" depart="0" departLane="1" departPos="55" departSpeed="15" color="0.2,0.4,1"/>
+    <vehicle id="bg_01" type="background_1" route="straight" depart="0" departLane="2" departPos="15" departSpeed="6" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_02" type="background_2" route="straight" depart="0" departLane="2" departPos="35" departSpeed="6.5" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_03" type="background_3" route="straight" depart="0" departLane="2" departPos="55" departSpeed="7" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_04" type="background_4" route="straight" depart="0" departLane="2" departPos="75" departSpeed="7.5" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_05" type="background_5" route="straight" depart="0" departLane="2" departPos="95" departSpeed="8" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_06" type="background_6" route="straight" depart="0" departLane="2" departPos="115" departSpeed="8.5" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_07" type="background_2" route="straight" depart="0" departLane="0" departPos="25" departSpeed="6.5" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_08" type="background_4" route="straight" depart="0" departLane="0" departPos="65" departSpeed="7.5" color="0.6,0.65,0.7"/>
+    <vehicle id="bg_09" type="background_6" route="straight" depart="0" departLane="0" departPos="105" departSpeed="8.5" color="0.6,0.65,0.7"/>
 </routes>

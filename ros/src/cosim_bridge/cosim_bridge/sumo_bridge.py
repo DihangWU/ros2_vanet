@@ -297,7 +297,7 @@ class SumoBridge(Node):
             markers.markers.append(label)
         road = self.marker('road', 0, Marker.CUBE, stamp)
         road_length = self.road_length if self.scenario == 'traffic' else 250.0
-        road_width = 6.4 if self.scenario == 'traffic' else 3.2
+        road_width = 9.6 if self.scenario == 'traffic' else 3.2
         road.pose.position = Point(x=road_length/2, y=-road_width/2, z=-0.1)
         road.scale.x, road.scale.y, road.scale.z = road_length, road_width, 0.1
         road.color.r = road.color.g = road.color.b = 0.18
@@ -306,10 +306,11 @@ class SumoBridge(Node):
         lines.scale.x = 0.16
         lines.color.r = lines.color.g = lines.color.b = 1.0
         if self.scenario == 'traffic':
-            for y in (-0.15, -6.25):
+            for y in (-0.15, -9.45):
                 lines.points.extend([Point(x=0.0, y=y, z=0.01), Point(x=road_length, y=y, z=0.01)])
-            for x in range(0, int(road_length), 8):
-                lines.points.extend([Point(x=float(x), y=-3.2, z=0.01), Point(x=float(x+3), y=-3.2, z=0.01)])
+            for y in (-3.2, -6.4):
+                for x in range(0, int(road_length), 8):
+                    lines.points.extend([Point(x=float(x), y=y, z=0.01), Point(x=float(x+3), y=y, z=0.01)])
         else:
             for y in (-0.25, -2.95):
                 for x in range(0, 250, 8):

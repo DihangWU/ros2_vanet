@@ -1,4 +1,4 @@
 <edges>
-    <!-- 同向双车道，lane 0 为右车道，lane 1 为左车道。 -->
-    <edge id="road" from="start" to="end" numLanes="2" speed="15"/>
+    <!-- 同向三车道：lane 0 右侧背景车，lane 1 红蓝车，lane 2 左侧背景车。 -->
+    <edge id="road" from="start" to="end" numLanes="3" speed="15"/>
 </edges>

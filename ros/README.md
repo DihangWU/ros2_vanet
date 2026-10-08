@@ -4,7 +4,7 @@ SUMO 是车辆运动真值源。ROS2 读取车辆状态、接收警告并发出�
 
 ## 构建与运行
 
-默认 `scenario:=traffic`：400 m 双车道直路、A/B 和 bg_01～bg_06 六辆背景车，时长 30 秒。初始车辆 ID 从 SUMO 路线文件读取，全部车辆发布 `/<id>/odom`、`/<id>/path` 和 TF。道路 Marker 长度读取 SUMO 节点定义，与 Gazebo 道路同步。旧场景入口为 `scenario:=two_cars duration:=15.0`。
+默认 `scenario:=traffic`：400 m 三车道直路、A/B 和 bg_01～bg_09 九辆背景车，时长 30 秒。A/B 位于中间车道，左侧六辆背景车，右侧三辆背景车。初始车辆 ID 从 SUMO 路线文件读取，全部车辆发布 `/<id>/odom`、`/<id>/path` 和 TF。道路 Marker 长度读取 SUMO 节点定义，显示 9.6 m 宽的道路和两排间断车道线，与 Gazebo 道路同步。旧场景入口为 `scenario:=two_cars duration:=15.0`。
 
 从项目根目录执行：
 
@@ -106,7 +106,7 @@ ros2 topic echo /brake_cmd
 
 SUMO 内部步长 0.01 秒，ROS2 每 0.05 仿真秒取样，默认 20 Hz。控制器和测试发布器使用 `/clock`；步进定时器使用稳态时钟。事件记录精度受 0.05 秒取样周期及 ROS2 调度影响。
 
-`map` 保留 SUMO 平面坐标。两种模式均读取实际车头位置和角度，转换为 ROS yaw，再沿朝向减去半车长作为车体中心。双车道右车道中心 y=-4.8，左车道中心 y=-1.6。状态映射已支持不同车道；A/B 停车策略仍假定两车在同一条直路同一车道。
+`map` 保留 SUMO 平面坐标。两种模式均读取实际车头位置和角度，转换为 ROS yaw，再沿朝向减去半车长作为车体中心。三车道从右到左中心为 y=-8.0、-4.8、-1.6 m，A/B 保持在 y=-4.8 m。状态映射已支持不同车道；A/B 停车策略仍假定两车在同一条直路同一车道。
 
 SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合收包和 `brake_command_applied` 事件，以及普通跟车或无收包基线判断。当前为单次警告学习演示，不是统计性的无线性能评估。
 
@@ -138,7 +138,7 @@ JSONL 同时记录 SUMO 仿真时间和本机单调时钟。测试节点关闭�
 ```bash
 python3 ros/tests/test_brake_controller.py
 python3 ros/tests/test_communication_visuals.py
-# 默认八车网络演示完成后检查真实输出
+# 默认三车道十一车网络演示完成后检查真实输出
 python3 ros/tests/check_traffic_run.py
 ```
 
