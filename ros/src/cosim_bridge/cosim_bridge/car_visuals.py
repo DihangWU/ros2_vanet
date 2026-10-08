@@ -5,7 +5,8 @@ from visualization_msgs.msg import Marker
 
 
 def car_markers(vehicle, stamp, x, y, yaw):
-    color = (1.0, 0.15, 0.12) if vehicle == 'car_a' else (0.12, 0.35, 1.0)
+    color = ((1.0, 0.15, 0.12) if vehicle == 'car_a' else
+             ((0.12, 0.35, 1.0) if vehicle == 'car_b' else (0.6, 0.65, 0.7)))
     parts = [
         ('body', (0, 0, .65), (5, 1.8, .65), color, False),
         ('cabin', (-.25, 0, 1.2), (2.4, 1.6, .7), color, False),

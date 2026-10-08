@@ -17,3 +17,5 @@ config/wireless.ini 保存实际参与运行的 INET 参数，由 omnet/omnetpp.
 默认配置实测延迟约 0.152 ms。启动前设置 COSIM_RADIO_POWER=0.000000001mW，已验证无收包、无 ROS2 制动；SUMO 安全跟车仍会减速。修改参数需重启演示。
 
 INET 实现来自已有安装，本目录只保存项目配置。路径和启动见 [OMNeT++ README](../omnet/README.md)。
+
+默认双车道交通场景有八个 VeinsInetCar，全部复用本目录的 802.11p/UDP 配置。仅前车 A 发送一次警告；背景车辆拥有网卡，但其应用不触发 A/B 控制。增加车数不改变网络桥接接口。

@@ -4,6 +4,8 @@ SUMO 是车辆运动真值源。ROS2 读取车辆状态、接收警告并发出�
 
 ## 构建与运行
 
+默认 `scenario:=traffic`：400 m 双车道直路、A/B 和 bg_01～bg_06 六辆背景车，时长 30 秒。初始车辆 ID 从 SUMO 路线文件读取，全部车辆发布 `/<id>/odom`、`/<id>/path` 和 TF。道路 Marker 长度读取 SUMO 节点定义，与 Gazebo 道路同步。旧场景入口为 `scenario:=two_cars duration:=15.0`。
+
 从项目根目录执行：
 
 ```bash
@@ -15,7 +17,7 @@ export ROS_LOG_DIR="$PWD/log/runtime"
 ros2 launch cosim_bridge demo.launch.py
 ```
 
-默认先打开 Gazebo 和 RViz2，8 秒后打开 SUMO。点击 SUMO 的绿色“开始 / Play”按钮才开始运行；约第 5 秒前车急刹，15 秒结束后保留最终画面，Ctrl+C 退出。不要单独点击 Gazebo 的播放按钮。
+默认先打开 Gazebo 和 RViz2，8 秒后打开 SUMO。点击 SUMO 的绿色“开始 / Play”按钮才开始运行；约第 5 秒前车急刹，30 秒结束后保留最终画面，Ctrl+C 退出。不要单独点击 Gazebo 的播放按钮。
 
 无界面运行时无需点击按钮，会自动实时运行：
 
@@ -29,7 +31,7 @@ ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false rviz:=fals
 ros2 launch cosim_bridge demo.launch.py network:=false test_warning:=false
 ```
 
-`network:=false` 恢复人工警告模式，此时 `warning_delay:=0.1` 控制测试警告延迟，可取 0 到 0.4 秒。网络模式不启动测试节点，`test_warning` 和 `warning_delay` 不影响实际收包。`network_gui:=true` 可打开 Qtenv，必要时先点击 Run；界面操作尚未验证。`playback_rate:=0.5` 为半速；`duration` 默认 15 秒，网络模式目前必须为 15 秒；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
+`network:=false` 恢复人工警告模式，此时 `warning_delay:=0.1` 控制测试警告延迟，可取 0 到 0.4 秒。网络模式不启动测试节点，`test_warning` 和 `warning_delay` 不影响实际收包。`network_gui:=true` 可打开 Qtenv，演示请用 F6 Fast Run，普通 Run 的包动画可能让联合时间暂停。`playback_rate:=0.5` 为半速；`duration` 默认 30 秒，由 ROS2、Veins 和 SUMO 统一使用（当前最少 15 秒）；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
 每次启动前关闭上一组演示，避免同时发布两个 `/clock`。
 
 ## 默认网络闭环
@@ -104,7 +106,7 @@ ros2 topic echo /brake_cmd
 
 SUMO 内部步长 0.01 秒，ROS2 每 0.05 仿真秒取样，默认 20 Hz。控制器和测试发布器使用 `/clock`；步进定时器使用稳态时钟。事件记录精度受 0.05 秒取样周期及 ROS2 调度影响。
 
-`map` 保留 SUMO 平面坐标。SUMO 车头位置减去半个车长后作为 ROS 车体中心；车体 x 轴朝前。人工警告模式把 SUMO 角度转换为 ROS yaw；当前网络适配器只支持单条直路，使用 y=-1.6、yaw=0，不可直接套用到任意道路。
+`map` 保留 SUMO 平面坐标。两种模式均读取实际车头位置和角度，转换为 ROS yaw，再沿朝向减去半车长作为车体中心。双车道右车道中心 y=-4.8，左车道中心 y=-1.6。状态映射已支持不同车道；A/B 停车策略仍假定两车在同一条直路同一车道。
 
 SUMO 原有跟车安全规则仍启用，因此“后车降速”本身不能证明是 ROS2 命令导致；需结合收包和 `brake_command_applied` 事件，以及普通跟车或无收包基线判断。当前为单次警告学习演示，不是统计性的无线性能评估。
 
@@ -120,19 +122,24 @@ Gazebo 从暂停状态按 SUMO 时间定步推进，不发布另一个 ROS2 时�
 - `brake_controller.jsonl`：警告接收、命令发布和拒绝原因。
 - `sumo_bridge.jsonl`：前车急刹、命令接收与执行、首次后车速度响应及结束摘要。
 - `trajectory.csv`：两车中心位置、速度和净间距。
+- `traffic_trajectory.csv`：全部车辆每步的 ID、中心 x/y、yaw 和速度。
 - `summary.json`：是否执行 ROS2 制动、最小间距和最终速度。
+- 默认网络模式摘要还包含 `scenario`、`vehicle_count` 和 `collision_steps`；碰撞检查失败时中止推进，不生成正常完成摘要。
 - `network_process.log`：默认模式的 SUMO / OMNeT++ 进程输出；网络失败时优先查看。
 
 网络精确发包、收包与控制应用时间另存于 `omnet/results/network_events.jsonl`，统计量为同目录 `.sca/.vec`。日志中的 `network_delay_s` 是无线发送到接收延迟，不能与 0.05 秒的 ROS2 桥接周期混为一谈。
 
 JSONL 同时记录 SUMO 仿真时间和本机单调时钟。测试节点关闭时，不会生成新的测试警告日志；旧文件不代表本轮事件。
 
-默认网络模式已验证：5.00 秒急刹、5.001 秒发包、5.001152 秒实际收包、5.05 秒执行制动；15 秒两车均停止，净间距约 2.548 m。极低发射功率对照无警告、无 ROS2 制动，最终间距约 2.521 m。原人工警告模式仍保留，其警告及命令约在 5.10 秒出现。这些结果对应当前初始间距和驾驶参数。
+默认网络模式已验证：5.00 秒急刹、5.001 秒发包、5.001152 秒实际收包、5.05 秒执行制动；30 秒两车均停止，净间距约 2.548 m。极低发射功率对照无警告、无 ROS2 制动，最终间距约 2.521 m。原人工警告模式仍保留，其警告及命令约在 5.10 秒出现。这些结果对应当前初始间距和驾驶参数。
 
 控制器边界检查（从项目根目录执行，先 source 环境）：
 
 ```bash
 python3 ros/tests/test_brake_controller.py
+python3 ros/tests/test_communication_visuals.py
+# 默认八车网络演示完成后检查真实输出
+python3 ros/tests/check_traffic_run.py
 ```
 
 已验证有效警告、重复警告、过期警告、错误目标车辆和非法速度的处理。实际 INET 收包闭环也已完成联调。

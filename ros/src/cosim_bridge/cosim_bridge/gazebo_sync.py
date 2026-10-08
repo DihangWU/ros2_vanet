@@ -2,6 +2,8 @@
 import copy
 import time
 import signal
+import importlib.util
+from pathlib import Path
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
@@ -20,9 +22,16 @@ class GazeboSync(Node):
         self.target_steps = 0
         self.latest = {}
         self.pending = {}
+        self.declare_parameter('project_root', '')
+        self.declare_parameter('scenario', 'traffic')
+        root = Path(self.get_parameter('project_root').value)
+        spec = importlib.util.spec_from_file_location('traffic_scene', root / 'sumo/scripts/traffic_scene.py')
+        scene = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(scene)
+        vehicle_ids = [v['id'] for v in scene.vehicles(root, self.get_parameter('scenario').value)]
         self.subscriptions_list = [self.create_subscription(
             Odometry, f'/{v}/odom', lambda msg, vehicle=v: self.receive(vehicle, msg), 10)
-            for v in ('car_a', 'car_b')]
+            for v in vehicle_ids]
         self.timer = self.create_timer(0.05, self.sync)
         self.last_warning = 0.0
         self.confirmed = set()

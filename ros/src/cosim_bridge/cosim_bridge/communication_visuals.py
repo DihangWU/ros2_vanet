@@ -48,7 +48,7 @@ class CommunicationVisuals:
 
     def markers(self, states, now, stamp, make_marker):
         result = MarkerArray()
-        if len(states) != 2:
+        if 'car_a' not in states or 'car_b' not in states:
             return result
         a, b = states['car_a'], states['car_b']
         status, color = self.status(now)
@@ -84,7 +84,7 @@ class CommunicationVisuals:
         arrow = marker(1, Marker.ARROW)
         arrow.points = [Point(x=a[0], y=a[1], z=2.1), Point(x=b[0], y=b[1], z=2.1)]
         arrow.scale.x, arrow.scale.y, arrow.scale.z = 0.15, 0.5, 0.8
-        text(2, ((a[0]+b[0])/2, -1.6, 4.5), status)
+        text(2, ((a[0]+b[0])/2, (a[1]+b[1])/2, 4.5), status)
 
         for identifier, car in [(3, a), (4, b)]:
             circle = marker(identifier, Marker.LINE_STRIP)
@@ -119,7 +119,7 @@ class CommunicationVisuals:
             packet.pose.position = Point(x=start[0]+(end[0]-start[0])*fraction,
                                          y=start[1]+(end[1]-start[1])*fraction, z=3.0)
             packet.scale.x = packet.scale.y = packet.scale.z = 1.0
-            replay.pose.position = Point(x=(start[0]+end[0])/2, y=-6.0, z=3.5)
+            replay.pose.position = Point(x=(start[0]+end[0])/2, y=(start[1]+end[1])/2-4.0, z=3.5)
             replay.scale.z = 0.8
             replay.text = 'PACKET REPLAY (1.5 s visual only)'
         return result

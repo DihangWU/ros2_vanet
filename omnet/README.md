@@ -22,7 +22,7 @@ ros2 launch cosim_bridge demo.launch.py
 ros2 launch cosim_bridge demo.launch.py network_gui:=true
 ```
 
-默认 Cmdenv 已验证。Qtenv 使用同一配置，必要时先点击 Run，再点击 SUMO Play；界面操作尚未验证。不开 Qtenv，INET 也实际参与计算。run_network.py 依赖 ROS2 TCP 接收端，不是独立演示入口。
+默认 Cmdenv 已验证。Qtenv 使用同一配置，演示时先点击 Fast Run（F6），再点击 SUMO Play。不开 Qtenv，INET 也实际参与计算。run_network.py 依赖 ROS2 TCP 接收端，不是独立演示入口。
 
 仅构建可执行 python3 omnet/scripts/build_network.py。需要 clang++、nlohmann/json.hpp 和已构建的第三方 release 库。
 
@@ -40,6 +40,8 @@ veins_inet 位于 Veins 的 subprojects/veins_inet，也需已编译。安装库
 
 results/network_events.jsonl 记录急刹、发包、收包和命令执行，每次覆盖；.sca/.vec/.vci 按运行 ID 保存统计量。build/、results/ 不纳入 Git。
 
-TraCI 9999、ROS2 交换 9998 均为固定本机端口。不要同时启动多组演示。网络模式固定 15 秒，ROS2 不独立推进 SUMO。
+TraCI 9999、ROS2 交换 9998 均为固定本机端口。不要同时启动多组演示。网络模式默认 30 秒，管理器 duration 与 sim-time-limit 同步接收 ROS2 duration，ROS2 不独立推进 SUMO。默认八个 VeinsInetCar；`scenario:=two_cars duration:=15.0` 使用旧两车场景。
+
+Qtenv 联合演示请用 F6 Fast Run；普通 Run 在 5 秒发包附近可能为动画暂停联合时间。Fast Run 不改变网络事件和收发计算。
 
 SUMO GUI 模式自动启用管理器 followSumoVehicles，并设 ignoreGuiCommands=false，使视野随两车移动；后台 SUMO 模式禁用这两项 GUI 操作。

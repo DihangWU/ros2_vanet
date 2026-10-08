@@ -4,21 +4,24 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 ## 当前显示功能
 
-配置文件：[two_cars.rviz](two_cars.rviz)。
+默认八车配置：[traffic.rviz](traffic.rviz)。旧两车配置：[two_cars.rviz](two_cars.rviz)，通过 `scenario:=two_cars duration:=15.0` 使用。多车场景默认 30 秒。
+
+默认显示红色 A、蓝色 B 和六辆灰色背景车，所有车辆均有 Odom、Path 和 TF；背景速度标签为 `BACKGROUND`，不错误标成制动。通信显示仍表示 A → B 的警告闭环。道路长度读取 SUMO 节点定义，当前为 400 m；多车网格中心为 x=200，覆盖整条道路；相机保持自由操作。
 
 | 显示项 | 数据来源 | 显示内容 |
 | --- | --- | --- |
-| 车体与状态 | `/demo/markers` | 红色前车 A、蓝色后车 B，速度及行驶、跟车、制动或近似停车文字 |
+| 车体与状态 | `/demo/markers` | 红色 A、蓝色 B、六辆灰色背景车及速度状态 |
 | 道路参照 | `/demo/markers` | 道路、白色虚线及仿真时间 |
 | 前车轨迹 | `/car_a/path` | 红色行驶轨迹 |
 | 后车轨迹 | `/car_b/path` | 蓝色行驶轨迹 |
-| 坐标系 | `/tf` | `map` 到 `car_a/base_link` 和 `car_b/base_link` 的变换 |
+| 背景轨迹 | `/bg_01/path`～`/bg_06/path` | 灰色行驶轨迹（默认多车配置） |
+| 坐标系 | `/tf` | `map` 到全部 `<id>/base_link` 的变换 |
 | 仿真时钟 | `/clock` | 为 RViz2 提供统一的仿真时间 |
 | 通信信息 | `/v2v/markers` | 收发时间、无线延迟、车辆 ID、命令时间、范围圆、收发位置与包回放 |
 
 固定坐标系为 `map`，启用 `use_sim_time=true`。车辆由三维车身、座舱、车窗、四个车轮和前后灯的 Marker 组成，每辆车 13 个部件，轨迹随运动增长。仿真结束后，数据发布节点继续发布最终状态，方便观察停车位置。
 
-网格每格 10 m，每边 100 格，覆盖以原点为中心约 1000 m × 1000 m 的区域，包含车辆全程运动、最终停车位置及通信范围参照圆。
+网格每格 10 m，每边 100 格，覆盖以 x=200 m 为中心约 1000 m × 1000 m 的区域，包含车辆全程运动、最终停车位置及通信范围参照圆。
 
 支持通信连线和 ROS2 制动状态。默认来自 INET 后车实际收包，显示为 `WARNING RECEIVED`；人工测试模式显示 `TEST WARNING`。
 
@@ -39,14 +42,14 @@ ros2 launch cosim_bridge demo.launch.py
 ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false
 ```
 
-默认以实时速度播放 15 秒，第 5 秒前车急刹，结束后保留最终画面。按 Ctrl+C 退出；滚轮可缩放视角。
+默认以实时速度播放 30 秒，第 5 秒前车急刹，结束后保留最终画面。按 Ctrl+C 退出；滚轮可缩放视角。
 
 ## 单独打开显示配置
 
 桥接节点已运行时，可从项目根目录执行：
 
 ```bash
-rviz2 -d rviz/two_cars.rviz --ros-args -p use_sim_time:=true
+rviz2 -d rviz/traffic.rviz --ros-args -p use_sim_time:=true
 ```
 
 仅打开 RViz2 不会启动车辆或生成数据，需要 `sumo_bridge` 发布对应 Topic。
@@ -65,9 +68,9 @@ rviz2 -d rviz/two_cars.rviz --ros-args -p use_sim_time:=true
 
 ## 手动开始与时间同步
 
-三个窗口准备完成后，SUMO 默认保持等待，请点击 SUMO 工具栏的绿色“开始 / Play”按钮。点击开始后才推进演示：约 5 秒时前车急刹，15 秒时结束。启动等待时间不计入车辆演示。
+三个窗口准备完成后，SUMO 默认保持等待，请点击 SUMO 工具栏的绿色“开始 / Play”按钮。点击开始后才推进演示：约 5 秒时前车急刹，30 秒时结束。启动等待时间不计入车辆演示。
 
-RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 15 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
+RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo_sync` 通过 `/world/cosim_demo/control` 按 SUMO 时间定步推进；结束后停在 30 秒，继续保留画面。姿态同步和视角操作不改变车辆运动真值。请用 SUMO 的开始按钮启动，不要单独点击 Gazebo 的播放按钮，以免它自行推进展示时间。
 
 `startup_delay` 只控制 SUMO 窗口何时打开，不再自动开始行驶。`sumo_gui:=false` 时没有手动按钮，仍自动实时运行。
 
@@ -81,7 +84,7 @@ RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo
 
 多行 Marker 文本显示 `V2V STATUS`、`PACKET`、`SENT`、`RECEIVED`、`NETWORK DELAY`、`SOURCE`、`TARGET`、`ROS CMD PUBLISHED` 和 `SUMO CMD APPLIED`。时间使用仿真秒，延迟使用毫秒；没有发生的事件显示 `--`。文本位于道路旁，是可随视角观察的三维文字。
 
-绿色 `CONNECTED (reception unverified)` 表示仿真桥接正在交换状态，尚未验证车辆间收包；发送后为 `WAITING FOR PACKET`。橙色 `WARNING RECEIVED` 表示后车已收到警告。发包后超过 0.5 仿真秒仍未收包，显示红色 `NOT RECEIVED`；网络进程断开时显示红色 `DISCONNECTED` 并保留最后状态。正常 15 秒结束不标记为断连。当前只发送一次警告，不能据此监测持续通信质量。
+绿色 `CONNECTED (reception unverified)` 表示仿真桥接正在交换状态，尚未验证车辆间收包；发送后为 `WAITING FOR PACKET`。橙色 `WARNING RECEIVED` 表示后车已收到警告。发包后超过 0.5 仿真秒仍未收包，显示红色 `NOT RECEIVED`；网络进程断开时显示红色 `DISCONNECTED` 并保留最后状态。正常 30 秒结束不标记为断连。当前只发送一次警告，不能据此监测持续通信质量。
 
 两车各有一个范围参照圆，默认半径 100 m，可用 `communication_range_m:=50.0` 修改。圆标为 `illustrative`，仅表示几何距离，不是 INET 保证接收的半径，也不修改无线参数。
 

@@ -50,6 +50,15 @@ class CommunicationTests(unittest.TestCase):
         self.visuals.sent, self.visuals.received = 5.0, 5.1
         self.assertIn('NETWORK DELAY: --', self.markers()[0].text)
 
+    def test_background_traffic_does_not_hide_pair_markers(self):
+        self.states['car_a'] = (172.35, -4.8, 0.0, 15.0)
+        self.states['car_b'] = (127.35, -4.8, 0.0, 15.0)
+        self.states.update({f'bg_{i:02d}': (float(i*60), -1.6, 0.0, 10.0) for i in range(1, 7)})
+        markers = self.markers()
+        self.assertEqual(len(markers), 12)
+        self.assertEqual(markers[1].points[0].y, -4.8)
+        self.assertEqual(markers[2].pose.position.y, -4.8)
+
 
 if __name__ == '__main__':
     unittest.main()

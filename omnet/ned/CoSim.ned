@@ -10,6 +10,7 @@ simple CoSimManager extends TraCIScenarioManager {
     parameters:
         int rosPort = default(9998);
         bool followSumoVehicles = default(false);
+        double duration @unit(s) = default(30s);
         @class(CoSimManager);
 }
 simple EmergencyWarningApp extends VeinsInetApplicationBase {

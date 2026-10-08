@@ -20,15 +20,11 @@ Visualization Manager:
       Name: Grid
       Normal Cell Count: 0
       Offset:
-        X: 0
-        Y: 0
+        X: 200
+        Y: -3.2
         Z: 0
       Plane: XY
       Plane Cell Count: 100
-      Offset:
-        X: 500
-        Y: -3.2
-        Z: 0
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz_default_plugins/MarkerArray
@@ -116,6 +112,60 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /car_b/path
       Value: true
+    - Class: rviz_default_plugins/Path
+      Name: bg_01 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_01/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_02 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_02/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_03 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_03/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_04 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_04/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_05 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_05/path
+    - Class: rviz_default_plugins/Path
+      Name: bg_06 path
+      Enabled: true
+      Color: 153; 166; 178
+      Alpha: 0.5
+      Line Style: Lines
+      Line Width: 0.12
+      Topic:
+        Value: /bg_06/path
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""

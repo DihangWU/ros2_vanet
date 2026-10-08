@@ -1,0 +1,4 @@
+<edges>
+    <!-- 同向双车道，lane 0 为右车道，lane 1 为左车道。 -->
+    <edge id="road" from="start" to="end" numLanes="2" speed="15"/>
+</edges>

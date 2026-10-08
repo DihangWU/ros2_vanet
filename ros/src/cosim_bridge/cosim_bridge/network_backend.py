@@ -18,6 +18,7 @@ class NetworkBackend:
         self.server.listen(1)
         self.server.settimeout(60)
         command = ['python3', str(owner.root / 'omnet/scripts/run_network.py')]
+        command += ['--scenario', owner.scenario, '--duration', str(owner.duration)]
         if owner.gui:
             command.append('--gui')
         if owner.get_parameter('network_gui').value:
@@ -64,6 +65,8 @@ class NetworkBackend:
         if not line:
             raise RuntimeError('网络进程断开，请查看 ros/log/events/network_process.log')
         frame = json.loads(line)
+        if frame['collisions']:
+            raise RuntimeError(f'SUMO 检测到碰撞: {frame["collisions"]}')
         self.needs_ack = True
         o.now = float(frame['time'])
         o.communication.connected = True
@@ -83,11 +86,12 @@ class NetworkBackend:
             o.response_start_speed = 15.0
             o.log.write('brake_command_applied', frame['applied_time'], event_id=o.applied_command.event_id,
                         simulated=False, backend='veins_inet')
-        a, b = o.states.values()
+        a, b = o.states['car_a'], o.states['car_b']
         gap = a[0] - b[0] - 5.0
         o.minimum_gap = min(o.minimum_gap, gap)
         o.trajectory.write(f'{o.now:.2f},{a[0]:.4f},{a[3]:.4f},{b[0]:.4f},{b[3]:.4f},{gap:.4f}\n')
         o.trajectory.flush()
+        o.record_traffic()
         if o.applied_command is not None and not o.response_recorded and b[3] < o.response_start_speed-.01:
             o.response_recorded = True
             o.log.write('rear_speed_response', o.now, event_id=o.applied_command.event_id, speed_mps=b[3])
@@ -110,9 +114,12 @@ class NetworkBackend:
         if o.now >= o.duration-1e-8:
             o.finished = True
             o.trajectory.close()
+            o.traffic_trajectory.close()
             summary = dict(end_time_s=o.now, minimum_gap_m=o.minimum_gap, final_gap_m=gap,
                            ros_brake_applied=o.applied_command is not None, warning_seen=o.warning_seen,
                            simulated_warning=False, backend='veins_inet',
+                           scenario=o.scenario, vehicle_count=len(o.states),
+                           collision_steps=0,
                            final_speed_mps={v: s[3] for v,s in o.states.items()})
             (o.trajectory_dir/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
             o.log.write('simulation_finished', o.now, **summary)

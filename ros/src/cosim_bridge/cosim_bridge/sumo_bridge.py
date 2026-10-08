@@ -27,6 +27,8 @@ class SumoBridge(Node):
         self.declare_parameter('sumo_gui', True)
         self.declare_parameter('network_mode', False)
         self.declare_parameter('network_gui', False)
+        self.declare_parameter('scenario', 'traffic')
+        self.scenario = self.get_parameter('scenario').value
         self.network_mode = self.get_parameter('network_mode').value
         self.declare_parameter('communication_range_m', 100.0)
         radius = float(self.get_parameter('communication_range_m').value)
@@ -35,7 +37,7 @@ class SumoBridge(Node):
         self.communication = CommunicationVisuals(radius)
         self.communication.simulated = not self.network_mode
         self.communication_pub = self.create_publisher(MarkerArray, '/v2v/markers', 10)
-        self.declare_parameter('duration', 15.0)
+        self.declare_parameter('duration', 30.0)
         self.declare_parameter('playback_rate', 1.0)
         self.root = Path(self.get_parameter('project_root').value).resolve()
         self.duration = float(self.get_parameter('duration').value)
@@ -55,9 +57,15 @@ class SumoBridge(Node):
         if not binary:
             raise RuntimeError('找不到 SUMO，请检查 PATH')
         self.traci = demo.load_traci(binary)
-        demo.build_network()
+        scene_spec = importlib.util.spec_from_file_location('traffic_scene', self.root / 'sumo/scripts/traffic_scene.py')
+        scene = importlib.util.module_from_spec(scene_spec)
+        scene_spec.loader.exec_module(scene)
+        scene.build_network(self.root, self.scenario)
+        self.road_length = scene.road_length(self.root, self.scenario)
+        self.sumo_config = scene.scene_files(self.root, self.scenario)[3]
+        self.vehicle_ids = [v['id'] for v in scene.vehicles(self.root, self.scenario)]
         self.odom = {v: self.create_publisher(Odometry, f'/{v}/odom', 10)
-                     for v in ('car_a', 'car_b')}
+                     for v in self.vehicle_ids}
         self.path_pub = {v: self.create_publisher(RosPath, f'/{v}/path', 10)
                          for v in self.odom}
         self.paths = {v: RosPath() for v in self.odom}
@@ -80,19 +88,19 @@ class SumoBridge(Node):
         self.trajectory_dir = self.root / 'ros/log/events'
         self.trajectory = (self.trajectory_dir / 'trajectory.csv').open('w')
         self.trajectory.write('time_s,car_a_x_m,car_a_speed_mps,car_b_x_m,car_b_speed_mps,gap_m\n')
+        self.traffic_trajectory = (self.trajectory_dir / 'traffic_trajectory.csv').open('w')
+        self.traffic_trajectory.write('time_s,vehicle_id,x_m,y_m,yaw_rad,speed_mps\n')
         self.braked = False
         self.holding = False
         self.finished = False
         self.closed = False
         self.now = 0.0
         self.states = {}
-        cmd = [binary, '-c', str(self.root / 'sumo/config/demo.sumocfg'),
+        cmd = [binary, '-c', str(self.sumo_config),
                '--end', str(self.duration), '--seed', '42', '--no-step-log', 'true']
         if self.gui:
             cmd += ['--delay', '0', '--quit-on-end']
         if self.network_mode:
-            if self.duration != 15.0:
-                raise ValueError('当前网络场景时长固定为 15 秒')
             from .network_backend import NetworkBackend
             self.get_logger().info('连接真实 Veins + INET 网络；SUMO 打开后请点击开始。')
             self.network_backend = NetworkBackend(self)
@@ -209,24 +217,27 @@ class SumoBridge(Node):
                 x -= length / 2 * math.cos(yaw)
                 y -= length / 2 * math.sin(yaw)
                 self.states[vehicle] = (x, y, yaw, self.traci.vehicle.getSpeed(vehicle))
-            a, b = self.states.values()
+            a, b = self.states['car_a'], self.states['car_b']
             gap = a[0] - b[0] - 5.0
             self.minimum_gap = min(self.minimum_gap, gap)
             self.trajectory.write(f'{self.now:.2f},{a[0]:.4f},{a[3]:.4f},{b[0]:.4f},{b[3]:.4f},{gap:.4f}\n')
             self.trajectory.flush()
+            self.record_traffic()
             if self.applied_command is not None and not self.response_recorded and b[3] < self.response_start_speed - 0.01:
                 self.response_recorded = True
                 self.log.write('rear_speed_response', self.now, event_id=self.applied_command.event_id,
                                speed_mps=b[3])
             if self.gui:
-                a, b = self.states.values()
+                a, b = self.states['car_a'], self.states['car_b']
                 self.traci.gui.setOffset('View #0', (a[0]+b[0])/2, (a[1]+b[1])/2)
             if self.now >= self.duration - 1e-8:
                 self.finished = True
                 self.trajectory.close()
+                self.traffic_trajectory.close()
                 summary = dict(end_time_s=self.now, minimum_gap_m=self.minimum_gap,
                                ros_brake_applied=self.applied_command is not None,
                                warning_seen=self.warning_seen, simulated_warning=self.simulated_warning,
+                               scenario=self.scenario, vehicle_count=len(self.states),
                                final_gap_m=gap,
                                final_speed_mps={v: state[3] for v, state in self.states.items()})
                 (self.trajectory_dir / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
@@ -235,6 +246,11 @@ class SumoBridge(Node):
                     f'仿真结束：{self.now:.2f}s，现实 {time.monotonic()-self.started:.2f}s；保留最终状态。')
         self.publish_state(append_path=advanced)
 
+    def record_traffic(self):
+        for vehicle, (x, y, yaw, speed) in self.states.items():
+            self.traffic_trajectory.write(f'{self.now:.2f},{vehicle},{x:.4f},{y:.4f},{yaw:.6f},{speed:.4f}\n')
+        self.traffic_trajectory.flush()
+
     def publish_state(self, append_path):
         stamp = rclpy.time.Time(seconds=self.now).to_msg()
         clock = ClockMessage()
@@ -242,6 +258,10 @@ class SumoBridge(Node):
         self.clock_pub.publish(clock)
         markers = MarkerArray()
         for vehicle, (x, y, yaw, speed) in self.states.items():
+            if vehicle not in self.odom:
+                self.odom[vehicle] = self.create_publisher(Odometry, f'/{vehicle}/odom', 10)
+                self.path_pub[vehicle] = self.create_publisher(RosPath, f'/{vehicle}/path', 10)
+                self.paths[vehicle] = RosPath()
             odom = Odometry()
             odom.header.frame_id = 'map'
             odom.header.stamp = stamp
@@ -271,28 +291,36 @@ class SumoBridge(Node):
             label = self.marker(vehicle, 1, Marker.TEXT_VIEW_FACING, stamp)
             label.pose.position = Point(x=x, y=y, z=3.0)
             label.scale.z = 1.2
-            state = 'STOPPED' if speed < 0.05 else (('BRAKING' if vehicle == 'car_a' else ('ROS BRAKING' if self.applied_command is not None else 'FOLLOWING')) if self.braked else 'DRIVING')
+            state = 'BACKGROUND' if vehicle.startswith('bg_') else ('STOPPED' if speed < 0.05 else (('BRAKING' if vehicle == 'car_a' else ('ROS BRAKING' if self.applied_command is not None else 'FOLLOWING')) if self.braked else 'DRIVING'))
             label.text = f'{vehicle}: {speed:.2f} m/s  {state}'
             label.color.r = label.color.g = label.color.b = 1.0
             markers.markers.append(label)
         road = self.marker('road', 0, Marker.CUBE, stamp)
-        road.pose.position = Point(x=125.0, y=-1.6, z=-0.1)
-        road.scale.x, road.scale.y, road.scale.z = 250.0, 3.2, 0.1
+        road_length = self.road_length if self.scenario == 'traffic' else 250.0
+        road_width = 6.4 if self.scenario == 'traffic' else 3.2
+        road.pose.position = Point(x=road_length/2, y=-road_width/2, z=-0.1)
+        road.scale.x, road.scale.y, road.scale.z = road_length, road_width, 0.1
         road.color.r = road.color.g = road.color.b = 0.18
         markers.markers.append(road)
         lines = self.marker('road', 1, Marker.LINE_LIST, stamp)
         lines.scale.x = 0.16
         lines.color.r = lines.color.g = lines.color.b = 1.0
-        for y in (-0.25, -2.95):
-            for x in range(0, 250, 8):
-                lines.points.extend([Point(x=float(x), y=y, z=0.01), Point(x=float(x+3), y=y, z=0.01)])
+        if self.scenario == 'traffic':
+            for y in (-0.15, -6.25):
+                lines.points.extend([Point(x=0.0, y=y, z=0.01), Point(x=road_length, y=y, z=0.01)])
+            for x in range(0, int(road_length), 8):
+                lines.points.extend([Point(x=float(x), y=-3.2, z=0.01), Point(x=float(x+3), y=-3.2, z=0.01)])
+        else:
+            for y in (-0.25, -2.95):
+                for x in range(0, 250, 8):
+                    lines.points.extend([Point(x=float(x), y=y, z=0.01), Point(x=float(x+3), y=y, z=0.01)])
         markers.markers.append(lines)
         status = self.marker('status', 0, Marker.TEXT_VIEW_FACING, stamp)
         status.pose.position = Point(x=125.0, y=10.0, z=2.0)
         status.scale.z = 2.0
         status.color.r = status.color.g = status.color.b = 1.0
         mode = 'TEST WARNING -> ROS BRAKE' if self.simulated_warning else ('WARNING -> ROS BRAKE' if self.warning_seen else 'following baseline')
-        status.text = f'SUMO time: {self.now:.2f} s | {mode}'
+        status.text = f'SUMO time: {self.now:.2f} s | {len(self.states)} vehicles | {mode}'
         markers.markers.append(status)
         self.markers.publish(markers)
         self.communication_pub.publish(self.communication.markers(
@@ -314,6 +342,8 @@ class SumoBridge(Node):
             self.closed = True
             if not self.trajectory.closed:
                 self.trajectory.close()
+            if not self.traffic_trajectory.closed:
+                self.traffic_trajectory.close()
             if self.network_mode:
                 self.network_backend.close()
                 return

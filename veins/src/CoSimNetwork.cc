@@ -7,10 +7,14 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fstream>
+#include <cmath>
 #include "veins_inet/VeinsInetManagerBase.h"
 #include "veins_inet/VeinsInetApplicationBase.h"
+#include "veins_inet/VeinsInetMobility.h"
+#include "veins/modules/mobility/traci/TraCIConstants.h"
 #include "EmergencyWarning_m.h"
 using namespace omnetpp;
+using namespace veins::TraCIConstants;
 using Json = nlohmann::json;
 
 class CoSimManager : public veins::VeinsInetManagerBase {
@@ -23,13 +27,47 @@ class CoSimManager : public veins::VeinsInetManagerBase {
     std::ofstream events;
 public:
     static CoSimManager* instance;
+    veins::TraCIBuffer queryValue(uint8_t command, uint8_t variable, const std::string& id) {
+        auto response = getConnection()->query(command, veins::TraCIBuffer() << variable << id);
+        uint8_t length, responseCommand, responseVariable;
+        std::string responseId;
+        response >> length;
+        if (length == 0) { uint32_t extendedLength; response >> extendedLength; }
+        response >> responseCommand >> responseVariable >> responseId;
+        if (responseCommand != command + 0x10 || responseVariable != variable || responseId != id)
+            throw cRuntimeError("Unexpected TraCI response");
+        return response;
+    }
+    Json vehicleState(const std::string& id) {
+        // Read the current SUMO front position, including the first insertion frame.
+        auto response = queryValue(CMD_GET_VEHICLE_VARIABLE, VAR_POSITION, id);
+        uint8_t type;
+        double x, y;
+        response >> type >> x >> y;
+        if (type != POSITION_2D || !response.eof()) throw cRuntimeError("Invalid vehicle position");
+        auto vehicle = getCommandInterface()->vehicle(id);
+        double yaw = (90.0 - vehicle.getAngle()) * std::acos(-1.0) / 180.0;
+        return {{"x", x - vehicle.getLength()/2*std::cos(yaw)},
+                {"y", y - vehicle.getLength()/2*std::sin(yaw)},
+                {"yaw", yaw}, {"speed", vehicle.getSpeed()}};
+    }
+    Json collisions() {
+        auto response = queryValue(CMD_GET_SIM_VARIABLE, VAR_COLLIDING_VEHICLES_IDS, "");
+        uint8_t type;
+        int32_t count;
+        response >> type >> count;
+        if (type != TYPE_STRINGLIST || count < 0) throw cRuntimeError("Invalid collision list");
+        Json ids = Json::array();
+        for (int32_t i = 0; i < count; ++i) { std::string id; response >> id; ids.push_back(id); }
+        return ids;
+    }
     void record(const Json& event) {
         events << event.dump() << std::endl;
         networkEvents.push_back(event);
     }
     void received(const inet::Ptr<const EmergencyWarning>& payload, double received) {
-        auto receiver = getCommandInterface()->vehicle("car_b");
-        Json event = {{"event", "packet_received"}, {"source_time_s",payload->getSourceTime()},{"send_time_s",payload->getSendTime()}, {"receive_time_s",received}, {"event_id",payload->getEventId()},{"x",payload->getX()},{"y",payload->getY()},{"speed",payload->getSpeed()}, {"receive_x",receiver.getLanePosition()-receiver.getLength()/2}, {"receive_y",-1.6}};
+        auto receiver = vehicleState("car_b");
+        Json event = {{"event", "packet_received"}, {"source_time_s",payload->getSourceTime()},{"send_time_s",payload->getSendTime()}, {"receive_time_s",received}, {"event_id",payload->getEventId()},{"x",payload->getX()},{"y",payload->getY()},{"speed",payload->getSpeed()}, {"receive_x",receiver["x"]}, {"receive_y",receiver["y"]}};
         record(event); warnings.push_back(event);
     }
     ~CoSimManager() override { if(fd >= 0) ::close(fd); instance = nullptr; }
@@ -71,10 +109,9 @@ protected:
         if(now>=7)getCommandInterface()->vehicle("car_a").setSpeed(0);
         if (par("followSumoVehicles").boolValue()) {
             // setBoundary converts these Veins coordinates back to SUMO coordinates.
-            auto a = getConnection()->traci2omnet(veins::TraCICoord(
-                getCommandInterface()->vehicle("car_a").getLanePosition() - 2.5, -1.6));
-            auto b = getConnection()->traci2omnet(veins::TraCICoord(
-                getCommandInterface()->vehicle("car_b").getLanePosition() - 2.5, -1.6));
+            auto stateA = vehicleState("car_a"), stateB = vehicleState("car_b");
+            auto a = getConnection()->traci2omnet(veins::TraCICoord(stateA["x"], stateA["y"]));
+            auto b = getConnection()->traci2omnet(veins::TraCICoord(stateB["x"], stateB["y"]));
             double centerX = (a.x + b.x) / 2;
             double centerY = (a.y + b.y) / 2;
             double halfWidth = std::max(50.0, std::abs(a.x - b.x) / 2 + 25.0);
@@ -85,11 +122,10 @@ protected:
             }
         }
         Json cars=Json::object();
-        for(auto id : {"car_a","car_b"}) {
-            auto v=getCommandInterface()->vehicle(id);
-            cars[id]={{"x",v.getLanePosition()-v.getLength()/2},{"y",-1.6},{"yaw",0.0},{"speed",v.getSpeed()}};
+        for (const auto& entry : getManagedHosts()) {
+            cars[entry.first] = vehicleState(entry.first);
         }
-        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"command_active",braking},{"applied_time",appliedAt}};
+        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"collisions",collisions()},{"command_active",braking},{"applied_time",appliedAt}};
         warnings=Json::array();
         networkEvents=Json::array();
         Json reply=exchange(state);
@@ -99,7 +135,7 @@ protected:
             braking=true; appliedAt=now;
             record({{"event","brake_command_applied"},{"sim_time_s",now},{"event_id",eventId}});
         }
-        if(now>=15)endSimulation();
+        if(now>=par("duration").doubleValue())endSimulation();
     }
 };
 CoSimManager* CoSimManager::instance=nullptr;
@@ -113,7 +149,8 @@ protected:
             timerManager.create(veins::TimerSpecification([this]() {
                 auto payload=inet::makeShared<EmergencyWarning>();
                 payload->setChunkLength(inet::B(100)); payload->setEventId("front_brake_1"); payload->setSourceTime(5.0); payload->setSendTime(simTime().dbl());
-                payload->setX(traciVehicle->getLanePosition()-traciVehicle->getLength()/2); payload->setY(-1.6); payload->setSpeed(traciVehicle->getSpeed()); timestampPayload(payload);
+                auto state = CoSimManager::instance->vehicleState("car_a");
+                payload->setX(state["x"]); payload->setY(state["y"]); payload->setSpeed(state["speed"]); timestampPayload(payload);
                 auto packet=createPacket("EMERGENCY_BRAKE"); packet->insertAtBack(payload); sendPacket(std::move(packet));
                 CoSimManager::instance->record({{"event","packet_sent"},{"send_time_s",simTime().dbl()},{"event_id","front_brake_1"},{"x",payload->getX()},{"y",payload->getY()}});
             }).oneshotAt(SimTime(5.001)));

@@ -22,6 +22,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gui', action='store_true')
     parser.add_argument('--qtenv', action='store_true')
+    parser.add_argument('--scenario', choices=['traffic', 'two_cars'], default='traffic')
+    parser.add_argument('--duration', type=float, default=30.0)
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -31,12 +33,17 @@ def main():
     inet = Path(os.environ.get('INET_ROOT', home / 'inet4.5'))
     veins_inet = veins / 'subprojects/veins_inet'
     (root / 'omnet/results').mkdir(exist_ok=True)
+    import sys
+    sys.path.insert(0, str(root / 'sumo/scripts'))
+    from traffic_scene import build_network, scene_files
+    build_network(root, args.scenario)
+    config = scene_files(root, args.scenario)[3]
     subprocess.run(['python3', str(root / 'omnet/scripts/build_network.py')], check=True)
 
     # No --start: SUMO GUI waits for the user's Play button.
     sumo = subprocess.Popen([
         'sumo-gui' if args.gui else 'sumo', '-c',
-        str(root / 'sumo/config/demo.sumocfg'),
+        str(config), '--end', str(args.duration),
         '--remote-port', '9999', '--seed', '42', '--no-step-log', 'true',
     ])
     network = None
@@ -55,6 +62,8 @@ def main():
             '-l', str(veins_inet / 'src/veins_inet'),
             '-l', str(root / 'omnet/build/cosim_network'),
             '-f', 'omnetpp.ini',
+            '--sim-time-limit=' + str(args.duration + 0.001) + 's',
+            '--*.manager.duration=' + str(args.duration) + 's',
             '--*.manager.followSumoVehicles=' + ('true' if args.gui else 'false'),
             '--*.manager.ignoreGuiCommands=' + ('false' if args.gui else 'true'),
             '--*.node[*].wlan[0].radio.transmitter.power=' +

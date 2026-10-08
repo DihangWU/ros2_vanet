@@ -4,6 +4,12 @@
 
 ## 运行
 
+本节独立脚本仍是原单车道两车基线。默认联合场景为 `config/traffic.sumocfg`：400 m 同向双车道、8 辆车、30 秒。路线见 `routes/traffic.rou.xml`，路网由 `network/traffic.edg.xml` 和 `network/traffic.nod.xml` 生成 `traffic.net.xml`。缩短停车点后方道路，A/B 的初始位置和制动参数保持原值。
+
+右车道 A/B 初始净间距仍为 40 m，5 秒 A 急刹；左车道 bg_01～bg_06 初始车头位置为 15、35、55、75、95、115 m，速度分别为 6、6.5、7、7.5、8、8.5 m/s，30 秒内全部仍在道路上。先禁用主动换道，六车构成背景交通。
+
+联合入口：`ros2 launch cosim_bridge demo.launch.py`；回到旧场景用 `scenario:=two_cars duration:=15.0`。新场景用 `scripts/traffic_scene.py` 读取车辆定义及按需生成路网，独立 `run_demo.py` 不改变。
+
 在项目根目录执行：
 
 ```bash

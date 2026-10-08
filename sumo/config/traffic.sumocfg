@@ -1,0 +1,9 @@
+<configuration>
+    <input>
+        <net-file value="../network/traffic.net.xml"/>
+        <route-files value="../routes/traffic.rou.xml"/>
+    </input>
+    <time><begin value="0"/><end value="30"/><step-length value="0.01"/></time>
+    <gui_only><gui-settings-file value="viewsettings.xml"/></gui_only>
+    <processing><time-to-teleport value="-1"/></processing>
+</configuration>
