@@ -4,6 +4,10 @@
 
 ## 文件
 
+车顶模组含与车顶相接的底板、雷达支柱、摄像头支柱及横臂；传感器机身不再悬空。RViz 从相同的独立 SDF 读取这些几何和安装位置，保持两边外观一致。三目预览从上到下为长焦、标准主摄、广角。
+
+蓝色后车在车顶前缘装有三维 GPU 激光雷达和三目摄像头，光心均高于车顶。独立配置与一行安装方法见 [perception_rig/README.md](models/perception_rig/README.md)。雷达水平左右各 60°（总 120°）、垂直 −25°～+15°；广角、标准、长焦水平视场为 120°、60°、30°。世界增加 Sensors / Ogre2 插件，从实际渲染场景生成图像和点云。SUMO 仍负责运动，Gazebo 不参与制动判断。
+
 默认 `scenario:=traffic` 使用 `worlds/traffic.sdf`：400 m 三车道、11 辆车，道路宽度 9.6 m；默认运行 30 秒。道路长度读取 SUMO 的 `network/traffic.nod.xml`，停车点后方保留约 210 m 道路。`config/traffic_gui.config` 提供较宽的初始视角。旧资源 `worlds/two_cars.sdf` 通过 `scenario:=two_cars duration:=15.0` 使用。
 
 灰车复用 `models/background_car/`。`gazebo_sync` 按 SUMO 路线文件中的全部车辆 ID 订阅 Odom。新增或修改初始车辆后，在项目根目录执行 `python3 gazebo/scripts/build_traffic_world.py` 重新生成世界。目前模型在启动前创建，不实现运行时新增或移除。
@@ -14,6 +18,7 @@
 | `worlds/traffic.sdf` | 默认三车道十一车世界，由脚本生成 |
 | `scripts/build_traffic_world.py` | 根据 SUMO 路线定义生成默认世界 |
 | `models/background_car/model.sdf` | 背景交通共用的灰色车模型 |
+| `models/perception_rig/model.sdf` | 独立雷达与三目配置，车辆通过 merge include 复用 |
 | `models/car_a/model.sdf` | 红色前车的三维几何 |
 | `models/car_b/model.sdf` | 蓝色后车的三维几何 |
 | `config/gui.config` | 初始相机、鼠标视角控制和 GUI 插件 |

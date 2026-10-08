@@ -82,7 +82,7 @@ class CommunicationVisuals:
         # World-space text leaves the user's freely movable camera untouched.
         text(0, (125.0, 19.0, 5.0), content, 1.1)
         arrow = marker(1, Marker.ARROW)
-        arrow.points = [Point(x=a[0], y=a[1], z=2.1), Point(x=b[0], y=b[1], z=2.1)]
+        arrow.points = [Point(x=a[0], y=a[1], z=3.6), Point(x=b[0], y=b[1], z=3.6)]
         arrow.scale.x, arrow.scale.y, arrow.scale.z = 0.15, 0.5, 0.8
         text(2, ((a[0]+b[0])/2, (a[1]+b[1])/2, 4.5), status)
 

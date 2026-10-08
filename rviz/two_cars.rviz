@@ -39,6 +39,7 @@ Visualization Manager:
         car_a/model: true
         car_b: true
         car_b/model: true
+        car_b/sensors: true
         road: true
         status: true
       Topic:
@@ -116,6 +117,33 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /car_b/path
       Value: true
+    - Class: rviz_default_plugins/Image
+      Name: Triple camera - tele main wide
+      Enabled: true
+      Transport Hint: raw
+      Topic:
+        Value: /car_b/camera/triple/image_raw
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Roof lidar - bright surface returns
+      Enabled: true
+      Topic:
+        Value: /car_b/lidar/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 4
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""

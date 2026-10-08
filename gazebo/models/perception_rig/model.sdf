@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <!-- 以车辆中心为原点，x 前、y 左、z 上；话题使用 Gazebo 自动模型作用域。 -->
+  <model name="perception_rig">
+    <static>true</static>
+    <link name="sensor_mount">
+      <!-- 车顶 z=1.55；底板、支柱与机身相接，不悬空。 -->
+      <visual name="mounting_plate">
+        <pose>0.75 0 1.57 0 0 0</pose>
+        <geometry><box><size>0.38 0.40 0.04</size></box></geometry>
+        <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.25 0.25 0.28 1</diffuse></material>
+      </visual>
+      <visual name="lidar_pedestal">
+        <pose>0.82 0 1.64 0 0 0</pose>
+        <geometry><cylinder><radius>0.06</radius><length>0.18</length></cylinder></geometry>
+        <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.25 0.25 0.28 1</diffuse></material>
+      </visual>
+      <visual name="lidar_housing">
+        <pose>0.90 0 1.78 0 0 0</pose>
+        <geometry><cylinder><radius>0.13</radius><length>0.2</length></cylinder></geometry>
+        <material><ambient>0.1 0.9 0.7 1</ambient><diffuse>0.1 0.9 0.7 1</diffuse></material>
+      </visual>
+      <visual name="camera_pedestal">
+        <pose>0.74 0 1.67 0 0 0</pose>
+        <geometry><box><size>0.06 0.32 0.24</size></box></geometry>
+        <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.25 0.25 0.28 1</diffuse></material>
+      </visual>
+      <visual name="camera_arm">
+        <pose>0.86 0 1.79 0 0 0</pose>
+        <geometry><box><size>0.30 0.32 0.04</size></box></geometry>
+        <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.25 0.25 0.28 1</diffuse></material>
+      </visual>
+      <visual name="camera_housing">
+        <pose>0.98 0 1.82 0 0 0</pose>
+        <geometry><box><size>0.1 0.36 0.12</size></box></geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wide_lens">
+        <pose>1.04 0.10 1.85 0 0 0</pose>
+        <geometry><box><size>0.04 0.055 0.055</size></box></geometry>
+        <material><ambient>0.2 0.6 1 1</ambient><diffuse>0.2 0.6 1 1</diffuse></material>
+      </visual>
+      <visual name="standard_lens">
+        <pose>1.04 0 1.85 0 0 0</pose>
+        <geometry><box><size>0.04 0.055 0.055</size></box></geometry>
+        <material><ambient>0.2 0.6 1 1</ambient><diffuse>0.2 0.6 1 1</diffuse></material>
+      </visual>
+      <visual name="tele_lens">
+        <pose>1.04 -0.10 1.85 0 0 0</pose>
+        <geometry><box><size>0.04 0.055 0.055</size></box></geometry>
+        <material><ambient>0.2 0.6 1 1</ambient><diffuse>0.2 0.6 1 1</diffuse></material>
+      </visual>
+      <sensor name="lidar" type="gpu_lidar">
+        <pose>0.90 0 1.85 0 0 0</pose>
+        <always_on>true</always_on><update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal><samples>720</samples><resolution>1</resolution><min_angle>-1.0471975512</min_angle><max_angle>1.0471975512</max_angle></horizontal>
+            <vertical><samples>64</samples><resolution>1</resolution><min_angle>-0.4363323130</min_angle><max_angle>0.2617993878</max_angle></vertical>
+          </scan>
+          <range><min>0.3</min><max>100</max><resolution>0.01</resolution></range>
+        </lidar>
+      </sensor>
+      <!-- 车顶前缘 x=0.95、顶面 z=1.55；镜头略向前伸且高于顶面。 -->
+      <sensor name="wide" type="camera">
+        <pose>1.05 0.10 1.85 0 0 0</pose>
+        <always_on>true</always_on><update_rate>15</update_rate>
+        <camera><horizontal_fov>2.0943951024</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
+      </sensor>
+      <sensor name="standard" type="camera">
+        <pose>1.05 0 1.85 0 0 0</pose>
+        <always_on>true</always_on><update_rate>15</update_rate>
+        <camera><horizontal_fov>1.0471975512</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
+      </sensor>
+      <sensor name="tele" type="camera">
+        <pose>1.05 -0.10 1.85 0 0 0</pose>
+        <always_on>true</always_on><update_rate>15</update_rate>
+        <camera><horizontal_fov>0.5235987756</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
+      </sensor>
+    </link>
+  </model>
+</sdf>

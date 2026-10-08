@@ -34,7 +34,25 @@ ros2 launch cosim_bridge demo.launch.py network:=false test_warning:=false
 `network:=false` 恢复人工警告模式，此时 `warning_delay:=0.1` 控制测试警告延迟，可取 0 到 0.4 秒。网络模式不启动测试节点，`test_warning` 和 `warning_delay` 不影响实际收包。`network_gui:=true` 可打开 Qtenv，演示请用 F6 Fast Run，普通 Run 的包动画可能让联合时间暂停。`playback_rate:=0.5` 为半速；`duration` 默认 30 秒，由 ROS2、Veins 和 SUMO 统一使用（当前最少 15 秒）；`startup_delay` 仅控制 SUMO 窗口打开时间。从其他目录启动需指定 `project_root`。
 每次启动前关闭上一组演示，避免同时发布两个 `/clock`。
 
-## 默认网络闭环
+## 独立传感器数据
+
+开启 Gazebo 时，`demo.launch.py` 自动包含 `sensors.launch.py`。它扫描引用 `model://perception_rig` 的车辆模型，逐车建立 Gazebo → ROS2 单向桥接和 `perception_display`，当前仅 `car_b` 安装。安装与参数见 [传感器模块说明](../gazebo/models/perception_rig/README.md)。图像与雷达均由 Gazebo 实际采样，未替换当前 SUMO 真值距离制动反馈。
+
+| 话题（当前后车） | 类型与功能 |
+| --- | --- |
+| `/car_b/camera/wide/image_raw` | 独立广角 Image，640×360，15 Hz |
+| `/car_b/camera/standard/image_raw` | 独立标准 Image，640×360，15 Hz |
+| `/car_b/camera/tele/image_raw` | 独立长焦 Image，640×360，15 Hz |
+| `/car_b/camera/{wide,standard,tele}/camera_info` | 三套独立 CameraInfo 和光学坐标系 |
+| `/car_b/camera/triple/image_raw` | 同时间戳三图竖排预览，上长焦、中主摄、下广角，640×1176，仅用于显示 |
+| `/car_b/lidar/points` | 原始 PointCloud2，10 Hz，720×64 射线 |
+| `/car_b/lidar/points_colored` | 有效回波点的高度着色，用于 RViz 叠加 |
+
+`/car_b/sensors/raw/...` 是桥接内部输入。传感器均安装在车顶前缘，安装位置和视场直接从独立 SDF 配置读取；静态 TF 从 `car_b/base_link` 连到雷达及三台相机，并为相机提供标准 optical frame，移动安装位置不需要复制修改 TF。拼图不提供虚构的统一 CameraInfo。雷达有效点按地面高度着亮绿色和亮青色，不进行障碍物语义分类。新增依赖为 `sensor_msgs`、`sensor_msgs_py`、`cv_bridge`、NumPy 与 OpenCV；本机均已存在。
+
+演示正在播放时执行 `python3 ros/tests/check_sensor_run.py`，检查真实图像、各焦段标定、拼图、三维点云和 TF。传感器由 Gazebo 时间驱动，SUMO 未开始时暂停，最终停车后保留最后画面。
+
+## 默认网络闭环实现
 
 Veins 是唯一 SUMO 步进者。`network_backend.py` 在 TCP 9998 接收车辆状态和 INET 实际收包事件，经 `sumo_bridge` 发布 `/v2v_warning`，`simulated=false`。控制器发布 `/brake_cmd` 后，ROS2 在下一次应答中把停车目标交给 Veins 执行。ROS2 在此模式不调用 TraCI `simulationStep()`。
 
@@ -74,6 +92,7 @@ sumo_bridge：下一次步进前调用 TraCI setSpeed(car_b)，按实时净间�
 | `src/cosim_bridge/cosim_bridge/event_log.py` | 各节点独立 JSONL 日志 |
 | `src/cosim_bridge/cosim_bridge/gazebo_sync.py` | 姿态服务和 Gazebo 定步时间同步 |
 | `src/cosim_bridge/cosim_bridge/car_visuals.py` | RViz 三维车体部件 |
+| `src/cosim_bridge/cosim_bridge/sensor_visuals.py` | 读取 Gazebo 独立 SDF 生成相同的 RViz 传感器几何 |
 | `src/cosim_bridge/launch/demo.launch.py` | 启动顺序和参数 |
 
 自定义消息放在独立的 `ament_cmake` 包，Python 节点放在 `ament_python` 包。

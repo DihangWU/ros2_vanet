@@ -13,6 +13,7 @@ setup(
     description='SUMO to ROS2 state bridge', license='Apache-2.0',
     entry_points={'console_scripts': ['sumo_bridge = cosim_bridge.sumo_bridge:main',
                                          'gazebo_sync = cosim_bridge.gazebo_sync:main',
+                                         'perception_display = cosim_bridge.perception_display:main',
                                          'brake_controller = cosim_bridge.brake_controller:main',
                                          'test_warning_publisher = cosim_bridge.test_warning_publisher:main']},
 )

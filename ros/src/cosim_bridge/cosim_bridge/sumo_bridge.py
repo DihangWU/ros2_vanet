@@ -15,6 +15,7 @@ from rosgraph_msgs.msg import Clock as ClockMessage
 from visualization_msgs.msg import Marker, MarkerArray
 from tf2_ros import TransformBroadcaster
 from .car_visuals import car_markers
+from .sensor_visuals import sensor_markers
 from cosim_interfaces.msg import V2VWarning, BrakeCommand
 from .event_log import EventLog, seconds
 from .communication_visuals import CommunicationVisuals
@@ -288,6 +289,7 @@ class SumoBridge(Node):
                 path.poses.append(pose)
             self.path_pub[vehicle].publish(path)
             markers.markers.extend(car_markers(vehicle, stamp, x, y, yaw))
+            markers.markers.extend(sensor_markers(vehicle, stamp, x, y, yaw, self.root))
             label = self.marker(vehicle, 1, Marker.TEXT_VIEW_FACING, stamp)
             label.pose.position = Point(x=x, y=y, z=3.0)
             label.scale.z = 1.2

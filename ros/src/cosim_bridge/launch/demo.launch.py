@@ -1,7 +1,8 @@
 """在项目根目录或 ros 工作空间执行，先开三维窗口，再启动交通仿真。"""
 from pathlib import Path
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
@@ -17,6 +18,10 @@ def generate_launch_description():
         DeclareLaunchArgument('sumo_gui', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='true'),
         DeclareLaunchArgument('gazebo', default_value='true'),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(Path(__file__).with_name('sensors.launch.py'))),
+            launch_arguments={'project_root': LaunchConfiguration('project_root'), 'scenario': LaunchConfiguration('scenario')}.items(),
+            condition=IfCondition(LaunchConfiguration('gazebo'))),
         DeclareLaunchArgument('startup_delay', default_value='8.0'),
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'models'])),
         ExecuteProcess(cmd=['gz', 'sim',

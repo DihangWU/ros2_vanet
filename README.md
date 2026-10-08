@@ -1,4 +1,5 @@
 # ROS2-VANET 协同紧急制动学习 Demo
+
 Demo Videos:
 
 https://github.com/user-attachments/assets/8d6f57a3-4b61-4725-bc9e-d6f320ae1481
@@ -13,6 +14,8 @@ https://github.com/user-attachments/assets/52f0274f-e892-4b3e-a1d8-890e59684523
 
 
 前车急刹并通过 Veins + INET 无线网络发送警告；后车实际收包后，ROS2 生成制动命令。SUMO 是车辆运动唯一真值源，Gazebo 和 RViz2 同步三维展示。目录按组件划分，优先保持学习时的可读性。
+
+蓝色后车新增可复用传感器：三维激光雷达（水平 120°、垂直 −25°～+15°）和广角 / 标准 / 长焦三目摄像头，均安装在车顶前缘，支架与车顶相接。RViz 同窗竖排显示三目拼图（上长焦、中标准主摄、下广角），同时绘制传感器模组，并将亮色点云叠在车体与地面；三台相机分别发布独立 ROS2 图像和标定。安装、话题与一行引用方式见 [传感器模块说明](gazebo/models/perception_rig/README.md)。当前传感器用于显示，制动距离反馈仍沿用 SUMO。
 
 | 目录 | 版本 | 功能 |
 | --- | --- | --- |

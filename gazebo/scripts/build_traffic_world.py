@@ -30,6 +30,8 @@ def main():
     for plugin in ('Physics', 'UserCommands', 'SceneBroadcaster'):
         filename = {'Physics': 'physics', 'UserCommands': 'user-commands', 'SceneBroadcaster': 'scene-broadcaster'}[plugin]
         ET.SubElement(world, 'plugin', filename=f'gz-sim-{filename}-system', name=f'gz::sim::systems::{plugin}')
+    sensors = ET.SubElement(world, 'plugin', filename='gz-sim-sensors-system', name='gz::sim::systems::Sensors')
+    ET.SubElement(sensors, 'render_engine').text = 'ogre2'
     light = ET.SubElement(world, 'light', name='sun', type='directional')
     ET.SubElement(light, 'pose').text = '0 0 20 0 0 0'
     ET.SubElement(light, 'diffuse').text = '0.9 0.9 0.9 1'

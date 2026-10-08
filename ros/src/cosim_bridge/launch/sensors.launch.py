@@ -1,0 +1,47 @@
+"""自动识别引用 perception_rig 的车辆，逐车建立独立话题与展示节点。"""
+import importlib.util
+from pathlib import Path
+import xml.etree.ElementTree as ET
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
+
+def sensor_nodes(context):
+    root = Path(LaunchConfiguration('project_root').perform(context))
+    scenario = LaunchConfiguration('scenario').perform(context)
+    spec = importlib.util.spec_from_file_location('traffic_scene', root / 'sumo/scripts/traffic_scene.py')
+    scene = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(scene)
+    actions = []
+    for vehicle in scene.vehicles(root, scenario):
+        name = vehicle['id']
+        model_name = name if name in ('car_a', 'car_b') else 'background_car'
+        model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
+        if not any(i.findtext('uri') == 'model://perception_rig' for i in model.findall('.//include')):
+            continue
+        base = f'/world/cosim_demo/model/{name}/link/sensor_mount/sensor'
+        arguments, remappings = [], []
+        for camera in ('wide', 'standard', 'tele'):
+            for suffix, ros_type, gz_type in [('image', 'Image', 'Image'), ('camera_info', 'CameraInfo', 'CameraInfo')]:
+                topic = f'{base}/{camera}/{suffix}'
+                arguments.append(f'{topic}@sensor_msgs/msg/{ros_type}[gz.msgs.{gz_type}')
+                remappings.append((topic, f'/{name}/sensors/raw/{camera}/{suffix}'))
+        topic = f'{base}/lidar/scan/points'
+        arguments.append(f'{topic}@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked')
+        remappings.append((topic, f'/{name}/sensors/raw/lidar/points'))
+        actions.extend([
+            Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{name}_sensor_bridge',
+                 arguments=arguments, remappings=remappings, output='screen'),
+            Node(package='cosim_bridge', executable='perception_display', name=f'{name}_perception_display',
+                 parameters=[{'project_root': str(root), 'vehicle': name, 'use_sim_time': True}], output='screen'),
+        ])
+    return actions
+
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument('project_root'), DeclareLaunchArgument('scenario', default_value='traffic'),
+        OpaqueFunction(function=sensor_nodes),
+    ])
