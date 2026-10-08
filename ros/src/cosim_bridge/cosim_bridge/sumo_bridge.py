@@ -13,10 +13,11 @@ from geometry_msgs.msg import PoseStamped, TransformStamped, Point
 from nav_msgs.msg import Odometry, Path as RosPath
 from rosgraph_msgs.msg import Clock as ClockMessage
 from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Time as TimeMessage
 from tf2_ros import TransformBroadcaster
 from .car_visuals import car_markers
 from .sensor_visuals import sensor_markers
-from cosim_interfaces.msg import V2VWarning, BrakeCommand
+from cosim_interfaces.msg import V2VWarning, BrakeCommand, LongitudinalCommand
 from .event_log import EventLog, seconds
 from .communication_visuals import CommunicationVisuals
 
@@ -31,6 +32,17 @@ class SumoBridge(Node):
         self.declare_parameter('scenario', 'traffic')
         self.scenario = self.get_parameter('scenario').value
         self.network_mode = self.get_parameter('network_mode').value
+        self.declare_parameter('control_mode', 'sumo')
+        self.control_mode = self.get_parameter('control_mode').value
+        if self.control_mode not in ('lidar', 'sumo'):
+            raise ValueError('control_mode 必须为 lidar 或 sumo')
+        self.lidar_mode = self.control_mode == 'lidar'
+        self.longitudinal = None
+        self.last_control_sequence = 0
+        self.gazebo_synced_time = -1.0
+        self.sync_wait_started = None
+        self.longitudinal_sub = self.create_subscription(LongitudinalCommand, '/lidar_brake/cmd', self.on_longitudinal, 10)
+        self.sync_sub = self.create_subscription(TimeMessage, '/gazebo/synced', self.on_gazebo_sync, 10)
         self.declare_parameter('communication_range_m', 100.0)
         radius = float(self.get_parameter('communication_range_m').value)
         if not math.isfinite(radius) or radius <= 0:
@@ -87,6 +99,7 @@ class SumoBridge(Node):
         self.response_recorded = False
         self.minimum_gap = float('inf')
         self.trajectory_dir = self.root / 'ros/log/events'
+        (self.trajectory_dir / 'summary.json').unlink(missing_ok=True)
         self.trajectory = (self.trajectory_dir / 'trajectory.csv').open('w')
         self.trajectory.write('time_s,car_a_x_m,car_a_speed_mps,car_b_x_m,car_b_speed_mps,gap_m\n')
         self.traffic_trajectory = (self.trajectory_dir / 'traffic_trajectory.csv').open('w')
@@ -110,8 +123,10 @@ class SumoBridge(Node):
                 self.get_logger().info('SUMO 窗口准备好后，请点击绿色“开始”；演示时间从开始运行计算。')
             self.traci.start(cmd)
         self.started = time.monotonic()
-        # 独立于 /clock 的稳态定时器；每个回调推进 0.05 仿真秒。
-        self.timer = self.create_timer(0.05 / self.rate, self.tick,
+        # 雷达模式频繁检查同步就绪；真正步进仍每次 0.05 仿真秒，
+        # 现实节拍由 started / rate 的绝对时间控制，不累计等待误差。
+        self.last_state_wall = 0.0
+        self.timer = self.create_timer(.01 if self.lidar_mode else 0.05 / self.rate, self.tick,
                                       clock=Clock(clock_type=ClockType.STEADY_TIME))
         self.get_logger().info(f'开始 {self.rate:g} 倍实时播放；{self.duration:g} 秒后保留画面，Ctrl+C 退出。')
 
@@ -148,6 +163,47 @@ class SumoBridge(Node):
         self.log.write('brake_command_received', self.now, event_id=command.event_id,
                        published_time_s=seconds(command.header.stamp))
 
+    def on_longitudinal(self, command):
+        age = self.now-seconds(command.header.stamp)
+        valid = (self.lidar_mode and not self.finished and command.target_vehicle == 'car_b'
+                 and command.header.frame_id == 'car_b/base_link'
+                 and math.isfinite(command.target_speed_mps) and 0 <= command.target_speed_mps <= 15
+                 and math.isfinite(command.acceleration_mps2) and -8 <= command.acceleration_mps2 <= 1.5
+                 and -.05 <= age <= .35 and command.sequence > self.last_control_sequence)
+        if valid:
+            self.longitudinal = command
+            self.last_control_sequence = command.sequence
+
+    def on_gazebo_sync(self, stamp):
+        self.gazebo_synced_time = max(self.gazebo_synced_time, seconds(stamp))
+
+    def sensor_frame_ready(self):
+        if not self.lidar_mode or self.now <= 0:
+            return True
+        # A 10 Hz lidar may not produce its first scan at t=0.05. Allow only a
+        # short startup interval to collect it; keep the initial cruise command.
+        control_ready = (self.longitudinal is None and self.now <= .2) or (
+            self.longitudinal is not None and seconds(self.longitudinal.header.stamp) >= self.now-1e-8
+            and seconds(self.longitudinal.measurement_stamp) >= self.now-.200001)
+        ready = self.gazebo_synced_time >= self.now-1e-8 and control_ready
+        if ready:
+            self.sync_wait_started = None
+            return True
+        if self.sync_wait_started is None:
+            self.sync_wait_started = time.monotonic()
+        elif time.monotonic()-self.sync_wait_started > 15:
+            raise RuntimeError('等待 Gazebo 同步/雷达控制超时；仿真暂停，请检查传感器与 lidar_brake 日志')
+        return False
+
+    def execute_lidar_speed(self):
+        command = self.longitudinal
+        speed = self.traci.vehicle.getSpeed('car_b')
+        target = max(0., speed-8*.05) if command is None or self.now-seconds(command.header.stamp)>.35 else command.target_speed_mps
+        if command is None and self.now <= .2:
+            target = speed
+        self.traci.vehicle.setSpeedMode('car_b', 30)
+        self.traci.vehicle.setSpeed('car_b', target)
+
     def tick(self):
         if self.network_mode:
             if self.communication.failed:
@@ -162,6 +218,12 @@ class SumoBridge(Node):
             return
         advanced = not self.finished
         if not self.finished:
+            if self.lidar_mode and self.now > 0 and time.monotonic() < self.started+(self.now+.05)/self.rate:
+                self.publish_state(False)
+                return
+            if not self.sensor_frame_ready():
+                self.publish_state(False)
+                return
             if self.now >= 5.0 - 1e-8 and not self.braked:
                 self.traci.vehicle.slowDown('car_a', 0.0, 2.0)
                 self.braked = True
@@ -189,7 +251,9 @@ class SumoBridge(Node):
                 self.response_start_speed = self.traci.vehicle.getSpeed('car_b')
                 self.log.write('brake_command_applied', self.now, event_id=command.event_id,
                                speed_before_mps=self.response_start_speed, simulated=command.simulated)
-            if self.applied_command is not None:
+            if self.lidar_mode and self.now > 0:
+                self.execute_lidar_speed()
+            elif self.applied_command is not None:
                 # 根据实时净间距收拢停车位置，SUMO 原有安全跟车约束仍生效。
                 front_speed = self.traci.vehicle.getSpeed('car_a')
                 rear_speed = self.traci.vehicle.getSpeed('car_b')
@@ -204,6 +268,8 @@ class SumoBridge(Node):
             # SUMO 内部仍以 0.01 秒步长计算，ROS2 每 0.05 秒取样。
             self.traci.simulationStep(min(round(self.now + 0.05, 8), self.duration))
             self.now = self.traci.simulation.getTime()
+            if self.now <= .05:
+                self.started = time.monotonic()-self.now/self.rate
             self.communication.connected = True
             if set(self.traci.vehicle.getIDList()) != set(self.odom):
                 raise RuntimeError('两辆车未按预期存在于 SUMO 中')
@@ -236,6 +302,7 @@ class SumoBridge(Node):
                 self.trajectory.close()
                 self.traffic_trajectory.close()
                 summary = dict(end_time_s=self.now, minimum_gap_m=self.minimum_gap,
+                               control_mode=self.control_mode, control_sequence=self.last_control_sequence,
                                ros_brake_applied=self.applied_command is not None,
                                warning_seen=self.warning_seen, simulated_warning=self.simulated_warning,
                                scenario=self.scenario, vehicle_count=len(self.states),
@@ -253,6 +320,10 @@ class SumoBridge(Node):
         self.traffic_trajectory.flush()
 
     def publish_state(self, append_path):
+        wall_now = time.monotonic()
+        if not append_path and wall_now-self.last_state_wall < .05:
+            return
+        self.last_state_wall = wall_now
         stamp = rclpy.time.Time(seconds=self.now).to_msg()
         clock = ClockMessage()
         clock.clock = stamp

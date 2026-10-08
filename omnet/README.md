@@ -40,8 +40,10 @@ veins_inet 位于 Veins 的 subprojects/veins_inet，也需已编译。安装库
 
 results/network_events.jsonl 记录急刹、发包、收包和命令执行，每次覆盖；.sca/.vec/.vci 按运行 ID 保存统计量。build/、results/ 不纳入 Git。
 
-TraCI 9999、ROS2 交换 9998 均为固定本机端口。不要同时启动多组演示。网络模式默认 30 秒，管理器 duration 与 sim-time-limit 同步接收 ROS2 duration，ROS2 不独立推进 SUMO。默认八个 VeinsInetCar；`scenario:=two_cars duration:=15.0` 使用旧两车场景。
+TraCI 9999、ROS2 交换 9998 均为固定本机端口。不要同时启动多组演示。网络模式默认 30 秒，管理器 duration 与 sim-time-limit 同步接收 ROS2 duration，ROS2 不独立推进 SUMO。默认十一个 VeinsInetCar；`scenario:=two_cars duration:=15.0` 使用旧两车场景。
 
 Qtenv 联合演示请用 F6 Fast Run；普通 Run 在 5 秒发包附近可能为动画暂停联合时间。Fast Run 不改变网络事件和收发计算。
 
 SUMO GUI 模式自动启用管理器 followSumoVehicles，并设 ignoreGuiCommands=false，使视野随两车移动；后台 SUMO 模式禁用这两项 GUI 操作。
+
+默认雷达模式由 ROS2 包装传入 `--lidar-control`，对应 `CoSim.manager.lidarControl`。逐步应答携带连续目标速度，网络管理器只执行，算法在 `Algorithm/LidarBrake/`。INET 的发包与收包模型保持相同。`results/network_events.jsonl` 新增 `lidar_control_accepted`（命令序号、生成时间、执行者接收时间与目标速度）；不是无线数据包。

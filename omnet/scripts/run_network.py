@@ -22,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gui', action='store_true')
     parser.add_argument('--qtenv', action='store_true')
+    parser.add_argument('--lidar-control', action='store_true')
     parser.add_argument('--scenario', choices=['traffic', 'two_cars'], default='traffic')
     parser.add_argument('--duration', type=float, default=30.0)
     args = parser.parse_args()
@@ -64,6 +65,7 @@ def main():
             '-f', 'omnetpp.ini',
             '--sim-time-limit=' + str(args.duration + 0.001) + 's',
             '--*.manager.duration=' + str(args.duration) + 's',
+            '--*.manager.lidarControl=' + ('true' if args.lidar_control else 'false'),
             '--*.manager.followSumoVehicles=' + ('true' if args.gui else 'false'),
             '--*.manager.ignoreGuiCommands=' + ('false' if args.gui else 'true'),
             '--*.node[*].wlan[0].radio.transmitter.power=' +

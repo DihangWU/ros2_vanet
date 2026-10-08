@@ -22,5 +22,6 @@ sumo/output/
 
 # Network adapter build and run artifacts
 omnet/build/
+gazebo/build/
 veins/src/*_m.cc
 veins/src/*_m.h

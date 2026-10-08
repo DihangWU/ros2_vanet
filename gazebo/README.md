@@ -6,7 +6,7 @@
 
 车顶模组含与车顶相接的底板、雷达支柱、摄像头支柱及横臂；传感器机身不再悬空。RViz 从相同的独立 SDF 读取这些几何和安装位置，保持两边外观一致。三目预览从上到下为长焦、标准主摄、广角。
 
-蓝色后车在车顶前缘装有三维 GPU 激光雷达和三目摄像头，光心均高于车顶。独立配置与一行安装方法见 [perception_rig/README.md](models/perception_rig/README.md)。雷达水平左右各 60°（总 120°）、垂直 −25°～+15°；广角、标准、长焦水平视场为 120°、60°、30°。世界增加 Sensors / Ogre2 插件，从实际渲染场景生成图像和点云。SUMO 仍负责运动，Gazebo 不参与制动判断。
+蓝色后车在车顶前缘装有三维 GPU 激光雷达和三目摄像头，光心均高于车顶。独立配置与一行安装方法见 [perception_rig/README.md](models/perception_rig/README.md)。雷达水平左右各 60°（总 120°）、垂直 −25°～+15°；广角、标准、长焦水平视场为 120°、60°、30°。世界增加 Sensors / Ogre2 插件，从实际渲染场景生成图像和点云。SUMO 仍负责运动，Gazebo 生成制动算法的原始点云输入；制动判断由独立算法和 ROS2 节点完成。
 
 默认 `scenario:=traffic` 使用 `worlds/traffic.sdf`：400 m 三车道、11 辆车，道路宽度 9.6 m；默认运行 30 秒。道路长度读取 SUMO 的 `network/traffic.nod.xml`，停车点后方保留约 210 m 道路。`config/traffic_gui.config` 提供较宽的初始视角。旧资源 `worlds/two_cars.sdf` 通过 `scenario:=two_cars duration:=15.0` 使用。
 
@@ -22,6 +22,8 @@
 | `models/car_a/model.sdf` | 红色前车的三维几何 |
 | `models/car_b/model.sdf` | 蓝色后车的三维几何 |
 | `config/gui.config` | 初始相机、鼠标视角控制和 GUI 插件 |
+| `plugins/SensorRenderSync.cc` | 订阅渲染事件，确保外部定步与暂停帧的传感器场景及时刷新 |
+| `scripts/build_sensor_sync.py` | 使用本机 Harmonic SDK 构建适配器，输出到忽略的 `build/` |
 
 ## 启动
 
@@ -39,7 +41,7 @@ ros2 launch cosim_bridge demo.launch.py
 默认打开 Gazebo、RViz2 和 SUMO；等待 8 秒后打开 SUMO 窗口，点击 SUMO 的开始按钮后才推进交通仿真。运动默认实时播放 30 秒，第 5 秒前车急刹，结束后保留车辆和窗口，Ctrl+C 退出。若窗口启动较慢，可以加 `startup_delay:=15.0`。
 
 不打开 SUMO 窗口：`ros2 launch cosim_bridge demo.launch.py sumo_gui:=false`。
-不打开 Gazebo：加 `gazebo:=false`。
+不打开 Gazebo：加 `gazebo:=false control_mode:=sumo`，使用旧真值反馈对照。雷达模式必须开启 Gazebo。
 
 ## 自由视角
 
@@ -55,9 +57,11 @@ ros2 launch cosim_bridge demo.launch.py
 
 ## 同步原理与边界
 
-`ros/` 中的 `gazebo_sync` 从当前 SUMO 路线读取车辆 ID，订阅全部 `/<id>/odom`，通过 `ros_gz_bridge` 的 `/world/cosim_demo/set_pose` 服务更新模型中心姿态。每辆车最多一个在途请求，优先同步最新状态。
+`ros/` 中的 `gazebo_sync` 从当前 SUMO 路线读取车辆 ID，订阅全部 `/<id>/odom`，使用 Gazebo Transport 的 `/world/cosim_demo/set_pose_vector` 一次提交完整帧，再请求 `/world/cosim_demo/control` 推进。通过 ROS 桥接的 `/gazebo/clock` 确认世界实际到达目标时间，经 `/gazebo/synced` 通知交通步进者。Gazebo Python 绑定由 `gz_transport_vendor`、`gz_msgs_vendor` 提供；时钟只桥接到独立话题，不覆盖 ROS `/clock`。
 
 SUMO 是车辆运动唯一真值源。模型设为静态、无碰撞体，用姿态更新实现展示，不模拟轮胎、转向或另一套跟车动力学。车轮目前不滚动。Gazebo 的时间按 SUMO 定步同步，但不桥接到 ROS2 `/clock`；ROS2 时间来自 SUMO。
+
+世界的 `real_time_factor=0` 允许尽快计算请求的展示步，不另加现实时间等待；`run_to_sim_time` 到目标时间后自动暂停。现实倍速由 ROS2 交通协调器统一控制。`SensorRenderSync` 只保持渲染事件连接，让暂停与外部步进期间的场景也及时刷新，雷达与相机仍遵循自己的 update_rate。启动时自动构建，需 CMake、C++ 编译器和本机 Harmonic SDK；不修改第三方安装。可靠的原始点云 ROS 通道用于制动，彩色点云仍用于显示。
 
 已验证模型加载、姿态服务成功、30 秒最终位置与 ROS2 一致（检查误差小于 0.02 m）。自由视角插件已加载，鼠标操作尚未自动化验证。
 
@@ -73,4 +77,4 @@ RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo
 
 默认运行已接入 Veins + INET 实际收包与 ROS2 制动控制：前车急刹后发送无线警告，后车收包后由控制器生成停车目标，经 Veins 执行到 SUMO。Gazebo 继续订阅同一份车辆状态，不直接执行制动。事件和日志见 [ROS2 README](../ros/README.md)。`network:=false` 切换人工警告，再加 `test_warning:=false` 运行普通跟车对照场景。
 
-当前后车按目标净间距 2.5 m 靠近停车，实测最终两车停止、净间距约 2.55 m；模型继续同步 SUMO 状态。
+默认 `control_mode:=lidar` 从 Gazebo 雷达测距控制靠近停车，参数见 [LidarBrake](../Algorithm/LidarBrake/README.md)。`control_mode:=sumo` 保留旧真值反馈策略。模型继续同步 SUMO 状态。

@@ -21,6 +21,9 @@ class CoSimManager : public veins::VeinsInetManagerBase {
     int fd = -1;
     bool braking = false, frontBraked = false, held = false;
     double desiredGap = 2.5, appliedAt = -1;
+    bool externalSpeedMode = false;
+    double controlTarget = 15, controlTime = -1;
+    uint64_t controlSequence = 0;
     std::string eventId;
     Json warnings = Json::array();
     Json networkEvents = Json::array();
@@ -93,7 +96,15 @@ protected:
     }
     void handleSelfMsg(cMessage* msg) override {
         bool step = (msg == executeOneTimestepTrigger);
-        if(step && braking) {
+        if(step && par("lidarControl").boolValue() && externalSpeedMode) {
+            // Only execute the ROS lidar command; no lead position/speed/gap feedback here.
+            auto rear = getCommandInterface()->vehicle("car_b");
+            double target = controlTarget;
+            if(controlTime >= 0 && simTime().dbl()-controlTime > .35)
+                target = std::max(0.0, rear.getSpeed()-8.0*.05);
+            rear.setSpeed(target);
+        }
+        else if(step && braking) {
             auto a=getCommandInterface()->vehicle("car_a"), b=getCommandInterface()->vehicle("car_b");
             double gap=a.getLanePosition()-a.getLength()-b.getLanePosition();
             if(a.getSpeed()<.01 && b.getSpeed()<.05 && gap<=desiredGap+.05)held=true;
@@ -102,6 +113,11 @@ protected:
         veins::TraCIScenarioManager::handleSelfMsg(msg);
         if(!step)return;
         double now=simTime().dbl();
+        if(par("lidarControl").boolValue() && !externalSpeedMode && getManagedHosts().count("car_b")) {
+            // Disable only SUMO's safe-speed/car-follow override; keep actuator limits.
+            getCommandInterface()->vehicle("car_b").setSpeedMode(30);
+            externalSpeedMode=true;
+        }
         if(now>=5 && !frontBraked) {
             getCommandInterface()->vehicle("car_a").slowDown(0,SimTime(2)); frontBraked=true;
             record({{"event","front_brake"},{"sim_time_s",now}});
@@ -125,10 +141,22 @@ protected:
         for (const auto& entry : getManagedHosts()) {
             cars[entry.first] = vehicleState(entry.first);
         }
-        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"collisions",collisions()},{"command_active",braking},{"applied_time",appliedAt}};
+        Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"collisions",collisions()},{"command_active",braking},{"applied_time",appliedAt},{"control_sequence",controlSequence},{"control_time",controlTime}};
         warnings=Json::array();
         networkEvents=Json::array();
         Json reply=exchange(state);
+        if(par("lidarControl").boolValue() && reply.contains("longitudinal") && !reply["longitudinal"].is_null()) {
+            auto control = reply["longitudinal"];
+            double target=control["target_speed_mps"], stamp=control["time_s"];
+            uint64_t sequence=control["sequence"];
+            if(!std::isfinite(target) || target<0 || target>15 || stamp>now+.05 || now-stamp>.35)
+                throw cRuntimeError("Invalid longitudinal command");
+            if(sequence>controlSequence) {
+                controlTarget=target; controlTime=stamp; controlSequence=sequence;
+                events << Json({{"event","lidar_control_accepted"},{"sim_time_s",now},
+                                {"sequence",sequence},{"target_speed_mps",target}}).dump() << std::endl;
+            }
+        }
         if(reply.contains("command") && !reply["command"].is_null() && !braking) {
             desiredGap=reply["command"]["desired_gap_m"]; eventId=reply["command"]["event_id"];
             if(desiredGap<2.5 || desiredGap>10)throw cRuntimeError("Invalid stopping gap");

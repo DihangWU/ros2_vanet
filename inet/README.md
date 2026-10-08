@@ -14,7 +14,7 @@ config/wireless.ini 保存实际参与运行的 INET 参数，由 omnet/omnetpp.
 
 警告经过 INET 的协议栈、网卡和无线介质，后车实际收包后触发 ROS2。无线延迟来自网络模型，精确发送与接收时间见 omnet/results/network_events.jsonl。
 
-默认配置实测延迟约 0.152 ms。启动前设置 COSIM_RADIO_POWER=0.000000001mW，已验证无收包、无 ROS2 制动；SUMO 安全跟车仍会减速。修改参数需重启演示。
+默认配置实测延迟约 0.152 ms。启动前设置 COSIM_RADIO_POWER=0.000000001mW，此前 `control_mode:=sumo` 已验证无收包、无 V2V 命令；SUMO 安全跟车仍会减速。默认雷达模式仍可依据点云独立制动，丢包不代表不会制动。修改参数需重启演示。
 
 INET 实现来自已有安装，本目录只保存项目配置。路径和启动见 [OMNeT++ README](../omnet/README.md)。
 

@@ -1,0 +1,24 @@
+# Straight-road learning configuration, not a production vehicle calibration.
+stop_gap: 2.5
+time_headway: 1.2
+cruise_speed: 15.0
+kp: 0.7
+kd: 1.8
+max_acceleration: 1.5
+max_deceleration: 8.0
+max_jerk: 8.0
+control_period: 0.05
+stale_timeout: 0.35
+roi_half_width: 1.05
+min_height: 0.2
+max_height: 2.4
+max_distance: 100.0
+voxel_size: 0.3
+min_cluster_points: 6
+distance_alpha: 0.7
+velocity_alpha: 0.45
+emergency_ttc: 1.5
+warning_deceleration: 2.0
+warning_duration: 0.5
+hold_gap_tolerance: 0.05
+hold_speed: 0.05

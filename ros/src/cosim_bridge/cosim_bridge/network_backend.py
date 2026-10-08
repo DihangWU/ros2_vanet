@@ -19,6 +19,8 @@ class NetworkBackend:
         self.server.settimeout(60)
         command = ['python3', str(owner.root / 'omnet/scripts/run_network.py')]
         command += ['--scenario', owner.scenario, '--duration', str(owner.duration)]
+        if owner.lidar_mode:
+            command.append('--lidar-control')
         if owner.gui:
             command.append('--gui')
         if owner.get_parameter('network_gui').value:
@@ -60,6 +62,12 @@ class NetworkBackend:
             o.publish_state(False)
             return
         if self.needs_ack:
+            if o.lidar_mode and time.monotonic() < o.started+(o.now+.05)/o.rate:
+                o.publish_state(False)
+                return
+            if not o.sensor_frame_ready():
+                o.publish_state(False)
+                return
             self.ack()
         line = self.stream.readline()
         if not line:
@@ -116,6 +124,7 @@ class NetworkBackend:
             o.trajectory.close()
             o.traffic_trajectory.close()
             summary = dict(end_time_s=o.now, minimum_gap_m=o.minimum_gap, final_gap_m=gap,
+                           control_mode=o.control_mode, control_sequence=o.last_control_sequence,
                            ros_brake_applied=o.applied_command is not None, warning_seen=o.warning_seen,
                            simulated_warning=False, backend='veins_inet',
                            scenario=o.scenario, vehicle_count=len(o.states),
@@ -127,7 +136,11 @@ class NetworkBackend:
 
     def ack(self):
         command = self.owner.pending_command
-        payload = {'command': None}
+        payload = {'command': None, 'longitudinal': None}
+        control = self.owner.longitudinal
+        if self.owner.lidar_mode and control is not None:
+            payload['longitudinal'] = dict(sequence=control.sequence, time_s=control.header.stamp.sec+control.header.stamp.nanosec/1e9,
+                                          target_speed_mps=control.target_speed_mps)
         if command is not None:
             payload['command'] = {'event_id': command.event_id, 'desired_gap_m': command.desired_gap_m}
             self.sent_command = command

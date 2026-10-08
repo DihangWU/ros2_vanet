@@ -4,11 +4,12 @@
     <gravity>0 0 0</gravity>
     <physics name="default" type="ignored">
       <max_step_size>0.01</max_step_size>
-      <real_time_factor>1</real_time_factor>
+      <real_time_factor>0</real_time_factor>
     </physics>
     <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
     <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="libcosim_sensor_render_sync.so" name="SensorRenderSync" />
     <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors"><render_engine>ogre2</render_engine></plugin>
     <light name="sun" type="directional">
       <pose>0 0 20 0 0 0</pose>

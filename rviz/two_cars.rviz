@@ -144,6 +144,15 @@ Visualization Manager:
       Alpha: 1
       Decay Time: 0
       Use Fixed Frame: true
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Lidar distance and brake control
+      Enabled: true
+      Topic:
+        Value: /lidar_brake/markers
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 10
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""

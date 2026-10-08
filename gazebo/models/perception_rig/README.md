@@ -21,7 +21,7 @@ ROS2 对每台相机分别发布 `/<vehicle>/camera/{wide,standard,tele}/image_r
 
 安装底板直接接触 z=1.55 m 的车顶，雷达和摄像头分别通过支柱及横臂连接到底板。Gazebo 与 RViz 使用同一份 SDF 可视几何：底板、支柱、雷达机身、摄像头机身及三个镜头。RViz 的 `/<vehicle>/sensors` Marker 命名空间随车辆姿态一起更新，通信提示箭头抬高到 z=3.6 m，避开模组。
 
-雷达原始输出为 `/<vehicle>/lidar/points`；显示输出为 `lidar/points_colored`。高于地面 0.15 m 的有效回波着亮青色，地面回波着亮绿色。这是平坦路面的高度着色，不是车辆识别或障碍物分类。RViz 用真实传感器 TF 将点云叠在车体和路面；无有效回波的位置不补点。当前只显示感知数据，未接入制动距离反馈。
+雷达原始输出为 `/<vehicle>/lidar/points`；显示输出为 `lidar/points_colored`。高于地面 0.15 m 的有效回波着亮青色，地面回波着亮绿色。这是平坦路面的高度着色，不是车辆识别或障碍物分类。RViz 用真实传感器 TF 将点云叠在车体和路面；无有效回波的位置不补点。默认 `control_mode:=lidar` 的 ROS2 节点使用原始 `/car_b/lidar/points` 反馈车距；高度着色话题只用于显示，不作为算法输入。算法参数独立放在 [Algorithm/LidarBrake](../../../Algorithm/LidarBrake/README.md)。
 
 修改传感器参数后重启演示。TF 与可视几何位置从此 SDF 读取，当前支持与车体平行安装；改变安装旋转时，需要扩展 `perception_display.py` 与 `sensor_visuals.py` 中对应旋转处理。摄像头分辨率应保持一致以便纵向拼图。
 

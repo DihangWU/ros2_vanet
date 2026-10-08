@@ -78,6 +78,8 @@ GUI 自动加载 `config/viewsettings.xml`，聚焦车辆活动区域，并显�
 
 默认网络模式下，SUMO 镜头每 0.05 仿真秒随两车位置移动，视野以两车中点为中心，横向至少覆盖 100 m，并留出边距。由 Veins 管理器调用 GUI 边界接口实现；无界面运行不调用 GUI 命令。Gazebo 和 RViz2 的自由视角不受影响。
 
-独立脚本仍是普通跟车基线。`ros2 launch cosim_bridge demo.launch.py` 默认启用 Veins + INET：Veins 通过 TraCI 9999 唯一步进 SUMO，后车实际收包后 ROS2 生成命令，再交给 Veins 执行。SUMO GUI 等待点击 Play，默认现实时间播放 15 秒。两种入口不要同时控制同一仿真。
+独立脚本仍是普通跟车基线。`ros2 launch cosim_bridge demo.launch.py` 默认启用 Veins + INET：Veins 通过 TraCI 9999 唯一步进 SUMO，后车实际收包后 ROS2 生成命令，再交给 Veins 执行。SUMO GUI 等待点击 Play，默认三车道场景播放 30 秒。两种入口不要同时控制同一仿真。
 
 `network:=false` 恢复 ROS2 直接步进及人工警告；再加 `test_warning:=false` 关闭测试输入。闭环日志在 `ros/log/events/`，精确网络事件在 `omnet/results/`。接口与结果见 [ROS2 README](../ros/README.md)。
+
+联合默认 `control_mode:=lidar`：由 Gazebo 点云测距控制后车，不使用 SUMO 通知的前车距离。后车 `speedMode=30` 关闭内置安全跟车速度覆盖，保留加减速度与交通规则限制，执行外部目标速度。`control_mode:=sumo` 保留旧真值反馈与 SUMO 安全跟车对照；上文独立 `run_demo.py` 基线不变。自车速度仍来自 SUMO，作为模拟车速传感器；运动真值可以写入日志评估，但不进入雷达算法。

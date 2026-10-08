@@ -51,6 +51,7 @@ class PerceptionDisplay(Node):
         self.lidar_height = float(self.sensors['lidar'].findtext('pose').split()[2])
         self.cv = CvBridge()
         self.frames = {}
+        self.first_cloud = True
         self.image_publishers = {}
         self.info_publishers = {}
         self.subscriptions_list = []
@@ -64,10 +65,10 @@ class PerceptionDisplay(Node):
             self.subscriptions_list.append(self.create_subscription(
                 CameraInfo, f'/{self.vehicle}/sensors/raw/{name}/camera_info',
                 lambda msg, camera=name: self.camera_info(msg, camera), qos_profile_sensor_data))
-        self.points = self.create_publisher(PointCloud2, f'/{self.vehicle}/lidar/points', qos_profile_sensor_data)
+        self.points = self.create_publisher(PointCloud2, f'/{self.vehicle}/lidar/points', 10)
         self.colored = self.create_publisher(PointCloud2, f'/{self.vehicle}/lidar/points_colored', qos_profile_sensor_data)
         self.subscriptions_list.append(self.create_subscription(
-            PointCloud2, f'/{self.vehicle}/sensors/raw/lidar/points', self.cloud, qos_profile_sensor_data))
+            PointCloud2, f'/{self.vehicle}/sensors/raw/lidar/points', self.cloud, 10))
         self.tf = StaticTransformBroadcaster(self)
         self.publish_transforms()
 
@@ -129,6 +130,9 @@ class PerceptionDisplay(Node):
         self.info_publishers[camera].publish(msg)
 
     def cloud(self, msg):
+        if self.first_cloud:
+            self.get_logger().info(f'First raw lidar frame: {msg.header.stamp.sec + msg.header.stamp.nanosec/1e9:.3f}s')
+            self.first_cloud = False
         msg.header.frame_id = f'{self.vehicle}/lidar_link'
         self.points.publish(msg)
         self.colored.publish(colored_cloud(msg, self.lidar_height))

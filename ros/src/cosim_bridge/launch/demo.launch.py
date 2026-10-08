@@ -1,12 +1,26 @@
 """在项目根目录或 ros 工作空间执行，先开三维窗口，再启动交通仿真。"""
 from pathlib import Path
+import runpy
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, SetEnvironmentVariable, IncludeLaunchDescription, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, EnvironmentVariable
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+
+
+def validate_control(context):
+    mode = LaunchConfiguration('control_mode').perform(context)
+    gazebo = LaunchConfiguration('gazebo').perform(context)
+    if mode not in ('lidar', 'sumo'):
+        raise ValueError('control_mode 必须为 lidar 或 sumo')
+    if mode == 'lidar' and gazebo.lower() != 'true':
+        raise ValueError('雷达控制需要 Gazebo 生成真实点云；无 Gazebo 对比运行请指定 control_mode:=sumo')
+    if gazebo.lower() == 'true':
+        root = Path(LaunchConfiguration('project_root').perform(context))
+        runpy.run_path(str(root/'gazebo/scripts/build_sensor_sync.py'))['build'](root)
+    return []
 
 
 def generate_launch_description():
@@ -18,12 +32,20 @@ def generate_launch_description():
         DeclareLaunchArgument('sumo_gui', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='true'),
         DeclareLaunchArgument('gazebo', default_value='true'),
+        DeclareLaunchArgument('control_mode', default_value='lidar'),
+        OpaqueFunction(function=validate_control),
+        Node(package='cosim_bridge', executable='lidar_brake', output='screen',
+             condition=IfCondition(PythonExpression(["'", LaunchConfiguration('control_mode'), "' == 'lidar'"])),
+             parameters=[{'project_root': LaunchConfiguration('project_root'), 'use_sim_time': True}]),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(Path(__file__).with_name('sensors.launch.py'))),
             launch_arguments={'project_root': LaunchConfiguration('project_root'), 'scenario': LaunchConfiguration('scenario')}.items(),
             condition=IfCondition(LaunchConfiguration('gazebo'))),
         DeclareLaunchArgument('startup_delay', default_value='8.0'),
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'models'])),
+        SetEnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH', [
+            PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'build']), ':',
+            EnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH', default_value='')]),
         ExecuteProcess(cmd=['gz', 'sim',
             PathJoinSubstitution([LaunchConfiguration('project_root'), 'gazebo', 'worlds',
                 PythonExpression(["'traffic.sdf' if '", LaunchConfiguration('scenario'), "' == 'traffic' else 'two_cars.sdf'"])]),
@@ -31,8 +53,8 @@ def generate_launch_description():
                 PythonExpression(["'traffic_gui.config' if '", LaunchConfiguration('scenario'), "' == 'traffic' else 'gui.config'"])] )],
             condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
         Node(package='ros_gz_bridge', executable='parameter_bridge',
-             arguments=['/world/cosim_demo/set_pose@ros_gz_interfaces/srv/SetEntityPose',
-                        '/world/cosim_demo/control@ros_gz_interfaces/srv/ControlWorld'],
+             arguments=['/world/cosim_demo/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+             remappings=[('/world/cosim_demo/clock', '/gazebo/clock')],
              condition=IfCondition(LaunchConfiguration('gazebo')), output='screen'),
         Node(package='cosim_bridge', executable='gazebo_sync',
              condition=IfCondition(LaunchConfiguration('gazebo')), output='screen',
@@ -59,6 +81,7 @@ def generate_launch_description():
             Node(package='cosim_bridge', executable='sumo_bridge', output='screen',
                  parameters=[{
                      'network_mode': ParameterValue(LaunchConfiguration('network'), value_type=bool),
+                     'control_mode': LaunchConfiguration('control_mode'),
                      'scenario': LaunchConfiguration('scenario'),
                      'network_gui': ParameterValue(LaunchConfiguration('network_gui'), value_type=bool),
                      'communication_range_m': ParameterValue(LaunchConfiguration('communication_range_m'), value_type=float),

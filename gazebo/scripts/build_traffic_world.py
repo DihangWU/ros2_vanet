@@ -26,10 +26,11 @@ def main():
     ET.SubElement(world, 'gravity').text = '0 0 0'
     physics = ET.SubElement(world, 'physics', name='default', type='ignored')
     ET.SubElement(physics, 'max_step_size').text = '0.01'
-    ET.SubElement(physics, 'real_time_factor').text = '1'
+    ET.SubElement(physics, 'real_time_factor').text = '0'
     for plugin in ('Physics', 'UserCommands', 'SceneBroadcaster'):
         filename = {'Physics': 'physics', 'UserCommands': 'user-commands', 'SceneBroadcaster': 'scene-broadcaster'}[plugin]
         ET.SubElement(world, 'plugin', filename=f'gz-sim-{filename}-system', name=f'gz::sim::systems::{plugin}')
+    ET.SubElement(world, 'plugin', filename='libcosim_sensor_render_sync.so', name='SensorRenderSync')
     sensors = ET.SubElement(world, 'plugin', filename='gz-sim-sensors-system', name='gz::sim::systems::Sensors')
     ET.SubElement(sensors, 'render_engine').text = 'ogre2'
     light = ET.SubElement(world, 'light', name='sun', type='directional')

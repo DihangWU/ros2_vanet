@@ -24,8 +24,11 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 | 坐标系 | `/tf` | `map` 到全部 `<id>/base_link` 的变换 |
 | 仿真时钟 | `/clock` | 为 RViz2 提供统一的仿真时间 |
 | 通信信息 | `/v2v/markers` | 收发时间、无线延迟、车辆 ID、命令时间、范围圆、收发位置与包回放 |
+| 雷达控制 | `/lidar_brake/markers` | 测量车距、目标车距、相对速度、加速度和控制状态 |
 
 固定坐标系为 `map`，启用 `use_sim_time=true`。车辆由三维车身、座舱、车窗、四个车轮和前后灯的 Marker 组成，每辆车有 13 个基础部件；安装传感器的蓝车另外显示 9 个模组部件，轨迹随运动增长。仿真结束后，数据发布节点继续发布最终状态，方便观察停车位置。
+
+`Lidar distance and brake control` 显示后车旁的青色三维文字：`MEASURED GAP` 是点云测得的净间距，`TARGET GAP` 随自车速度变化，`REL SPEED` 是连续测距估计的相对速度，负值表示接近。状态包括 `LIDAR_FOLLOW`、`V2V_LIDAR_BRAKE`、`EMERGENCY_BRAKE`、`SENSOR_LOST_BRAKE` 和 `STOPPED_HOLD`。该显示可单独关闭；旧 `control_mode:=sumo` 不运行雷达控制节点，因此没有这组文字。通信 Marker 的命令时间对应单次 V2V 事件，连续雷达速度命令另存日志。
 
 网格每格 10 m，每边 100 格，覆盖以 x=200 m 为中心约 1000 m × 1000 m 的区域，包含车辆全程运动、最终停车位置及通信范围参照圆。
 
@@ -45,7 +48,7 @@ ros2 launch cosim_bridge demo.launch.py
 该命令同时启动 Gazebo、RViz2 和 SUMO。只打开 RViz2、让 SUMO 在后台运行：
 
 ```bash
-ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false
+ros2 launch cosim_bridge demo.launch.py sumo_gui:=false gazebo:=false control_mode:=sumo
 ```
 
 默认以实时速度播放 30 秒，第 5 秒前车急刹，结束后保留最终画面。按 Ctrl+C 退出；滚轮可缩放视角。
@@ -98,4 +101,4 @@ RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo
 
 人工测试模式明确显示 `TEST INPUT`，无线延迟为 `--`，不把人工延迟当成网络测量。
 
-后车现采用靠近停车策略，最终净间距约 2.55 m。`ROS BRAKING` 表示已执行 ROS2 停车目标，减速程度随实时距离调整，不意味着收到警告时立即停车。
+后车默认采用雷达测距的时间车距 PD 与停车保持；`control_mode:=sumo` 可切换旧真值反馈对照。`ROS BRAKING` 表示已执行 ROS2 停车目标，减速程度随实时距离调整，不意味着收到警告时立即停车。

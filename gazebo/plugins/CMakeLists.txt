@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(cosim_sensor_render_sync LANGUAGES CXX)
+find_package(gz-sim8 REQUIRED)
+find_package(gz-plugin2 REQUIRED COMPONENTS register)
+add_library(cosim_sensor_render_sync SHARED SensorRenderSync.cc)
+target_compile_features(cosim_sensor_render_sync PRIVATE cxx_std_17)
+target_link_libraries(cosim_sensor_render_sync PRIVATE gz-sim8::gz-sim8 gz-plugin2::register)
