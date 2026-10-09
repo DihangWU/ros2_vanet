@@ -1,6 +1,7 @@
 """JSONL lockstep transport: Veins steps SUMO, ROS2 publishes state and returns commands."""
 import json
 import socket
+import select
 import subprocess
 import time
 from pathlib import Path
@@ -50,15 +51,34 @@ class NetworkBackend:
             self.output.close()
             raise
         # SUMO GUI may wait indefinitely for Play; do not include that wait in elapsed time.
-        self.stream = self.connection.makefile('r')
         self.needs_ack = False
+        self.stop_ack_sent = False
+        self.receive_buffer = b''
         self.first_frame = True
+
+    def read_frame(self):
+        # GUI Play/Pause must not block ROS callbacks for scene deletion.
+        if b'\n' not in self.receive_buffer:
+            if not select.select([self.connection], [], [], 0)[0]:
+                return None
+            chunk = self.connection.recv(65536)
+            if not chunk:
+                raise RuntimeError('网络进程断开，请查看 ros/log/events/network_process.log')
+            self.receive_buffer += chunk
+        if b'\n' not in self.receive_buffer:
+            return None
+        line, self.receive_buffer = self.receive_buffer.split(b'\n', 1)
+        return line.decode()
 
     def tick(self):
         o = self.owner
         if o.finished:
             if self.needs_ack:
                 self.ack()
+            elif o.scene_stopped and not self.stop_ack_sent:
+                if self.read_frame() is not None:
+                    self.needs_ack = True
+                    self.ack()
             o.publish_state(False)
             return
         if self.needs_ack:
@@ -69,9 +89,10 @@ class NetworkBackend:
                 o.publish_state(False)
                 return
             self.ack()
-        line = self.stream.readline()
-        if not line:
-            raise RuntimeError('网络进程断开，请查看 ros/log/events/network_process.log')
+        line = self.read_frame()
+        if line is None:
+            o.publish_state(False)
+            return
         frame = json.loads(line)
         if frame['collisions']:
             raise RuntimeError(f'SUMO 检测到碰撞: {frame["collisions"]}')
@@ -84,7 +105,7 @@ class NetworkBackend:
             o.started = time.monotonic() - o.now / o.rate
             self.first_frame = False
         o.states = {v: (float(c['x']), float(c['y']), float(c['yaw']), float(c['speed']))
-                    for v, c in frame['cars'].items()}
+                    for v, c in frame['cars'].items() if v not in o.removed_vehicles}
         if o.now >= 5 and not o.braked:
             o.braked = True
             o.log.write('front_brake', 5.0, event_id='front_brake_1', backend='veins_inet')
@@ -136,9 +157,11 @@ class NetworkBackend:
 
     def ack(self):
         command = self.owner.pending_command
-        payload = {'command': None, 'longitudinal': None}
+        payload = {'command': None, 'longitudinal': None,
+                   'remove_vehicles': sorted(self.owner.pending_removals),
+                   'stop': self.owner.scene_stopped}
         control = self.owner.longitudinal
-        if self.owner.lidar_mode and control is not None:
+        if not self.owner.scene_stopped and self.owner.lidar_mode and control is not None:
             payload['longitudinal'] = dict(sequence=control.sequence, time_s=control.header.stamp.sec+control.header.stamp.nanosec/1e9,
                                           target_speed_mps=control.target_speed_mps)
         if command is not None:
@@ -146,11 +169,12 @@ class NetworkBackend:
             self.sent_command = command
             self.owner.pending_command = None
         self.connection.sendall((json.dumps(payload)+'\n').encode())
+        self.stop_ack_sent = self.stop_ack_sent or payload['stop']
+        self.owner.pending_removals.clear()
         self.needs_ack = False
 
     def close(self):
         self.connection.close()
-        self.stream.close()
         self.server.close()
         if self.process.poll() is None:
             import os, signal

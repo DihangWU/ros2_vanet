@@ -18,7 +18,7 @@ ros2 launch cosim_bridge sensor_preview.launch.py
 
 入口 `launch/sensor_preview.launch.py` 启动 Gazebo、传感器桥接、`sensor_preview` 静态展示节点和 RViz。不启动 SUMO、网络仿真、`gazebo_sync`、交通桥接或制动控制器；不读取 SUMO 路线，不需要 SUMO 安装。车辆初始姿态和道路几何直接读取 `gazebo/worlds/{traffic,two_cars}.sdf`。传感器扫描入口 `sensors.launch.py` 也直接读取同一个世界中的车辆模型引用。
 
-Gazebo 是预览模式唯一的 `/clock` 来源。启动时为世界生成临时副本，将 `real_time_factor` 设为 `playback_rate`（默认 1），使用 `-r` 自行播放；原联合仿真世界不修改，退出时清理临时文件。可以使用 Gazebo Play / Pause 控制传感器采样。车辆保持静止，静态 `map → <车辆ID>/base_link` TF 与车体 / 传感器 / 道路 Marker 独立发布；没有 Odom、运动轨迹、V2V 或制动结果。移动 GUI 相机不会改变车辆；此预览不跟踪通过 Gazebo 编辑工具手动挪动车辆的姿态。
+Gazebo 是预览模式唯一的 `/clock` 来源。启动时为世界生成临时副本，将 `real_time_factor` 设为 `playback_rate`（默认 1），使用 `-r` 自行播放；原联合仿真世界不修改，退出时清理临时文件。可以使用 Gazebo Play / Pause 控制传感器采样。车辆保持静止，固定初始姿态、持续发布的 `map → <车辆ID>/base_link` TF 与车体 / 传感器 / 道路 Marker 独立发布；没有 Odom、运动轨迹、V2V 或制动结果。移动 GUI 相机不会改变车辆；此预览不跟踪通过 Gazebo 编辑工具手动挪动车辆的姿态。
 
 ```bash
 # 旧两车静态世界
@@ -35,7 +35,7 @@ ros2 launch cosim_bridge sensor_preview.launch.py playback_rate:=0.5
 
 ### 完整交通演示
 
-`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机中心 yaw ±125°，向前覆盖 25°、向后覆盖 95°，向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
+`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机中心 yaw ±117.5°，向前覆盖 40°、向后覆盖 95°，向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
 
 运行中可执行 `python3 ros/tests/check_surround_camera_run.py` 检查六路真实图像、独立标定、光轴 TF、同步时间戳和拼图排列。
 
@@ -197,3 +197,20 @@ python3 ros/tests/check_traffic_run.py
 # 默认真实雷达网络模式 30 秒三车道演示结束后
 python3 ros/tests/check_lidar_brake_run.py
 ```
+
+## Gazebo 中删除车辆
+
+`gazebo_scene.py` 和 `vehicle_lifecycle.py` 负责确认删除与精确 Marker 清理，使用可靠、Transient Local 的 `/gazebo/vehicle_lifecycle`（std_msgs/String JSON，deleted 为累计删除 ID）。检测采用真实时间，不依赖 SUMO 或仿真时钟推进。预览根据删除列表停止车辆 TF / Marker，完整演示清空 Path、过滤旧网络帧及排队 Odom，避免已删除车辆重新显示或 Gazebo 同步等待卡住。网络模式通过 JSON 应答中的 remove_vehicles 委托 Veins 唯一 TraCI 控制者执行；network:=false 使用现有 Python TraCI 连接。核心车辆删除会结束演示、停止激光制动输出并记录 end_reason=core_vehicle_removed；窗口保留到 Ctrl+C。当前仅支持运行时删除既有车辆，不能通过 Gazebo 编辑新增交通车辆或恢复同 ID；重启恢复配置。
+
+验证命令（先构建并 source ROS2 工作空间）：
+
+```bash
+python3 ros/tests/test_vehicle_lifecycle.py
+# 会删除当前测试场景的 bg_01，请在单独测试运行中执行
+python3 ros/tests/check_vehicle_removal_run.py --mode preview
+python3 ros/tests/check_vehicle_removal_run.py --mode demo
+# 同时验证核心车辆删除及传感器显示清理
+python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehicle car_b
+```
+
+网络接收采用非阻塞帧缓存，SUMO 等待 Play 或 Qtenv 暂停时不会阻塞车辆删除的 ROS 回调。网络暂停时先清理显示，SUMO / Veins 删除在下一次锁步应答执行；核心车辆删除的结束请求同样在网络恢复到应答点后提交。

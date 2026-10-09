@@ -11,6 +11,8 @@ from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import PointCloud2
 from tf2_ros import StaticTransformBroadcaster
 from .perception_display import colored_cloud
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS, empty_cloud
 
 
 def radar_specs(root, rig_name='corner_radar_rig'):
@@ -42,6 +44,9 @@ class CornerRadarDisplay(Node):
         self.raw_publishers, self.colored_publishers = {}, {}
         self.subscriptions_list = []
         self.received = set()
+        self.removed = False
+        self.last_clouds = {}
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.tf = StaticTransformBroadcaster(self)
         transforms = []
         for name, spec in self.specs.items():
@@ -64,10 +69,21 @@ class CornerRadarDisplay(Node):
             transforms.append(transform)
         self.tf.sendTransform(transforms)
 
+    def on_lifecycle(self, message):
+        if self.vehicle not in deleted_ids(message):
+            return
+        self.removed = True
+        for name, cloud in self.last_clouds.items():
+            self.raw_publishers[name].publish(empty_cloud(cloud))
+            self.colored_publishers[name].publish(empty_cloud(colored_cloud(cloud, self.specs[name]['pose'][2], self.specs[name]['rgb'])))
+
     def cloud(self, message, name):
+        if self.removed:
+            return
         cloud = copy.copy(message)
         cloud.header = copy.deepcopy(message.header)
         cloud.header.frame_id = f'{self.vehicle}/radar/{name}_link'
+        self.last_clouds[name] = cloud
         self.raw_publishers[name].publish(cloud)
         spec = self.specs[name]
         self.colored_publishers[name].publish(colored_cloud(cloud, spec['pose'][2], spec['rgb']))

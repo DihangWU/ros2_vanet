@@ -39,6 +39,10 @@ def colored_cloud(message, lidar_height, obstacle_rgb=0x00FFFF):
     return cloud
 
 
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS, empty_cloud, black_image
+
+
 class PerceptionDisplay(Node):
     def __init__(self):
         super().__init__('perception_display')
@@ -52,6 +56,9 @@ class PerceptionDisplay(Node):
         self.cv = CvBridge()
         self.frames = {}
         self.first_cloud = True
+        self.removed = False
+        self.last_cloud = None
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.image_publishers = {}
         self.info_publishers = {}
         self.subscriptions_list = []
@@ -71,6 +78,20 @@ class PerceptionDisplay(Node):
             PointCloud2, f'/{self.vehicle}/sensors/raw/lidar/points', self.cloud, 10))
         self.tf = StaticTransformBroadcaster(self)
         self.publish_transforms()
+
+    def on_lifecycle(self, message):
+        if self.vehicle not in deleted_ids(message):
+            return
+        if self.last_cloud is not None:
+            self.points.publish(empty_cloud(self.last_cloud))
+            self.colored.publish(empty_cloud(colored_cloud(self.last_cloud, self.lidar_height)))
+        if not self.removed:
+            stamp = self.get_clock().now().to_msg()
+            for name, publisher in self.image_publishers.items():
+                publisher.publish(black_image(640, 360, f'{self.vehicle}/{name}_optical_frame', stamp))
+            self.montage.publish(black_image(640, 1176, 'map', stamp))
+            self.frames.clear()
+        self.removed = True
 
     def publish_transforms(self):
         transforms = []
@@ -102,6 +123,8 @@ class PerceptionDisplay(Node):
         self.tf.sendTransform(transforms)
 
     def image(self, msg, camera):
+        if self.removed:
+            return
         msg.header.frame_id = f'{self.vehicle}/{camera}_optical_frame'
         self.image_publishers[camera].publish(msg)
         key = (msg.header.stamp.sec, msg.header.stamp.nanosec)
@@ -126,14 +149,19 @@ class PerceptionDisplay(Node):
             del self.frames[next(iter(self.frames))]
 
     def camera_info(self, msg, camera):
+        if self.removed:
+            return
         msg.header.frame_id = f'{self.vehicle}/{camera}_optical_frame'
         self.info_publishers[camera].publish(msg)
 
     def cloud(self, msg):
+        if self.removed:
+            return
         if self.first_cloud:
             self.get_logger().info(f'First raw lidar frame: {msg.header.stamp.sec + msg.header.stamp.nanosec/1e9:.3f}s')
             self.first_cloud = False
         msg.header.frame_id = f'{self.vehicle}/lidar_link'
+        self.last_cloud = msg
         self.points.publish(msg)
         self.colored.publish(colored_cloud(msg, self.lidar_height))
 

@@ -15,6 +15,8 @@ from sensor_msgs_py import point_cloud2
 from visualization_msgs.msg import Marker, MarkerArray
 from cosim_interfaces.msg import V2VWarning, LongitudinalCommand
 from .event_log import EventLog, seconds
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS
 
 
 class LidarBrakeNode(Node):
@@ -40,6 +42,8 @@ class LidarBrakeNode(Node):
         self.cloud_sub = self.create_subscription(PointCloud2, f'/{self.vehicle}/lidar/points', self.cloud, 10)
         self.odom_sub = self.create_subscription(Odometry, f'/{self.vehicle}/odom', self.odom, 10)
         self.warning_sub = self.create_subscription(V2VWarning, '/v2v_warning', self.warning, 10)
+        self.scene_stopped = False
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.speed = None
         self.speed_stamp = None
         self.last_generated = None
@@ -47,6 +51,13 @@ class LidarBrakeNode(Node):
         self.handled = set()
         self.timer = self.create_timer(.01, self.control, clock=Clock(clock_type=ClockType.STEADY_TIME))
         self.get_logger().info('LidarBrake: raw lidar distance feedback; ego speed only from odometry')
+
+    def on_lifecycle(self, message):
+        if deleted_ids(message) & {'car_a', self.vehicle}:
+            self.scene_stopped = True
+            clear = Marker()
+            clear.action = Marker.DELETEALL
+            self.markers.publish(MarkerArray(markers=[clear]))
 
     def odom(self, message):
         # Deliberately do not access pose, car_a/odom or warning position/speed.
@@ -84,6 +95,8 @@ class LidarBrakeNode(Node):
             self.control(force=True)
 
     def control(self, force=False):
+        if getattr(self, 'scene_stopped', False):
+            return
         if self.speed is None:
             return
         now = self.get_clock().now().nanoseconds/1e9

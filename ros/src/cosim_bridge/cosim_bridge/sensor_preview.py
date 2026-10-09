@@ -4,7 +4,10 @@ import rclpy
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from geometry_msgs.msg import TransformStamped
-from tf2_ros import StaticTransformBroadcaster
+from tf2_ros import TransformBroadcaster
+from std_msgs.msg import String
+from rclpy.clock import Clock, ClockType
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS, MarkerHistory
 from visualization_msgs.msg import Marker, MarkerArray
 from .preview_scene import world_scene, world_vehicles
 from .car_visuals import car_markers
@@ -21,8 +24,11 @@ class SensorPreview(Node):
         self.vehicles = world_vehicles(self.root, scenario)
         self.road = world_scene(self.root, scenario).find('world/model[@name="road"]')
         self.publisher = self.create_publisher(MarkerArray, '/demo/markers', 10)
-        self.tf = StaticTransformBroadcaster(self)
-        transforms = []
+        self.tf = TransformBroadcaster(self)
+        self.removed = set()
+        self.history = MarkerHistory()
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
+        self.transforms = []
         for vehicle in self.vehicles:
             x, y, z, _, _, yaw = vehicle['pose']
             transform = TransformStamped()
@@ -33,15 +39,25 @@ class SensorPreview(Node):
             transform.transform.translation.z = z
             transform.transform.rotation.z = math.sin(yaw/2)
             transform.transform.rotation.w = math.cos(yaw/2)
-            transforms.append(transform)
-        self.tf.sendTransform(transforms)
-        self.timer = self.create_timer(.1, self.publish_scene)
+            self.transforms.append(transform)
+        self.timer = self.create_timer(.1, self.publish_scene, clock=Clock(clock_type=ClockType.STEADY_TIME))
+        self.publish_scene()
+
+    def on_lifecycle(self, message):
+        self.removed |= deleted_ids(message)
         self.publish_scene()
 
     def publish_scene(self):
         stamp = self.get_clock().now().to_msg()
         markers = MarkerArray()
+        transforms = [t for t in self.transforms if t.child_frame_id[:-10] not in self.removed]
+        for transform in transforms:
+            transform.header.stamp = stamp
+        if transforms:
+            self.tf.sendTransform(transforms)
         for vehicle in self.vehicles:
+            if vehicle['id'] in self.removed:
+                continue
             x, y, _, _, _, yaw = vehicle['pose']
             markers.markers.extend(car_markers(vehicle['id'], stamp, x, y, yaw))
             markers.markers.extend(sensor_markers(vehicle['id'], stamp, x, y, yaw, self.root))
@@ -59,7 +75,7 @@ class SensorPreview(Node):
             marker.scale.x, marker.scale.y, marker.scale.z = map(float, visual.findtext('geometry/box/size').split())
             marker.color.r, marker.color.g, marker.color.b, marker.color.a = map(float, visual.findtext('material/diffuse').split())
             markers.markers.append(marker)
-        self.publisher.publish(markers)
+        self.publisher.publish(self.history.reconcile(markers, stamp))
 
 
 def main(args=None):

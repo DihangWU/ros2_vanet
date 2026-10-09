@@ -15,6 +15,8 @@ from rosgraph_msgs.msg import Clock as ClockMessage
 from visualization_msgs.msg import Marker, MarkerArray
 from builtin_interfaces.msg import Time as TimeMessage
 from tf2_ros import TransformBroadcaster
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS, MarkerHistory
 from .car_visuals import car_markers
 from .sensor_visuals import sensor_markers
 from cosim_interfaces.msg import V2VWarning, BrakeCommand, LongitudinalCommand
@@ -77,6 +79,12 @@ class SumoBridge(Node):
         scene.build_network(self.root, self.scenario)
         self.road_length = scene.road_length(self.root, self.scenario)
         self.sumo_config = scene.scene_files(self.root, self.scenario)[3]
+        self.removed_vehicles = set()
+        self.pending_removals = set()
+        self.scene_stopped = False
+        self.marker_history = MarkerHistory()
+        self.communication_history = MarkerHistory()
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.vehicle_ids = [v['id'] for v in scene.vehicles(self.root, self.scenario)]
         self.odom = {v: self.create_publisher(Odometry, f'/{v}/odom', 10)
                      for v in self.vehicle_ids}
@@ -272,11 +280,11 @@ class SumoBridge(Node):
             if self.now <= .05:
                 self.started = time.monotonic()-self.now/self.rate
             self.communication.connected = True
-            if set(self.traci.vehicle.getIDList()) != set(self.odom):
+            if set(self.traci.vehicle.getIDList()) != set(self.vehicle_ids)-self.removed_vehicles:
                 raise RuntimeError('两辆车未按预期存在于 SUMO 中')
             if self.traci.simulation.getCollidingVehiclesIDList():
                 raise RuntimeError('SUMO 检测到碰撞')
-            for vehicle in self.odom:
+            for vehicle in set(self.vehicle_ids)-self.removed_vehicles:
                 x, y = self.traci.vehicle.getPosition(vehicle)
                 # SUMO 的角度从正北顺时针；ROS yaw 从正东逆时针。
                 yaw = math.radians(90 - self.traci.vehicle.getAngle(vehicle))
@@ -314,6 +322,42 @@ class SumoBridge(Node):
                 self.get_logger().info(
                     f'仿真结束：{self.now:.2f}s，现实 {time.monotonic()-self.started:.2f}s；保留最终状态。')
         self.publish_state(append_path=advanced)
+
+    def on_lifecycle(self, message):
+        removed = (deleted_ids(message) & set(self.vehicle_ids))-self.removed_vehicles
+        if not removed:
+            return
+        self.removed_vehicles |= removed
+        self.pending_removals |= removed
+        stamp = rclpy.time.Time(seconds=self.now).to_msg()
+        for vehicle in removed:
+            self.states.pop(vehicle, None)
+            path = RosPath()
+            path.header.frame_id, path.header.stamp = 'map', stamp
+            self.paths[vehicle] = path
+            self.path_pub[vehicle].publish(path)
+            self.log.write('vehicle_removed', self.now, vehicle_id=vehicle, source='gazebo')
+        if removed & {'car_a', 'car_b'}:
+            self.scene_stopped = self.finished = True
+            self.pending_command = None
+            self.get_logger().warning('前车或后车已从 Gazebo 删除；结束本次制动演示。')
+            self.log.write('simulation_stopped', self.now, reason='core_vehicle_removed',
+                           deleted_vehicle_ids=sorted(self.removed_vehicles))
+            summary = dict(end_time_s=self.now, end_reason='core_vehicle_removed',
+                           deleted_vehicle_ids=sorted(self.removed_vehicles),
+                           vehicle_count=len(self.states), final_gap_m=None,
+                           final_speed_mps={v: state[3] for v, state in self.states.items()})
+            (self.trajectory_dir/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
+        if not self.network_mode:
+            self.remove_sumo_vehicles()
+        self.last_state_wall = 0.0
+        self.publish_state(False)
+
+    def remove_sumo_vehicles(self):
+        present = set(self.traci.vehicle.getIDList())
+        for vehicle in self.pending_removals & present:
+            self.traci.vehicle.remove(vehicle)
+        self.pending_removals.clear()
 
     def record_traffic(self):
         for vehicle, (x, y, yaw, speed) in self.states.items():
@@ -396,12 +440,12 @@ class SumoBridge(Node):
         status.pose.position = Point(x=125.0, y=10.0, z=2.0)
         status.scale.z = 2.0
         status.color.r = status.color.g = status.color.b = 1.0
-        mode = 'TEST WARNING -> ROS BRAKE' if self.simulated_warning else ('WARNING -> ROS BRAKE' if self.warning_seen else 'following baseline')
+        mode = 'SCENE VEHICLE REMOVED' if self.scene_stopped else 'TEST WARNING -> ROS BRAKE' if self.simulated_warning else ('WARNING -> ROS BRAKE' if self.warning_seen else 'following baseline')
         status.text = f'SUMO time: {self.now:.2f} s | {len(self.states)} vehicles | {mode}'
         markers.markers.append(status)
-        self.markers.publish(markers)
-        self.communication_pub.publish(self.communication.markers(
-            self.states, self.now, stamp, self.marker))
+        self.markers.publish(self.marker_history.reconcile(markers, stamp))
+        self.communication_pub.publish(self.communication_history.reconcile(self.communication.markers(
+            self.states, self.now, stamp, self.marker), stamp))
 
     @staticmethod
     def marker(namespace, identifier, kind, stamp):

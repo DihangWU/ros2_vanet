@@ -19,3 +19,7 @@
 SUMO GUI 启用时，管理器每步更新视野边界，镜头以两车中点为中心，横向至少 100 m。启动脚本启用 followSumoVehicles 并关闭 ignoreGuiCommands；无界面运行保持 GUI 命令禁用。
 
 [OMNeT++ 模块](../omnet/README.md)提供构建与启动，[INET 模块](../inet/README.md)提供无线参数。EmergencyWarning_m.cc/.h 自动生成，不纳入 Git；第三方源码不复制到本目录。
+
+## Gazebo 中删除车辆
+
+ROS2 的 lockstep 应答新增可选 `remove_vehicles` 和 `stop` 字段。Gazebo 删除车辆后，管理器先取消对应 SUMO 订阅，再通过自己的 TraCI 连接删除车辆，调用 Veins 模块移除流程释放网络节点；不会创建第二个 TraCI 客户端。`stop=true` 用于 A/B 核心车辆被删时正常结束网络仿真。背景车辆删除后剩余车流继续运行。

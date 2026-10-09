@@ -126,3 +126,7 @@ ros2 launch cosim_bridge demo.launch.py scenario:=two_cars duration:=15.0
 ## License
 
 除明确标注的文件和第三方材料外，本项目原创部分采用 [Apache License 2.0](LICENSE)。Veins 网络适配文件采用 GPL-3.0-or-later。许可范围、第三方组件及其原始许可文本见 [lisence/THIRD_PARTY_NOTICES.md](lisence/THIRD_PARTY_NOTICES.md)。
+
+## Gazebo 中删除车辆
+
+两种入口均支持在 Gazebo 删除已有车辆：独立预览会同步撤销 RViz 模型；完整演示会同时删除 SUMO / Veins 中的对应车辆、清空轨迹并继续运行。删除前车 `car_a` 或后车 `car_b` 会结束本次制动演示。删除只影响当前运行，重启恢复原场景。

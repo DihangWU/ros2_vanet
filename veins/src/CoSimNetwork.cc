@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <cmath>
+#include <set>
 #include "veins_inet/VeinsInetManagerBase.h"
 #include "veins_inet/VeinsInetApplicationBase.h"
 #include "veins_inet/VeinsInetMobility.h"
@@ -25,6 +26,7 @@ class CoSimManager : public veins::VeinsInetManagerBase {
     double controlTarget = 15, controlTime = -1;
     uint64_t controlSequence = 0;
     std::string eventId;
+    std::set<std::string> removedVehicles;
     Json warnings = Json::array();
     Json networkEvents = Json::array();
     std::ofstream events;
@@ -139,12 +141,30 @@ protected:
         }
         Json cars=Json::object();
         for (const auto& entry : getManagedHosts()) {
-            cars[entry.first] = vehicleState(entry.first);
+            if (!removedVehicles.count(entry.first))
+                cars[entry.first] = vehicleState(entry.first);
         }
         Json state={{"time",now},{"cars",cars},{"warnings",warnings},{"network_events",networkEvents},{"collisions",collisions()},{"command_active",braking},{"applied_time",appliedAt},{"control_sequence",controlSequence},{"control_time",controlTime}};
         warnings=Json::array();
         networkEvents=Json::array();
         Json reply=exchange(state);
+        // The same TraCI owner handles Gazebo edit requests; no second SUMO client.
+        if (reply.contains("remove_vehicles")) {
+            for (const auto& value : reply["remove_vehicles"]) {
+                std::string id = value.get<std::string>();
+                if (!getManagedHosts().count(id) || !removedVehicles.insert(id).second) continue;
+                // SUMO drops a removed vehicle's subscriptions immediately. Cancel
+                // while it still exists, otherwise Veins later unsubscribes a missing ID.
+                unsubscribeFromVehicleVariables(id);
+                subscribedVehicles.erase(id);
+                auto response = getConnection()->query(CMD_SET_VEHICLE_VARIABLE,
+                    veins::TraCIBuffer() << REMOVE << id << TYPE_BYTE << REMOVE_VAPORIZED);
+                if (!response.eof()) throw cRuntimeError("Unexpected vehicle remove response");
+                deleteManagedModule(id);
+                record({{"event", "vehicle_removed"}, {"sim_time_s", now}, {"vehicle_id", id}});
+            }
+        }
+        if (reply.value("stop", false)) { endSimulation(); return; }
         if(par("lidarControl").boolValue() && reply.contains("longitudinal") && !reply["longitudinal"].is_null()) {
             auto control = reply["longitudinal"];
             double target=control["target_speed_mps"], stamp=control["time_s"];

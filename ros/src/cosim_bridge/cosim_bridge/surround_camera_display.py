@@ -43,6 +43,10 @@ def make_preview(frames, specs, rows, cv):
     return np.concatenate(result, axis=0)
 
 
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS, black_image
+
+
 class SurroundCameraDisplay(Node):
     def __init__(self):
         super().__init__('surround_camera_display')
@@ -58,6 +62,8 @@ class SurroundCameraDisplay(Node):
         if front_installed:
             self.specs.update(camera_specs(root, 'perception_rig'))
         self.cv, self.frames = CvBridge(), {}
+        self.removed = False
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.images, self.infos, self.subscriptions_list = {}, {}, []
         self.preview = self.create_publisher(Image, f'/{self.vehicle}/camera/surround/image_raw', 2)
         for name in SIDE_CAMERAS:
@@ -101,16 +107,32 @@ class SurroundCameraDisplay(Node):
             transforms.extend((mount, optical))
         self.tf.sendTransform(transforms)
 
+    def on_lifecycle(self, message):
+        if self.removed or self.vehicle not in deleted_ids(message):
+            return
+        self.removed = True
+        self.frames.clear()
+        stamp = self.get_clock().now().to_msg()
+        for name, publisher in self.images.items():
+            publisher.publish(black_image(640, 360, f'{self.vehicle}/{name}_optical_frame', stamp))
+        self.preview.publish(black_image(640*len(self.rows[0]), 392*len(self.rows), 'map', stamp))
+
     def image(self, message, name):
+        if self.removed:
+            return
         message.header.frame_id = f'{self.vehicle}/{name}_optical_frame'
         self.images[name].publish(message)
         self.record(message, name)
 
     def info(self, message, name):
+        if self.removed:
+            return
         message.header.frame_id = f'{self.vehicle}/{name}_optical_frame'
         self.infos[name].publish(message)
 
     def record(self, message, name):
+        if self.removed:
+            return
         key = (message.header.stamp.sec, message.header.stamp.nanosec)
         group = self.frames.setdefault(key, {})
         group[name] = message

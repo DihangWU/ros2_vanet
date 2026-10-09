@@ -11,7 +11,8 @@ from launch_ros.actions import Node
 def sensor_nodes(context):
     root = Path(LaunchConfiguration('project_root').perform(context))
     scenario = LaunchConfiguration('scenario').perform(context)
-    actions = []
+    actions = [Node(package='cosim_bridge', executable='gazebo_scene',
+                    parameters=[{'project_root': str(root), 'scenario': scenario}], output='screen')]
     for vehicle in world_vehicles(root, scenario):
         name = vehicle['id']
         model_name = vehicle['model']

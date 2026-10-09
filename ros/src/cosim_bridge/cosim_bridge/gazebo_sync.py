@@ -14,6 +14,8 @@ from gz.msgs10.pose_v_pb2 import Pose_V
 from gz.msgs10.world_control_pb2 import WorldControl
 from gz.msgs10.boolean_pb2 import Boolean
 from rosgraph_msgs.msg import Clock
+from std_msgs.msg import String
+from .vehicle_lifecycle import deleted_ids, SCENE_QOS
 
 
 class GazeboSync(Node):
@@ -37,13 +39,22 @@ class GazeboSync(Node):
         self.subscriptions_list = [self.create_subscription(
             Odometry, f'/{v}/odom', lambda msg, vehicle=v: self.receive(vehicle, msg), 10)
             for v in vehicle_ids]
+        self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.timer = self.create_timer(0.01, self.sync)
         self.last_warning = 0.0
+
+    def on_lifecycle(self, message):
+        for vehicle in deleted_ids(message):
+            self.vehicle_ids.discard(vehicle)
+            self.latest.pop(vehicle, None)
+            self.latest_steps.pop(vehicle, None)
 
     def receive_clock(self, message):
         self.actual_steps = round((message.clock.sec + message.clock.nanosec / 1e9) / 0.01)
 
     def receive(self, vehicle, msg):
+        if vehicle not in self.vehicle_ids:
+            return
         self.latest[vehicle] = copy.deepcopy(msg.pose.pose)
         stamp = msg.header.stamp
         self.latest_steps[vehicle] = round((stamp.sec + stamp.nanosec / 1e9) / 0.01)
