@@ -1,0 +1,646 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <model name="ultrasonic_rig">
+    <static>true</static>
+    <link name="ultrasonic_front_left_outer_mount">
+      <visual name="front_left_outer_housing">
+        <pose>2.5 0.75 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="front_left_outer" type="gpu_lidar">
+        <pose>2.54 0.75 0.45 0 0 0.6981317008</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_front_left_inner_mount">
+      <visual name="front_left_inner_housing">
+        <pose>2.5 0.25 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="front_left_inner" type="gpu_lidar">
+        <pose>2.54 0.25 0.45 0 0 0.1745329252</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_front_right_inner_mount">
+      <visual name="front_right_inner_housing">
+        <pose>2.5 -0.25 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="front_right_inner" type="gpu_lidar">
+        <pose>2.54 -0.25 0.45 0 0 -0.1745329252</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_front_right_outer_mount">
+      <visual name="front_right_outer_housing">
+        <pose>2.5 -0.75 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="front_right_outer" type="gpu_lidar">
+        <pose>2.54 -0.75 0.45 0 0 -0.6981317008</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_rear_left_outer_mount">
+      <visual name="rear_left_outer_housing">
+        <pose>-2.5 0.75 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="rear_left_outer" type="gpu_lidar">
+        <pose>-2.54 0.75 0.45 0 0 2.4434609528</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_rear_left_inner_mount">
+      <visual name="rear_left_inner_housing">
+        <pose>-2.5 0.25 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="rear_left_inner" type="gpu_lidar">
+        <pose>-2.54 0.25 0.45 0 0 2.9670597284</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_rear_right_inner_mount">
+      <visual name="rear_right_inner_housing">
+        <pose>-2.5 -0.25 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="rear_right_inner" type="gpu_lidar">
+        <pose>-2.54 -0.25 0.45 0 0 3.3161255788</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_rear_right_outer_mount">
+      <visual name="rear_right_outer_housing">
+        <pose>-2.5 -0.75 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.06 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="rear_right_outer" type="gpu_lidar">
+        <pose>-2.54 -0.75 0.45 0 0 3.8397243544</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_left_front_mount">
+      <visual name="side_left_front_housing">
+        <pose>2.25 0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_left_front" type="gpu_lidar">
+        <pose>2.25 0.94 0.45 0 0 1.3089969390</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_left_mid_front_mount">
+      <visual name="side_left_mid_front_housing">
+        <pose>0.75 0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_left_mid_front" type="gpu_lidar">
+        <pose>0.75 0.94 0.45 0 0 1.5707963268</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_left_mid_rear_mount">
+      <visual name="side_left_mid_rear_housing">
+        <pose>-0.75 0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_left_mid_rear" type="gpu_lidar">
+        <pose>-0.75 0.94 0.45 0 0 1.5707963268</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_left_rear_mount">
+      <visual name="side_left_rear_housing">
+        <pose>-2.25 0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_left_rear" type="gpu_lidar">
+        <pose>-2.25 0.94 0.45 0 0 1.8325957146</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_right_front_mount">
+      <visual name="side_right_front_housing">
+        <pose>2.25 -0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_right_front" type="gpu_lidar">
+        <pose>2.25 -0.94 0.45 0 0 -1.3089969390</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_right_mid_front_mount">
+      <visual name="side_right_mid_front_housing">
+        <pose>0.75 -0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_right_mid_front" type="gpu_lidar">
+        <pose>0.75 -0.94 0.45 0 0 -1.5707963268</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_right_mid_rear_mount">
+      <visual name="side_right_mid_rear_housing">
+        <pose>-0.75 -0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_right_mid_rear" type="gpu_lidar">
+        <pose>-0.75 -0.94 0.45 0 0 -1.5707963268</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+    <link name="ultrasonic_side_right_rear_mount">
+      <visual name="side_right_rear_housing">
+        <pose>-2.25 -0.9 0.45 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.06 0.04 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="side_right_rear" type="gpu_lidar">
+        <pose>-2.25 -0.94 0.45 0 0 -1.8325957146</pose>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>80</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.8726646260</min_angle>
+              <max_angle>0.8726646260</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.5235987756</min_angle>
+              <max_angle>0.5235987756</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.15</min>
+            <max>5</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </link>
+  </model>
+</sdf>

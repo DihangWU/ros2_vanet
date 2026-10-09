@@ -1,6 +1,7 @@
 """ROS adapter only: lidar + ego speed + V2V -> pure Algorithm/LidarBrake library."""
 import math
 import sys
+from collections import deque
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -43,6 +44,7 @@ class LidarBrakeNode(Node):
         self.odom_sub = self.create_subscription(Odometry, f'/{self.vehicle}/odom', self.odom, 10)
         self.warning_sub = self.create_subscription(V2VWarning, '/v2v_warning', self.warning, 10)
         self.scene_stopped = False
+        self.pending_clouds = deque(maxlen=20)
         self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.speed = None
         self.speed_stamp = None
@@ -55,6 +57,7 @@ class LidarBrakeNode(Node):
     def on_lifecycle(self, message):
         if deleted_ids(message) & {'car_a', self.vehicle}:
             self.scene_stopped = True
+            self.pending_clouds.clear()
             clear = Marker()
             clear.action = Marker.DELETEALL
             self.markers.publish(MarkerArray(markers=[clear]))
@@ -71,7 +74,20 @@ class LidarBrakeNode(Node):
             return
         stamp = seconds(message.header.stamp)
         now = self.get_clock().now().nanoseconds/1e9
-        if stamp > now+.05+1e-8 or now-stamp > self.config.stale_timeout:
+        if stamp > now+.05+1e-8:
+            self.pending_clouds.append(message)
+            return
+        LidarBrakeNode.consume_pending_clouds(self, now)
+        LidarBrakeNode.observe_cloud(self, message, now)
+        self.control(force=True)
+
+    def consume_pending_clouds(self, now):
+        while self.pending_clouds and seconds(self.pending_clouds[0].header.stamp) <= now+.05+1e-8:
+            LidarBrakeNode.observe_cloud(self, self.pending_clouds.popleft(), now)
+
+    def observe_cloud(self, message, now):
+        stamp = seconds(message.header.stamp)
+        if now-stamp > self.config.stale_timeout:
             self.log.write('lidar_frame_rejected', now, measurement_time_s=stamp,
                            reason='future_or_stale')
             return
@@ -81,7 +97,6 @@ class LidarBrakeNode(Node):
         self.log.write('lidar_measurement', now, measurement_time_s=stamp, point_count=len(points),
                        measured_gap_m=None if estimate is None else estimate.gap,
                        relative_speed_mps=None if estimate is None else estimate.relative_speed)
-        self.control(force=True)
 
     def warning(self, message):
         now = self.get_clock().now().nanoseconds/1e9
@@ -100,6 +115,7 @@ class LidarBrakeNode(Node):
         if self.speed is None:
             return
         now = self.get_clock().now().nanoseconds/1e9
+        self.consume_pending_clouds(now)
         if self.algorithm.last_scan is None and now < .2:
             return  # Brief sensor startup; the coordinator waits rather than faking a range.
         if not force and self.last_generated is not None and now <= self.last_generated+1e-8:

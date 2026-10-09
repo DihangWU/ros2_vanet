@@ -56,7 +56,7 @@ source ros/install/setup.bash
 ros2 launch cosim_bridge sensor_preview.launch.py
 ```
 
-使用独立配置 [sensor_preview.rviz](sensor_preview.rviz)，显示网格、静态车辆 / 道路 / 传感器 Marker、TF、六路相机拼图及七路点云（车顶激光雷达一路、毫米波雷达六路）。Gazebo 提供 `/clock`，车体姿态来自世界初始 pose，固定姿态通过动态 TF 持续发布；相机初始聚焦后车附近，不依赖交通、V2V 或制动节点。此配置不包含尚未发布的 Odom / Path / 通信显示。车辆不行驶，传感器会随 Gazebo 时间持续更新，可以自由拉动视角。预览与完整交通演示必须退出后切换，不能直接叠加启动。
+使用独立配置 [sensor_preview.rviz](sensor_preview.rviz)，显示网格、静态车辆 / 道路 / 传感器 Marker、TF、六路相机拼图及二十三路点云（车顶激光雷达一路、毫米波雷达六路、超声波十六路）。Gazebo 提供 `/clock`，车体姿态来自世界初始 pose，固定姿态通过动态 TF 持续发布；相机初始聚焦后车附近，不依赖交通、V2V 或制动节点。此配置不包含尚未发布的 Odom / Path / 通信显示。车辆不行驶，传感器会随 Gazebo 时间持续更新，可以自由拉动视角。预览与完整交通演示必须退出后切换，不能直接叠加启动。
 
 按 [ROS2 说明](../ros/README.md) 完成构建后，从项目根目录执行：
 
@@ -133,4 +133,8 @@ Gazebo 删除车辆后，展示节点对对应模型、标签与传感器机身�
 
 通信数据包动画结束后会删除动画标记；清理逻辑会复用消息中已有的 DELETE，保证同一条 MarkerArray 中每个命名空间与 ID 组合只出现一次，避免刹车后出现 `Duplicate Marker Check` 错误。
 
-独立传感器预览和完整交通演示均保留动态车辆 TF。七路 `points_colored` 显示点云由共享 `cloud_display.py` 等待测量时刻的 TF 后，实际转换到 `map` 再发布，避免 RViz 点云早于车辆 TF 到达而短暂报 Transform 错误。测量时间戳保留原值，不使用最新 TF 替代。每路最多缓存 20 帧，删除车辆时清空缓存和显示；原始 `points` 保持传感器坐标系并直接发布，制动算法输入不变。
+独立传感器预览和完整交通演示均保留动态车辆 TF。二十三路 `points_colored` 显示点云由共享 `cloud_display.py` 等待测量时刻的 TF 后，实际转换到 `map` 再发布，避免 RViz 点云早于车辆 TF 到达而短暂报 Transform 错误。测量时间戳保留原值，不使用最新 TF 替代。每路最多缓存 20 帧，删除车辆时清空缓存和显示；原始 `points` 保持传感器坐标系并直接发布，制动算法输入不变。
+
+独立预览、完整交通及两车配置新增十六个 `Ultrasonic` 点云显示，分别订阅前后保险杠与左右侧面十六路 `points_colored`，可独立开关。亮黄色表示高于地面的回波，白色表示地面，使用 RGB8、5 像素点、不累积历史帧。点云已按测量时刻动态 TF 转到 map，不依赖 RViz 再等传感器变换；十六个传感器机身由 `car_b/ultrasonics` Marker 显示。配置与复用见 [超声波模块](../gazebo/models/ultrasonic_rig/README.md)。
+
+新增八个 `Ultrasonic - side left/right ...` 显示项，依车长顺序为 front / mid front / mid rear / rear，黄色障碍回波、白色地面回波；前后八路保持原布局，三个 RViz 配置现在共有 16 路超声波、23 路传感器点云。

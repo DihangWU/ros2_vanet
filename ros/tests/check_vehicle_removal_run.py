@@ -28,7 +28,12 @@ subscriptions=[
  node.create_subscription(Clock,'/clock',lambda m:state.update(clock=m.clock.sec+m.clock.nanosec/1e9),10),
  node.create_subscription(Path,'/bg_01/path',lambda m:state.update(path=m),10)]
 
-for name in ('lidar', 'radar/front_left', 'radar/front_right', 'radar/rear_left', 'radar/rear_right', 'radar/side_left', 'radar/side_right'):
+cloud_names = ['lidar', 'radar/front_left', 'radar/front_right', 'radar/rear_left', 'radar/rear_right', 'radar/side_left', 'radar/side_right']
+cloud_names += [f'ultrasonic/{end}_{location}' for end in ('front','rear')
+                for location in ('left_outer','left_inner','right_inner','right_outer')]
+cloud_names += [f'ultrasonic/side_{side}_{location}' for side in ('left','right')
+                for location in ('front','mid_front','mid_rear','rear')]
+for name in cloud_names:
  subscriptions.append(node.create_subscription(PointCloud2, f'/car_b/{name}/points_colored', lambda m,key=name:state['clouds'].update({key:m}),qos_profile_sensor_data))
 subscriptions.append(node.create_subscription(Image,'/car_b/camera/surround/image_raw',lambda m:state.update(image=m),10))
 
@@ -59,7 +64,7 @@ try:
  if args.core:
   remove(args.core_vehicle);before=state['clock']
   if args.core_vehicle=='car_b':
-   wait_for(lambda:len(state['clouds'])==7 and all(m.width==0 for m in state['clouds'].values()) and state['image'] is not None and not any(state['image'].data))
+   wait_for(lambda:len(state['clouds'])==len(cloud_names) and all(m.width==0 for m in state['clouds'].values()) and state['image'] is not None and not any(state['image'].data))
   end=time.monotonic()+1.
   while time.monotonic()<end:rclpy.spin_once(node,timeout_sec=.1)
   if args.mode=='demo':assert abs(state['clock']-before)<.051,'Core removal did not stop demo'

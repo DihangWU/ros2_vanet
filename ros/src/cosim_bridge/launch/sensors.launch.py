@@ -1,4 +1,4 @@
-"""自动识别车顶、四角和侧向传感器模组，逐车建立独立话题与展示节点。"""
+"""自动识别车顶、毫米波、超声波和摄像头独立模组，逐车建立独立话题与展示节点。"""
 from cosim_bridge.preview_scene import world_vehicles
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -17,6 +17,8 @@ def sensor_nodes(context):
         name = vehicle['id']
         model_name = vehicle['model']
         model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
+        if any(i.findtext('uri') == 'model://ultrasonic_rig' for i in model.findall('.//include')):
+            actions.extend(ultrasonic_nodes(root, name))
         if any(i.findtext('uri') == 'model://corner_radar_rig' for i in model.findall('.//include')):
             actions.extend(corner_radar_nodes(root, name))
         if any(i.findtext('uri') == 'model://side_radar_rig' for i in model.findall('.//include')):
@@ -77,6 +79,23 @@ def surround_camera_nodes(root, vehicle):
         Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_surround_bridge',
              arguments=arguments, remappings=remappings, output='screen'),
         Node(package='cosim_bridge', executable='surround_camera_display', name=f'{vehicle}_surround_camera_display',
+             parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
+    ]
+
+
+def ultrasonic_nodes(root, vehicle):
+    rig = ET.parse(root/'gazebo/models/ultrasonic_rig/model.sdf')
+    arguments, remappings = [], []
+    for link in rig.findall('.//link'):
+        for sensor in link.findall('sensor'):
+            name = sensor.get('name')
+            topic = f"/world/cosim_demo/model/{vehicle}/link/{link.get('name')}/sensor/{name}/scan/points"
+            arguments.append(f'{topic}@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked')
+            remappings.append((topic, f'/{vehicle}/ultrasonic/raw/{name}/points'))
+    return [
+        Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_ultrasonic_bridge',
+             arguments=arguments, remappings=remappings, output='screen'),
+        Node(package='cosim_bridge', executable='ultrasonic_display', name=f'{vehicle}_ultrasonic_display',
              parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
     ]
 

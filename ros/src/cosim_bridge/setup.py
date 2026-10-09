@@ -16,6 +16,7 @@ setup(
                                          'gazebo_scene = cosim_bridge.gazebo_scene:main',
                                          'perception_display = cosim_bridge.perception_display:main',
                                          'corner_radar_display = cosim_bridge.corner_radar_display:main',
+                                         'ultrasonic_display = cosim_bridge.ultrasonic_display:main',
                                          'surround_camera_display = cosim_bridge.surround_camera_display:main',
                                          'sensor_preview = cosim_bridge.sensor_preview:main',
                                          'lidar_brake = cosim_bridge.lidar_brake_node:main',

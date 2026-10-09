@@ -130,3 +130,5 @@ ros2 launch cosim_bridge demo.launch.py scenario:=two_cars duration:=15.0
 ## Gazebo 中删除车辆
 
 两种入口均支持在 Gazebo 删除已有车辆：独立预览会同步撤销 RViz 模型；完整演示会同时删除 SUMO / Veins 中的对应车辆、清空轨迹并继续运行。删除前车 `car_a` 或后车 `car_b` 会结束本次制动演示。删除只影响当前运行，重启恢复原场景。
+
+蓝车新增可复用 [前后与侧面超声波模组](gazebo/models/ultrasonic_rig/README.md)：前后保险杠各四颗、左右侧面各四颗，共 16 颗，0.15～5 m 近距探测，RViz 使用亮黄色障碍回波和白色地面回波；十六路测距与点云独立发布，未接入制动控制。

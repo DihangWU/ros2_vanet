@@ -31,7 +31,7 @@ ros2 launch cosim_bridge sensor_preview.launch.py gui:=false rviz:=false
 ros2 launch cosim_bridge sensor_preview.launch.py playback_rate:=0.5
 ```
 
-运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、动态车辆 TF / Marker、六路拼图和七路点云（车顶激光雷达一路、毫米波雷达六路）；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
+运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、动态车辆 TF / Marker、六路拼图和二十三路点云（车顶激光雷达一路、毫米波雷达六路、超声波十六路）；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
 
 ### 完整交通演示
 
@@ -219,6 +219,14 @@ python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehi
 
 `MarkerHistory` 仅为当前 MarkerArray 未包含的退役标记补发 DELETE，避免与通信动画自身的删除消息重复；`python3 ros/tests/test_communication_visuals.py` 覆盖收包动画、动画结束及核心车辆移除时的标记唯一性。
 
-独立传感器预览和完整交通演示均保留动态车辆 TF。七路 `points_colored` 显示点云由共享 `cloud_display.py` 等待测量时刻的 TF 后，实际转换到 `map` 再发布，避免 RViz 点云早于车辆 TF 到达而短暂报 Transform 错误。测量时间戳保留原值，不使用最新 TF 替代。每路最多缓存 20 帧，删除车辆时清空缓存和显示；原始 `points` 保持传感器坐标系并直接发布，制动算法输入不变。
+独立传感器预览和完整交通演示均保留动态车辆 TF。二十三路 `points_colored` 显示点云由共享 `cloud_display.py` 等待测量时刻的 TF 后，实际转换到 `map` 再发布，避免 RViz 点云早于车辆 TF 到达而短暂报 Transform 错误。测量时间戳保留原值，不使用最新 TF 替代。每路最多缓存 20 帧，删除车辆时清空缓存和显示；原始 `points` 保持传感器坐标系并直接发布，制动算法输入不变。
 
 运行 `python3 ros/tests/test_cloud_display.py` 可验证延迟 TF、真实坐标旋转、测量时间戳与颜色保留、缓存上限和删除清理。
+
+自动识别 [ultrasonic_rig](../gazebo/models/ultrasonic_rig/README.md)，启动独立 `ultrasonic_display` 节点和十六路桥接。新增 `/car_b/ultrasonic/{front,rear}_{left_outer,left_inner,right_inner,right_outer}/{points,range,points_colored}`：原始点云可靠发布，Range 与显示点云使用传感器 QoS；原始点云 / Range 保留传感器坐标系，显示点云等待动态 TF 后转换到 map。最近有效距离包含地面，未接入制动算法。十六路无效 / 删除测距为 +inf，删除时同步清理显示缓存。
+
+`python3 ros/tests/test_ultrasonic.py` 验证安装与测距，`python3 ros/tests/check_ultrasonic_run.py` 验证运行中的十六路原始点云、测距、显示颜色及模组 Marker；可在单独的预览测试实例中加 `--obstacle` 创建并清理近车头与两侧测试方块，验证近场障碍回波。
+
+侧面新增 `/car_b/ultrasonic/side_{left,right}_{front,mid_front,mid_rear,rear}/{points,range,points_colored}` 八路独立输出；节点自动扫描同一 SDF，无需按传感器数量修改节点。原始传感器坐标系、动态车辆 TF、显示 map 变换和删除清理保持一致。
+
+ROS2 适配节点对先于仿真时钟到达的原始激光帧使用最多 20 帧的等待队列，时钟追上后按到达顺序处理，保留原测量时间戳；过期检查仍生效，删除核心车辆时清空队列。此处理避免多传感器启动时钟到达较晚造成点云丢失及同步等待超时，不改变距离算法或控制参数。

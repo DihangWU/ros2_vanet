@@ -3,6 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import sys
 import unittest
+from collections import deque
 import numpy as np
 import rclpy.time
 from std_msgs.msg import Header
@@ -20,6 +21,7 @@ class AdapterTests(unittest.TestCase):
         return SimpleNamespace(
             vehicle='car_b', config=Config(), mount=np.array([.9, 0., 1.85]),
             algorithm=LidarBrake(Config(), 2.5), speed=None, speed_stamp=None,
+            pending_clouds=deque(maxlen=20),
             handled=set(), get_clock=lambda: SimpleNamespace(now=lambda: rclpy.time.Time(seconds=1.)),
             log=SimpleNamespace(write=lambda *args, **kwargs: None),
             control=lambda **kwargs: None)
@@ -53,6 +55,25 @@ class AdapterTests(unittest.TestCase):
             LidarBrakeNode.warning(node, warning)
             self.assertAlmostEqual(node.algorithm.tracker.value.gap, 40., places=4)
             self.assertEqual(node.algorithm.warning_time, 1.)
+
+    def test_future_cloud_waits_for_clock_and_stale_cloud_remains_rejected(self):
+        node = self.adapter()
+        points = np.array([[42.5,y,z] for y in np.linspace(-.5,.5,9)
+                           for z in np.linspace(.4,1.2,9)])
+        cloud = point_cloud2.create_cloud_xyz32(Header(
+            stamp=rclpy.time.Time(seconds=1.2).to_msg(), frame_id='car_b/lidar_link'), points-node.mount)
+        LidarBrakeNode.cloud(node, cloud)
+        self.assertEqual(len(node.pending_clouds),1)
+        self.assertIsNone(node.algorithm.tracker.value)
+        LidarBrakeNode.consume_pending_clouds(node,1.)
+        self.assertEqual(len(node.pending_clouds),1)
+        LidarBrakeNode.consume_pending_clouds(node,1.2)
+        self.assertFalse(node.pending_clouds)
+        self.assertAlmostEqual(node.algorithm.tracker.value.gap,40.,places=4)
+        rejected = self.adapter()
+        rejected.pending_clouds.append(cloud)
+        LidarBrakeNode.consume_pending_clouds(rejected,10.)
+        self.assertIsNone(rejected.algorithm.tracker.value)
 
 
 if __name__ == '__main__':

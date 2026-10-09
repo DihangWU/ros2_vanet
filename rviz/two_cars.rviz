@@ -281,6 +281,278 @@ Visualization Manager:
             {}
       Update Interval: 0
       Value: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - front left outer
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/front_left_outer/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - front left inner
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/front_left_inner/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - front right inner
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/front_right_inner/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - front right outer
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/front_right_outer/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - rear left outer
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/rear_left_outer/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - rear left inner
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/rear_left_inner/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - rear right inner
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/rear_right_inner/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - rear right outer
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/rear_right_outer/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side left front
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_left_front/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side left mid front
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_left_mid_front/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side left mid rear
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_left_mid_rear/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side left rear
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_left_rear/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side right front
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_right_front/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side right mid front
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_right_mid_front/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side right mid rear
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_right_mid_rear/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Ultrasonic - side right rear
+      Enabled: true
+      Topic:
+        Value: /car_b/ultrasonic/side_right_rear/points_colored
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 2
+      Position Transformer: XYZ
+      Color Transformer: RGB8
+      Style: Points
+      Size (Pixels): 5
+      Size (m): 0.035
+      Alpha: 1
+      Decay Time: 0
+      Use Fixed Frame: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
