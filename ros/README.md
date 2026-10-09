@@ -2,6 +2,8 @@
 
 默认从 Veins / INET 实际收包事件发布 V2V 警告，使用 Gazebo 原始点云反馈后车车距。SUMO 负责车辆运动和自车速度；ROS2 负责消息包装、同步及控制命令。纯算法独立放在 [Algorithm/LidarBrake](../Algorithm/LidarBrake/README.md)。
 
+自动识别 `model://side_radar_rig`，通过 `corner_radar_display` 的 `rig_name` 参数复用点云处理节点。新增 `/car_b/radar/{side_left,side_right}/{points,points_colored}` 和对应安装 TF，和四角雷达独立传输；桥接自动读取 SDF，完整演示及独立预览均支持。位置与覆盖见 [双侧雷达说明](../gazebo/models/side_radar_rig/README.md)。
+
 ## 构建与启动
 
 ### 独立传感器预览
@@ -29,11 +31,11 @@ ros2 launch cosim_bridge sensor_preview.launch.py gui:=false rviz:=false
 ros2 launch cosim_bridge sensor_preview.launch.py playback_rate:=0.5
 ```
 
-运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、静态 TF / Marker、六路拼图和五路点云；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
+运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、静态 TF / Marker、六路拼图和七路点云（车顶激光雷达一路、毫米波雷达六路）；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
 
 ### 完整交通演示
 
-`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
+`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机中心 yaw ±125°，向前覆盖 25°、向后覆盖 95°，向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
 
 运行中可执行 `python3 ros/tests/check_surround_camera_run.py` 检查六路真实图像、独立标定、光轴 TF、同步时间戳和拼图排列。
 
@@ -128,6 +130,8 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `/car_b/lidar/points_colored` | 地面绿、其他有效回波青，仅用于 RViz 显示 |
 | `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points` | 四路独立三维距离回波点云，20 Hz |
 | `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored` | 四路有效点云，障碍表面按雷达着色、地面绿色 |
+| `/car_b/radar/{side_left,side_right}/points` | 两路独立侧向三维点云，20 Hz |
+| `/car_b/radar/{side_left,side_right}/points_colored` | 两路侧向有效点云和地面回波 |
 | `/car_b/camera/{wide,standard,tele}/image_raw` | 独立三路图像，640×360、15 Hz |
 | `/car_b/camera/{wide,standard,tele}/camera_info` | 三套独立标定 |
 | `/car_b/camera/triple/image_raw` | 640×1176 同时间戳竖排拼图：上长焦、中主摄、下广角 |
@@ -152,7 +156,7 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `src/cosim_bridge/cosim_bridge/preview_scene.py` | 直接解析 Gazebo 世界中的车辆与初始姿态，无 SUMO 导入 |
 | `src/cosim_bridge/cosim_bridge/sensor_preview.py` | 静态车辆 TF 和共享车体 / 传感器 / 世界道路 Marker |
 | `src/cosim_bridge/cosim_bridge/surround_camera_display.py` | 独立侧后图像、标定、光轴 TF 与六路同时间戳拼图 |
-| `src/cosim_bridge/cosim_bridge/corner_radar_display.py` | 四角独立点云输出、安装 TF 和回波着色 |
+| `src/cosim_bridge/cosim_bridge/corner_radar_display.py` | 四角 / 双侧模组通用点云输出、安装 TF 和回波着色 |
 | `src/cosim_bridge/cosim_bridge/communication_visuals.py` | 网络通信显示 |
 | `src/cosim_bridge/cosim_bridge/sensor_visuals.py` | 从独立 SDF 读取传感器外观 |
 | `src/cosim_bridge/launch/demo.launch.py` | 启动顺序与参数 |

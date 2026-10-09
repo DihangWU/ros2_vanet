@@ -12,7 +12,7 @@ from tf2_ros import Buffer, TransformListener
 from cosim_bridge.corner_radar_display import radar_specs
 
 root = Path(__file__).resolve().parents[2]
-specs = radar_specs(root)
+specs = radar_specs(root) | radar_specs(root, 'side_radar_rig')
 rclpy.init()
 node = Node('check_corner_radar_run')
 buffer = Buffer()
@@ -41,11 +41,11 @@ try:
     deadline = time.monotonic()+40
     while time.monotonic() < deadline:
         rclpy.spin_once(node, timeout_sec=.1)
-        if (len(received) == 8 and object_seen == set(specs)
+        if (len(received) == 2*len(specs) and object_seen == set(specs)
                 and all(len(values) >= 4 for values in stamps.values())
                 and all(buffer.can_transform('map', f'car_b/radar/{name}_link', rclpy.time.Time()) for name in specs)):
             break
-    assert len(received) == 8, f'Missing raw/colored streams: {received.keys()}'
+    assert len(received) == 2*len(specs), f'Missing raw/colored streams: {received.keys()}'
     assert object_seen == set(specs), f'No obstacle return: {set(specs)-object_seen}'
     for name, spec in specs.items():
         raw, cloud = received[name, False], received[name, True]
@@ -65,7 +65,7 @@ try:
         quaternion = np.array([transform.rotation.z, transform.rotation.w])
         expected = np.array([math.sin(spec['pose'][5]/2), math.cos(spec['pose'][5]/2)])
         assert np.allclose(quaternion, expected) or np.allclose(quaternion, -expected)
-    print('PASS: four independent real 3D corner clouds, obstacle/ground returns, changing timestamps and mounting TFs.')
+    print('PASS: six independent real 3D radar clouds, obstacle/ground returns, changing timestamps and mounting TFs.')
 finally:
     node.destroy_node()
     rclpy.shutdown()

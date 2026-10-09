@@ -2,6 +2,8 @@
 
 RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨迹。它负责观察数据，不计算车辆动力学。
 
+新增 `Side radar - left/right` 两个独立点云显示，订阅 `/car_b/radar/{side_left,side_right}/points_colored`。对应左右前轮后方雷达，向前覆盖 40°、向后覆盖 80°；障碍回波为绿色 / 蓝色，地面亮绿色。机身读取 [独立侧向模组](../gazebo/models/side_radar_rig/README.md)，Marker 命名空间 `car_b/side_radars`；完整演示和独立预览均显示六路雷达。
+
 ## 当前显示功能
 
 增加四个独立 `Corner radar` 点云显示，分别订阅 `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored`。左前橙色、右前粉色、左后紫色、右后蓝青色；地面回波统一亮绿色。四颗水平视场均为 120°（左右各 60°），垂直上下各 15°；前角朝左右前方各 45°，在车前中心线距前保险杠约 3.67 m 后形成水平交汇区；后角朝左右后方各 135°，近车侧 / 车尾仍有盲区。四路都是三维场景的真实射线回波，每帧替换，不累积；可分别开关。角雷达机身通过 `/demo/markers` 的 `car_b/radars` 命名空间显示，安装 TF 和机身几何均读取独立 SDF。此处展示的是毫米波距离回波的射线近似，不是射频或多普勒仿真。复用与参数见 [四角雷达模块](../gazebo/models/corner_radar_rig/README.md)。
@@ -9,6 +11,8 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 `Six cameras - front and surround` 在单个 `Image` 窗口显示六颗摄像头，订阅 `/car_b/camera/surround/image_raw`（1280×1176）。两列三行：左列从上到下为长焦、标准主摄、广角；右列从上到下为后向、左向、右向。六路原图 `/car_b/camera/{tele,standard,wide,rear,left,right}/image_raw` 和各自 CameraInfo 均独立传输；拼图仅拼接相同时间戳的六帧，缺帧时跳过该组。原三目 `camera/triple/image_raw` 仍保留，可以手动切换 Image 话题查看。两套 RViz 配置都只设置一个摄像头 Image 显示，可拖动、停靠并拉大查看。侧后相机安装与复用见 [独立侧后模组](../gazebo/models/surround_camera_rig/README.md)。
 
 左右侧相机均向下俯视 10°，六路拼图右列第二、三行能看到更多路面；安装 TF 同步读取 SDF 的完整姿态。
+
+左右侧向相机中心 yaw 为 ±125°，以正侧方向为基准向前覆盖 25°、向后覆盖 95°，总水平视场 120°，向下俯视 10°。两侧机身突出车身 3 cm、光心突出 5 cm，模组 Marker 与 Gazebo 共用几何。独立 TF 随 SDF 更新，六路拼图布局保持不变。
 
 后向相机水平视场为 140°，比原先 120° 更广角，车尾近处可见范围更大；右列第一行标题和独立 CameraInfo 随 SDF 自动更新。
 
@@ -52,7 +56,7 @@ source ros/install/setup.bash
 ros2 launch cosim_bridge sensor_preview.launch.py
 ```
 
-使用独立配置 [sensor_preview.rviz](sensor_preview.rviz)，显示网格、静态车辆 / 道路 / 传感器 Marker、TF、六路相机拼图及五路点云。Gazebo 提供 `/clock`，车体姿态来自世界初始 pose 的静态 TF；相机初始聚焦后车附近，不依赖交通、V2V 或制动节点。此配置不包含尚未发布的 Odom / Path / 通信显示。车辆不行驶，传感器会随 Gazebo 时间持续更新，可以自由拉动视角。预览与完整交通演示必须退出后切换，不能直接叠加启动。
+使用独立配置 [sensor_preview.rviz](sensor_preview.rviz)，显示网格、静态车辆 / 道路 / 传感器 Marker、TF、六路相机拼图及七路点云（车顶激光雷达一路、毫米波雷达六路）。Gazebo 提供 `/clock`，车体姿态来自世界初始 pose 的静态 TF；相机初始聚焦后车附近，不依赖交通、V2V 或制动节点。此配置不包含尚未发布的 Odom / Path / 通信显示。车辆不行驶，传感器会随 Gazebo 时间持续更新，可以自由拉动视角。预览与完整交通演示必须退出后切换，不能直接叠加启动。
 
 按 [ROS2 说明](../ros/README.md) 完成构建后，从项目根目录执行：
 

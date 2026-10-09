@@ -27,6 +27,8 @@ https://github.com/user-attachments/assets/d4d78d67-6a68-4f9a-a504-e893fb616150
 
 这些目录保存项目自己的文件，第三方安装不复制到项目中。Veins、INET 和车辆应用运行在同一个 OMNeT++ 进程中。
 
+蓝车前轮后方新增独立的 [双侧短距雷达模组](gazebo/models/side_radar_rig/README.md)，以正侧方向为基准向前覆盖 40°、向后覆盖 80°。现在共有六颗毫米波雷达，两路侧向点云独立传输并在 RViz 显示。
+
 ## 构建与启动
 
 只查看传感器时，可独立启动 Gazebo + RViz，无需 SUMO、Veins、INET 或 OMNeT++ 进程。ROS2 构建完成后执行：

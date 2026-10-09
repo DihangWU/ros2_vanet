@@ -34,7 +34,7 @@ def rig_visuals(project_root, vehicle, rig_name='perception_rig'):
 def sensor_markers(vehicle, stamp, x, y, yaw, project_root):
     result = []
     for rig_name, namespace in (('perception_rig', 'sensors'), ('corner_radar_rig', 'radars'),
-                                ('surround_camera_rig', 'surround_cameras')):
+                                ('side_radar_rig', 'side_radars'), ('surround_camera_rig', 'surround_cameras')):
         result.extend(rig_markers(vehicle, stamp, x, y, yaw, project_root, rig_name, namespace))
     return result
 

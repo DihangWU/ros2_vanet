@@ -1,4 +1,4 @@
-"""Four independent ray-based corner radar clouds and mounting TFs."""
+"""Independent ray-based radar clouds and mounting TFs."""
 import copy
 import math
 from pathlib import Path
@@ -13,9 +13,9 @@ from tf2_ros import StaticTransformBroadcaster
 from .perception_display import colored_cloud
 
 
-def radar_specs(root):
+def radar_specs(root, rig_name='corner_radar_rig'):
     """Link poses are identity; all mounting parameters live in this SDF."""
-    rig = ET.parse(Path(root)/'gazebo/models/corner_radar_rig/model.sdf')
+    rig = ET.parse(Path(root)/f'gazebo/models/{rig_name}/model.sdf')
     result = {}
     for link in rig.findall('.//link'):
         if any(abs(v) > 1e-9 for v in map(float, link.findtext('pose', '0 0 0 0 0 0').split())):
@@ -37,7 +37,8 @@ class CornerRadarDisplay(Node):
         self.declare_parameter('vehicle', 'car_b')
         self.declare_parameter('project_root', '')
         self.vehicle = self.get_parameter('vehicle').value
-        self.specs = radar_specs(self.get_parameter('project_root').value)
+        self.declare_parameter('rig_name', 'corner_radar_rig')
+        self.specs = radar_specs(self.get_parameter('project_root').value, self.get_parameter('rig_name').value)
         self.raw_publishers, self.colored_publishers = {}, {}
         self.subscriptions_list = []
         self.received = set()
@@ -71,7 +72,7 @@ class CornerRadarDisplay(Node):
         spec = self.specs[name]
         self.colored_publishers[name].publish(colored_cloud(cloud, spec['pose'][2], spec['rgb']))
         if name not in self.received:
-            self.get_logger().info(f'{name}: real Gazebo corner radar ray cloud received')
+            self.get_logger().info(f'{name}: Gazebo radar ray cloud received')
             self.received.add(name)
 
 

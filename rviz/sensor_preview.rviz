@@ -1,324 +1,435 @@
 Panels:
-- Class: rviz_common/Displays
-  Help Height: 138
-  Name: Displays
-  Property Tree Widget:
-    Expanded: null
-    Splitter Ratio: 0.5
-  Tree Height: 961
+  - Class: rviz_common/Displays
+    Help Height: 138
+    Name: Displays
+    Property Tree Widget:
+      Expanded: ~
+      Splitter Ratio: 0.5
+    Tree Height: 1119
 Visualization Manager:
-  Class: ''
+  Class: ""
   Displays:
-  - Alpha: 0.5
-    Cell Size: 10
-    Class: rviz_default_plugins/Grid
-    Color: 160; 160; 164
-    Enabled: true
-    Line Style:
-      Line Width: 0.029999999329447746
-      Value: Lines
-    Name: Grid
-    Normal Cell Count: 0
-    Offset:
-      X: 200
-      Y: -4.800000190734863
-      Z: 0
-    Plane: XY
-    Plane Cell Count: 100
-    Reference Frame: <Fixed Frame>
-    Value: true
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: true
-    Name: Static cars road and sensors
-    Namespaces: {}
-    Topic:
-      Depth: 10
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /demo/markers
-    Value: true
-  - Class: rviz_default_plugins/Image
-    Enabled: true
-    Max Value: 1
-    Median window: 5
-    Min Value: 0
-    Name: Six cameras - front and surround
-    Normalize Range: true
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /car_b/camera/surround/image_raw
-    Value: true
-  - Alpha: 1
-    Autocompute Intensity Bounds: true
-    Autocompute Value Bounds:
-      Max Value: 10
-      Min Value: -10
+    - Alpha: 0.5
+      Cell Size: 10
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 200
+        Y: -4.800000190734863
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 100
+      Reference Frame: <Fixed Frame>
       Value: true
-    Axis: Z
-    Channel Name: intensity
-    Class: rviz_default_plugins/PointCloud2
-    Color: 255; 255; 255
-    Color Transformer: RGB8
-    Decay Time: 0
-    Enabled: true
-    Invert Rainbow: false
-    Max Color: 255; 255; 255
-    Max Intensity: 4096
-    Min Color: 0; 0; 0
-    Min Intensity: 0
-    Name: Roof lidar - bright surface returns
-    Position Transformer: XYZ
-    Selectable: true
-    Size (Pixels): 4
-    Size (m): 0.03500000014901161
-    Style: Points
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Best Effort
-      Value: /car_b/lidar/points_colored
-    Use Fixed Frame: true
-    Use rainbow: true
-    Value: true
-  - Alpha: 1
-    Autocompute Intensity Bounds: true
-    Autocompute Value Bounds:
-      Max Value: 10
-      Min Value: -10
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Static cars road and sensors
+      Namespaces:
+        bg_01/model: true
+        bg_02/model: true
+        bg_03/model: true
+        bg_04/model: true
+        bg_05/model: true
+        bg_06/model: true
+        bg_07/model: true
+        bg_08/model: true
+        bg_09/model: true
+        car_a/model: true
+        car_b/model: true
+        car_b/radars: true
+        car_b/sensors: true
+        car_b/side_radars: true
+        car_b/surround_cameras: true
+        preview/road: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /demo/markers
       Value: true
-    Axis: Z
-    Channel Name: intensity
-    Class: rviz_default_plugins/PointCloud2
-    Color: 255; 255; 255
-    Color Transformer: RGB8
-    Decay Time: 0
-    Enabled: true
-    Invert Rainbow: false
-    Max Color: 255; 255; 255
-    Max Intensity: 4096
-    Min Color: 0; 0; 0
-    Min Intensity: 0
-    Name: Corner radar - front left
-    Position Transformer: XYZ
-    Selectable: true
-    Size (Pixels): 4
-    Size (m): 0.03500000014901161
-    Style: Points
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Best Effort
-      Value: /car_b/radar/front_left/points_colored
-    Use Fixed Frame: true
-    Use rainbow: true
-    Value: true
-  - Alpha: 1
-    Autocompute Intensity Bounds: true
-    Autocompute Value Bounds:
-      Max Value: 10
-      Min Value: -10
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Six cameras - front and surround
+      Normalize Range: true
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /car_b/camera/surround/image_raw
       Value: true
-    Axis: Z
-    Channel Name: intensity
-    Class: rviz_default_plugins/PointCloud2
-    Color: 255; 255; 255
-    Color Transformer: RGB8
-    Decay Time: 0
-    Enabled: true
-    Invert Rainbow: false
-    Max Color: 255; 255; 255
-    Max Intensity: 4096
-    Min Color: 0; 0; 0
-    Min Intensity: 0
-    Name: Corner radar - front right
-    Position Transformer: XYZ
-    Selectable: true
-    Size (Pixels): 4
-    Size (m): 0.03500000014901161
-    Style: Points
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Best Effort
-      Value: /car_b/radar/front_right/points_colored
-    Use Fixed Frame: true
-    Use rainbow: true
-    Value: true
-  - Alpha: 1
-    Autocompute Intensity Bounds: true
-    Autocompute Value Bounds:
-      Max Value: 10
-      Min Value: -10
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Roof lidar - bright surface returns
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/lidar/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
-    Axis: Z
-    Channel Name: intensity
-    Class: rviz_default_plugins/PointCloud2
-    Color: 255; 255; 255
-    Color Transformer: RGB8
-    Decay Time: 0
-    Enabled: true
-    Invert Rainbow: false
-    Max Color: 255; 255; 255
-    Max Intensity: 4096
-    Min Color: 0; 0; 0
-    Min Intensity: 0
-    Name: Corner radar - rear left
-    Position Transformer: XYZ
-    Selectable: true
-    Size (Pixels): 4
-    Size (m): 0.03500000014901161
-    Style: Points
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Best Effort
-      Value: /car_b/radar/rear_left/points_colored
-    Use Fixed Frame: true
-    Use rainbow: true
-    Value: true
-  - Alpha: 1
-    Autocompute Intensity Bounds: true
-    Autocompute Value Bounds:
-      Max Value: 10
-      Min Value: -10
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Side radar - left
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/side_left/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
-    Axis: Z
-    Channel Name: intensity
-    Class: rviz_default_plugins/PointCloud2
-    Color: 255; 255; 255
-    Color Transformer: RGB8
-    Decay Time: 0
-    Enabled: true
-    Invert Rainbow: false
-    Max Color: 255; 255; 255
-    Max Intensity: 4096
-    Min Color: 0; 0; 0
-    Min Intensity: 0
-    Name: Corner radar - rear right
-    Position Transformer: XYZ
-    Selectable: true
-    Size (Pixels): 4
-    Size (m): 0.03500000014901161
-    Style: Points
-    Topic:
-      Depth: 2
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Best Effort
-      Value: /car_b/radar/rear_right/points_colored
-    Use Fixed Frame: true
-    Use rainbow: true
-    Value: true
-  - Class: rviz_default_plugins/TF
-    Enabled: true
-    Filter (blacklist): ''
-    Filter (whitelist): ''
-    Frame Timeout: 15
-    Frames:
-      All Enabled: true
-      bg_01/base_link:
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
         Value: true
-      bg_02/base_link:
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Side radar - right
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/side_right/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
         Value: true
-      bg_03/base_link:
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Corner radar - front right
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/front_right/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
         Value: true
-      bg_04/base_link:
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Corner radar - front left
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/front_left/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
         Value: true
-      bg_05/base_link:
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Corner radar - rear left
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/rear_left/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
         Value: true
-      bg_06/base_link:
-        Value: true
-      bg_07/base_link:
-        Value: true
-      bg_08/base_link:
-        Value: true
-      bg_09/base_link:
-        Value: true
-      car_a/base_link:
-        Value: true
-      car_b/base_link:
-        Value: true
-      car_b/left_link:
-        Value: true
-      car_b/left_optical_frame:
-        Value: true
-      car_b/lidar_link:
-        Value: true
-      car_b/radar/front_left_link:
-        Value: true
-      car_b/radar/front_right_link:
-        Value: true
-      car_b/radar/rear_left_link:
-        Value: true
-      car_b/radar/rear_right_link:
-        Value: true
-      car_b/rear_link:
-        Value: true
-      car_b/rear_optical_frame:
-        Value: true
-      car_b/right_link:
-        Value: true
-      car_b/right_optical_frame:
-        Value: true
-      car_b/standard_link:
-        Value: true
-      car_b/standard_optical_frame:
-        Value: true
-      car_b/tele_link:
-        Value: true
-      car_b/tele_optical_frame:
-        Value: true
-      car_b/wide_link:
-        Value: true
-      car_b/wide_optical_frame:
-        Value: true
-      map:
-        Value: true
-    Marker Scale: 2
-    Name: TF
-    Show Arrows: false
-    Show Axes: true
-    Show Names: true
-    Tree:
-      map:
-        bg_01/base_link: {}
-        bg_02/base_link: {}
-        bg_03/base_link: {}
-        bg_04/base_link: {}
-        bg_05/base_link: {}
-        bg_06/base_link: {}
-        bg_07/base_link: {}
-        bg_08/base_link: {}
-        bg_09/base_link: {}
-        car_a/base_link: {}
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Corner radar - rear right
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.03500000014901161
+      Style: Points
+      Topic:
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /car_b/radar/rear_right/points_colored
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        bg_01/base_link:
+          Value: true
+        bg_02/base_link:
+          Value: true
+        bg_03/base_link:
+          Value: true
+        bg_04/base_link:
+          Value: true
+        bg_05/base_link:
+          Value: true
+        bg_06/base_link:
+          Value: true
+        bg_07/base_link:
+          Value: true
+        bg_08/base_link:
+          Value: true
+        bg_09/base_link:
+          Value: true
+        car_a/base_link:
+          Value: true
         car_b/base_link:
-          car_b/left_link:
-            car_b/left_optical_frame: {}
-          car_b/lidar_link: {}
-          car_b/radar/front_left_link: {}
-          car_b/radar/front_right_link: {}
-          car_b/radar/rear_left_link: {}
-          car_b/radar/rear_right_link: {}
-          car_b/rear_link:
-            car_b/rear_optical_frame: {}
-          car_b/right_link:
-            car_b/right_optical_frame: {}
-          car_b/standard_link:
-            car_b/standard_optical_frame: {}
-          car_b/tele_link:
-            car_b/tele_optical_frame: {}
-          car_b/wide_link:
-            car_b/wide_optical_frame: {}
-    Update Interval: 0
-    Value: true
+          Value: true
+        car_b/left_link:
+          Value: true
+        car_b/left_optical_frame:
+          Value: true
+        car_b/lidar_link:
+          Value: true
+        car_b/radar/front_left_link:
+          Value: true
+        car_b/radar/front_right_link:
+          Value: true
+        car_b/radar/rear_left_link:
+          Value: true
+        car_b/radar/rear_right_link:
+          Value: true
+        car_b/radar/side_left_link:
+          Value: true
+        car_b/radar/side_right_link:
+          Value: true
+        car_b/rear_link:
+          Value: true
+        car_b/rear_optical_frame:
+          Value: true
+        car_b/right_link:
+          Value: true
+        car_b/right_optical_frame:
+          Value: true
+        car_b/standard_link:
+          Value: true
+        car_b/standard_optical_frame:
+          Value: true
+        car_b/tele_link:
+          Value: true
+        car_b/tele_optical_frame:
+          Value: true
+        car_b/wide_link:
+          Value: true
+        car_b/wide_optical_frame:
+          Value: true
+        map:
+          Value: true
+      Marker Scale: 2
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          bg_01/base_link:
+            {}
+          bg_02/base_link:
+            {}
+          bg_03/base_link:
+            {}
+          bg_04/base_link:
+            {}
+          bg_05/base_link:
+            {}
+          bg_06/base_link:
+            {}
+          bg_07/base_link:
+            {}
+          bg_08/base_link:
+            {}
+          bg_09/base_link:
+            {}
+          car_a/base_link:
+            {}
+          car_b/base_link:
+            car_b/left_link:
+              car_b/left_optical_frame:
+                {}
+            car_b/lidar_link:
+              {}
+            car_b/radar/front_left_link:
+              {}
+            car_b/radar/front_right_link:
+              {}
+            car_b/radar/rear_left_link:
+              {}
+            car_b/radar/rear_right_link:
+              {}
+            car_b/radar/side_left_link:
+              {}
+            car_b/radar/side_right_link:
+              {}
+            car_b/rear_link:
+              car_b/rear_optical_frame:
+                {}
+            car_b/right_link:
+              car_b/right_optical_frame:
+                {}
+            car_b/standard_link:
+              car_b/standard_optical_frame:
+                {}
+            car_b/tele_link:
+              car_b/tele_optical_frame:
+                {}
+            car_b/wide_link:
+              car_b/wide_optical_frame:
+                {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -326,9 +437,9 @@ Visualization Manager:
     Frame Rate: 30
   Name: root
   Tools:
-  - Class: rviz_default_plugins/Interact
-    Hide Inactive Objects: true
-  - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
@@ -336,7 +447,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 45.0
+      Distance: 45
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -344,8 +455,8 @@ Visualization Manager:
         Value: false
       Focal Point:
         X: 52.5
-        Y: -4.8
-        Z: 1.0
+        Y: -4.800000190734863
+        Z: 1
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -355,9 +466,16 @@ Visualization Manager:
       Target Frame: map
       Value: Orbit (rviz_default_plugins)
       Yaw: 5.675016403198242
-    Saved: null
+    Saved: ~
 Window Geometry:
-  Height: 900
-  Width: 1400
+  Displays:
+    collapsed: false
+  Height: 2322
   Hide Left Dock: false
   Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000100000000000002f300000872fc0200000002fb00000040005300690078002000630061006d00650072006100730020002d002000660072006f006e007400200061006e006400200073007500720072006f0075006e006401000000700000030b0000002800fffffffb000000100044006900730070006c00610079007301000003870000055b0000018600ffffff000008e60000087200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Six cameras - front and surround:
+    collapsed: false
+  Width: 3045
+  X: 1249
+  Y: 64

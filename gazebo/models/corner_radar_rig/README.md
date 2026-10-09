@@ -2,6 +2,8 @@
 
 当前安装在蓝色后车 `car_b`，用于侧面与后方点云观察。四个传感器使用 Gazebo GPU 射线采样真实场景，作为毫米波雷达的距离回波近似；尚未模拟射频传播、多普勒速度、RCS、噪声、多径或稀疏目标检测。点云的 intensity 不作为真实毫米波反射强度使用。
 
+蓝车另装独立的 [双侧雷达模组](../side_radar_rig/README.md)，四角雷达保留原位置和参数，两组共六颗。ROS2 复用同一处理节点，通过 `rig_name` 参数选择模组。
+
 ## 一行安装
 
 在车辆 SDF 的 `<model>` 内加入：
@@ -65,6 +67,6 @@ Gazebo 与 RViz 打开后，在 SUMO 点击 Play。当前只增加感知与显�
 ```bash
 # 不启动仿真：检查覆盖与独立车辆的一行引用
 python3 ros/tests/test_corner_radar.py
-# 三车道演示正在播放时：验证四路真实点云、障碍物/地面回波及 TF
+# 三车道演示正在播放时：验证六路真实点云、障碍物/地面回波及 TF
 python3 ros/tests/check_corner_radar_run.py
 ```

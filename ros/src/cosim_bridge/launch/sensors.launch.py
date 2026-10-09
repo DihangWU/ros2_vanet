@@ -1,4 +1,4 @@
-"""自动识别车顶与四角传感器模组，逐车建立独立话题与展示节点。"""
+"""自动识别车顶、四角和侧向传感器模组，逐车建立独立话题与展示节点。"""
 from cosim_bridge.preview_scene import world_vehicles
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -18,6 +18,8 @@ def sensor_nodes(context):
         model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
         if any(i.findtext('uri') == 'model://corner_radar_rig' for i in model.findall('.//include')):
             actions.extend(corner_radar_nodes(root, name))
+        if any(i.findtext('uri') == 'model://side_radar_rig' for i in model.findall('.//include')):
+            actions.extend(corner_radar_nodes(root, name, 'side_radar_rig'))
         if any(i.findtext('uri') == 'model://surround_camera_rig' for i in model.findall('.//include')):
             actions.extend(surround_camera_nodes(root, name))
         if not any(i.findtext('uri') == 'model://perception_rig' for i in model.findall('.//include')):
@@ -41,8 +43,9 @@ def sensor_nodes(context):
     return actions
 
 
-def corner_radar_nodes(root, vehicle):
-    rig = ET.parse(root/'gazebo/models/corner_radar_rig/model.sdf')
+def corner_radar_nodes(root, vehicle, rig_name='corner_radar_rig'):
+    rig = ET.parse(root/f'gazebo/models/{rig_name}/model.sdf')
+    prefix = 'side' if rig_name == 'side_radar_rig' else 'corner'
     arguments, remappings = [], []
     for link in rig.findall('.//link'):
         for sensor in link.findall('sensor'):
@@ -51,10 +54,10 @@ def corner_radar_nodes(root, vehicle):
             arguments.append(f'{topic}@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked')
             remappings.append((topic, f'/{vehicle}/radar/raw/{name}/points'))
     return [
-        Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_radar_bridge',
+        Node(package='ros_gz_bridge', executable='parameter_bridge', name=f'{vehicle}_{prefix}_radar_bridge',
              arguments=arguments, remappings=remappings, output='screen'),
-        Node(package='cosim_bridge', executable='corner_radar_display', name=f'{vehicle}_corner_radar_display',
-             parameters=[{'project_root': str(root), 'vehicle': vehicle, 'use_sim_time': True}], output='screen'),
+        Node(package='cosim_bridge', executable='corner_radar_display', name=f'{vehicle}_{prefix}_radar_display',
+             parameters=[{'project_root': str(root), 'vehicle': vehicle, 'rig_name': rig_name, 'use_sim_time': True}], output='screen'),
     ]
 
 

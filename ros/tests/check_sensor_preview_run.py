@@ -30,7 +30,7 @@ def record(message, key):
 topics = [('/clock', Clock), ('/demo/markers', MarkerArray),
           ('/car_b/camera/surround/image_raw', Image), ('/car_b/lidar/points_colored', PointCloud2)]
 topics += [(f'/car_b/radar/{name}/points_colored', PointCloud2)
-           for name in ('front_left', 'front_right', 'rear_left', 'rear_right')]
+           for name in ('front_left', 'front_right', 'rear_left', 'rear_right', 'side_left', 'side_right')]
 for topic, kind in topics:
     subscriptions.append(node.create_subscription(kind, topic, lambda m, key=topic: record(m, key), qos_profile_sensor_data))
 try:
@@ -52,10 +52,10 @@ try:
         assert math.isclose(transform.rotation.w, math.cos(vehicle['pose'][5]/2), abs_tol=1e-6)
     namespaces = {m.ns for m in received['/demo/markers'].markers}
     assert all(v['id']+'/model' in namespaces for v in vehicles)
-    assert {'preview/road', 'car_b/sensors', 'car_b/radars', 'car_b/surround_cameras'} <= namespaces
+    assert {'preview/road', 'car_b/sensors', 'car_b/radars', 'car_b/side_radars', 'car_b/surround_cameras'} <= namespaces
     preview = received['/car_b/camera/surround/image_raw']
     assert (preview.width, preview.height) == (1280,1176)
-    print('PASS: one advancing Gazebo clock, 11 static vehicle TFs/markers, road, six-camera preview and five live clouds; no SUMO/control nodes.')
+    print('PASS: one advancing Gazebo clock, 11 static vehicle TFs/markers, road, six-camera preview and seven live clouds; no SUMO/control nodes.')
 finally:
     node.destroy_node()
     rclpy.shutdown()
