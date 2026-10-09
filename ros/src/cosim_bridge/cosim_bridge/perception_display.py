@@ -41,6 +41,7 @@ def colored_cloud(message, lidar_height, obstacle_rgb=0x00FFFF):
 
 from std_msgs.msg import String
 from .vehicle_lifecycle import deleted_ids, SCENE_QOS, empty_cloud, black_image
+from .cloud_display import CloudDisplay
 
 
 class PerceptionDisplay(Node):
@@ -58,6 +59,7 @@ class PerceptionDisplay(Node):
         self.first_cloud = True
         self.removed = False
         self.last_cloud = None
+        self.cloud_display = CloudDisplay(self)
         self.lifecycle_sub = self.create_subscription(String, '/gazebo/vehicle_lifecycle', self.on_lifecycle, SCENE_QOS)
         self.image_publishers = {}
         self.info_publishers = {}
@@ -84,7 +86,7 @@ class PerceptionDisplay(Node):
             return
         if self.last_cloud is not None:
             self.points.publish(empty_cloud(self.last_cloud))
-            self.colored.publish(empty_cloud(colored_cloud(self.last_cloud, self.lidar_height)))
+            self.cloud_display.clear(self.colored, colored_cloud(self.last_cloud, self.lidar_height))
         if not self.removed:
             stamp = self.get_clock().now().to_msg()
             for name, publisher in self.image_publishers.items():
@@ -168,7 +170,7 @@ class PerceptionDisplay(Node):
         msg.header.frame_id = f'{self.vehicle}/lidar_link'
         self.last_cloud = msg
         self.points.publish(msg)
-        self.colored.publish(colored_cloud(msg, self.lidar_height))
+        self.cloud_display.submit(self.colored, colored_cloud(msg, self.lidar_height))
 
 
 def main(args=None):

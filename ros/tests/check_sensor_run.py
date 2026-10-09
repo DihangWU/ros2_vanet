@@ -63,7 +63,7 @@ try:
         frame = cv.imgmsg_to_cv2(camera_frames[key][name], 'rgb8')
         assert np.array_equal(preview[index*392+32:(index+1)*392], frame), 'Wrong preview order or timestamp'
     cloud = received['cloud']
-    assert cloud.header.frame_id == 'car_b/lidar_link'
+    assert cloud.header.frame_id == 'map'
     points = point_cloud2.read_points(cloud)
     assert len(points) > 1000
     assert np.ptp(points['z']) > .5, 'Cloud must be three-dimensional'

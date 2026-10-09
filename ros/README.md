@@ -31,7 +31,7 @@ ros2 launch cosim_bridge sensor_preview.launch.py gui:=false rviz:=false
 ros2 launch cosim_bridge sensor_preview.launch.py playback_rate:=0.5
 ```
 
-运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、静态 TF / Marker、六路拼图和七路点云（车顶激光雷达一路、毫米波雷达六路）；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
+运行 `python3 ros/tests/check_sensor_preview_run.py` 可验证默认十一车预览的单一时钟、动态车辆 TF / Marker、六路拼图和七路点云（车顶激光雷达一路、毫米波雷达六路）；`check_surround_camera_run.py` 验证六颗独立相机的标定及拼图。预览模式与完整 `demo.launch.py` 使用相同话题、坐标系和世界名称，应先 Ctrl+C 退出上一组再切换，不可直接将交通启动叠加到预览上。当前两种入口分别运行，未实现运行中切换时钟或 SUMO 接管。
 
 ### 完整交通演示
 
@@ -218,3 +218,7 @@ python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehi
 车顶前向广角向下俯视 10°、标准主摄向下俯视 5°，水平视场分别为 135°（左右各 67.5°）和 60°；安装 TF 从独立模组 SDF 的完整姿态生成，六路拼图第二行显示标准主摄、第三行显示广角。
 
 `MarkerHistory` 仅为当前 MarkerArray 未包含的退役标记补发 DELETE，避免与通信动画自身的删除消息重复；`python3 ros/tests/test_communication_visuals.py` 覆盖收包动画、动画结束及核心车辆移除时的标记唯一性。
+
+独立传感器预览和完整交通演示均保留动态车辆 TF。七路 `points_colored` 显示点云由共享 `cloud_display.py` 等待测量时刻的 TF 后，实际转换到 `map` 再发布，避免 RViz 点云早于车辆 TF 到达而短暂报 Transform 错误。测量时间戳保留原值，不使用最新 TF 替代。每路最多缓存 20 帧，删除车辆时清空缓存和显示；原始 `points` 保持传感器坐标系并直接发布，制动算法输入不变。
+
+运行 `python3 ros/tests/test_cloud_display.py` 可验证延迟 TF、真实坐标旋转、测量时间戳与颜色保留、缓存上限和删除清理。

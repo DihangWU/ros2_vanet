@@ -48,7 +48,7 @@
 
 均为独立 `sensor_msgs/PointCloud2`，坐标系为 `<车辆ID>/radar/<雷达名>_link`，保留 Gazebo 测量时间戳。原始通道使用可靠 QoS，保留未命中回波的无效值；使用算法前应筛除非有限值。
 
-每路另发布 `points_colored`，只保留有效回波：地面亮绿色，障碍表面采用对应雷达颜色。这是高度着色，不是语义分类。RViz 使用 `map → <车辆ID>/base_link → <车辆ID>/radar/<雷达名>_link` 对齐，四个 PointCloud2 显示可以分别关闭，按帧替换点云。
+每路另发布 `points_colored`，只保留有效回波：地面亮绿色，障碍表面采用对应雷达颜色。这是高度着色，不是语义分类。显示节点等待测量时刻的 `map → <车辆ID>/base_link → <车辆ID>/radar/<雷达名>_link` 动态变换，实际转换着色点坐标到 `map` 后发布给 RViz，四个 PointCloud2 显示可以分别关闭，按帧替换点云。
 
 桥接内部话题为 `/<车辆ID>/radar/raw/<雷达名>/points`。桥接入口为 `ros/src/cosim_bridge/launch/sensors.launch.py`；点云 / TF 和机身显示分别位于 `ros/src/cosim_bridge/cosim_bridge/corner_radar_display.py` 与 `sensor_visuals.py`。点云从 Gazebo 渲染采样产生，不从 SUMO 车辆坐标构造。
 
