@@ -12,7 +12,7 @@
 
 模组独立于车顶 `perception_rig`，可以单独安装或同时引用。`model.sdf` 是安装位置、朝向、视场、频率、量程及外观的统一定义；不需要为每辆车复制四个传感器、TF 或 ROS2 桥接配置。
 
-启动扫描自动识别当前 SUMO 场景中的装备车辆，逐车创建桥接、点云输出、TF 和 RViz 机身 Marker。优先使用 `gazebo/models/<车辆ID>/model.sdf`，不存在时复用 `background_car`。在背景车共用模型中引用会给所有复用者安装；只装备 `bg_01` 时建立独立的 `gazebo/models/bg_01/model.sdf`，再生成交通世界。
+启动扫描直接读取 Gazebo 世界并识别装备车辆，逐车创建桥接、点云输出、TF 和 RViz 机身 Marker。优先使用 `gazebo/models/<车辆ID>/model.sdf`，不存在时复用 `background_car`。在背景车共用模型中引用会给所有复用者安装；只装备 `bg_01` 时建立独立的 `gazebo/models/bg_01/model.sdf`，再生成交通世界。
 
 添加场景车辆或独立车辆模型后，在项目根目录执行 `python3 gazebo/scripts/build_traffic_world.py`，并重启演示。已有车辆只增加此 include 或修改雷达参数时，重启即可。模组按当前 5 m × 1.8 m 车身设计，其他尺寸车辆需调整安装位置。
 

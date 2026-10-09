@@ -44,6 +44,16 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 ## 启动
 
+无需 SUMO 的预览入口：
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source ros/install/setup.bash
+ros2 launch cosim_bridge sensor_preview.launch.py
+```
+
+使用独立配置 [sensor_preview.rviz](sensor_preview.rviz)，显示网格、静态车辆 / 道路 / 传感器 Marker、TF、六路相机拼图及五路点云。Gazebo 提供 `/clock`，车体姿态来自世界初始 pose 的静态 TF；相机初始聚焦后车附近，不依赖交通、V2V 或制动节点。此配置不包含尚未发布的 Odom / Path / 通信显示。车辆不行驶，传感器会随 Gazebo 时间持续更新，可以自由拉动视角。预览与完整交通演示必须退出后切换，不能直接叠加启动。
+
 按 [ROS2 说明](../ros/README.md) 完成构建后，从项目根目录执行：
 
 ```bash

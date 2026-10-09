@@ -29,6 +29,16 @@ https://github.com/user-attachments/assets/d4d78d67-6a68-4f9a-a504-e893fb616150
 
 ## 构建与启动
 
+只查看传感器时，可独立启动 Gazebo + RViz，无需 SUMO、Veins、INET 或 OMNeT++ 进程。ROS2 构建完成后执行：
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source ros/install/setup.bash
+ros2 launch cosim_bridge sensor_preview.launch.py
+```
+
+车辆停在 Gazebo 世界的初始位置，Gazebo 自行推进时间，六路相机、前向激光雷达和四角雷达持续采样；RViz 显示静态车体、道路、传感器、TF、图像和点云。此入口不运行交通或制动控制，不等待 SUMO Play。参数与边界见 [ROS2 独立预览说明](ros/README.md)。完整交通演示仍使用下面的 `demo.launch.py`；切换入口前先 Ctrl+C 退出上一组，两种模式不能在同一 ROS 域 / Gazebo 分区同时运行。目前不支持在预览运行中直接启动 SUMO 接管车辆。
+
 在项目根目录执行：
 
 ```bash

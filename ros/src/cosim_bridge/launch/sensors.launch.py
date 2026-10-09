@@ -1,5 +1,5 @@
 """自动识别车顶与四角传感器模组，逐车建立独立话题与展示节点。"""
-import importlib.util
+from cosim_bridge.preview_scene import world_vehicles
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from launch import LaunchDescription
@@ -11,13 +11,10 @@ from launch_ros.actions import Node
 def sensor_nodes(context):
     root = Path(LaunchConfiguration('project_root').perform(context))
     scenario = LaunchConfiguration('scenario').perform(context)
-    spec = importlib.util.spec_from_file_location('traffic_scene', root / 'sumo/scripts/traffic_scene.py')
-    scene = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(scene)
     actions = []
-    for vehicle in scene.vehicles(root, scenario):
+    for vehicle in world_vehicles(root, scenario):
         name = vehicle['id']
-        model_name = name if (root/f'gazebo/models/{name}/model.sdf').is_file() else 'background_car'
+        model_name = vehicle['model']
         model = ET.parse(root / f'gazebo/models/{model_name}/model.sdf')
         if any(i.findtext('uri') == 'model://corner_radar_rig' for i in model.findall('.//include')):
             actions.extend(corner_radar_nodes(root, name))
