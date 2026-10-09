@@ -4,7 +4,7 @@
 
 ## 构建与启动
 
-`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立 yaw 安装 TF 和 optical TF。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
+`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
 
 运行中可执行 `python3 ros/tests/check_surround_camera_run.py` 检查六路真实图像、独立标定、光轴 TF、同步时间戳和拼图排列。
 

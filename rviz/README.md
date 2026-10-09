@@ -4,9 +4,15 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 ## 当前显示功能
 
-增加四个独立 `Corner radar` 点云显示，分别订阅 `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored`。左前橙色、右前粉色、左后紫色、右后蓝青色；地面回波统一亮绿色。四路都是三维场景的真实射线回波，每帧替换，不累积；可分别开关。角雷达机身通过 `/demo/markers` 的 `car_b/radars` 命名空间显示，安装 TF 和机身几何均读取独立 SDF。此处展示的是毫米波距离回波的射线近似，不是射频或多普勒仿真。复用与参数见 [四角雷达模块](../gazebo/models/corner_radar_rig/README.md)。
+增加四个独立 `Corner radar` 点云显示，分别订阅 `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored`。左前橙色、右前粉色、左后紫色、右后蓝青色；地面回波统一亮绿色。四颗水平视场均为 120°（左右各 60°），垂直上下各 15°；前角朝左右前方各 45°，在车前中心线距前保险杠约 3.67 m 后形成水平交汇区；后角朝左右后方各 135°，近车侧 / 车尾仍有盲区。四路都是三维场景的真实射线回波，每帧替换，不累积；可分别开关。角雷达机身通过 `/demo/markers` 的 `car_b/radars` 命名空间显示，安装 TF 和机身几何均读取独立 SDF。此处展示的是毫米波距离回波的射线近似，不是射频或多普勒仿真。复用与参数见 [四角雷达模块](../gazebo/models/corner_radar_rig/README.md)。
 
 `Six cameras - front and surround` 在单个 `Image` 窗口显示六颗摄像头，订阅 `/car_b/camera/surround/image_raw`（1280×1176）。两列三行：左列从上到下为长焦、标准主摄、广角；右列从上到下为后向、左向、右向。六路原图 `/car_b/camera/{tele,standard,wide,rear,left,right}/image_raw` 和各自 CameraInfo 均独立传输；拼图仅拼接相同时间戳的六帧，缺帧时跳过该组。原三目 `camera/triple/image_raw` 仍保留，可以手动切换 Image 话题查看。两套 RViz 配置都只设置一个摄像头 Image 显示，可拖动、停靠并拉大查看。侧后相机安装与复用见 [独立侧后模组](../gazebo/models/surround_camera_rig/README.md)。
+
+左右侧相机均向下俯视 10°，六路拼图右列第二、三行能看到更多路面；安装 TF 同步读取 SDF 的完整姿态。
+
+后向相机水平视场为 140°，比原先 120° 更广角，车尾近处可见范围更大；右列第一行标题和独立 CameraInfo 随 SDF 自动更新。
+
+长焦水平视场为 20°，预览标题从 SDF 自动读取；相比之前 15°，同距离目标显示尺寸约缩小四分之一，CameraInfo 同步反映新内参。
 
 车顶传感器模组也通过 `/demo/markers` 绘制，命名空间为 `car_b/sensors`：底板、雷达支柱与机身、摄像头支柱与横臂、机身和三个镜头。几何直接读取 Gazebo 的独立 SDF，随车移动，不需要另外维护 RViz 安装位置。通信提示箭头位于 z=3.6 m，避开车顶模组。
 

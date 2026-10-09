@@ -1,4 +1,4 @@
-"""Check close-side/rear coverage and reuse on an independently named car."""
+"""Check side/rear coverage, near-field gaps and independent model reuse."""
 from pathlib import Path
 import math
 import tempfile
@@ -17,10 +17,13 @@ class CornerRadarTests(unittest.TestCase):
         rig = ET.parse(ROOT/'gazebo/models/corner_radar_rig/model.sdf')
         specs = radar_specs(ROOT)
         self.assertEqual(set(specs), {'front_left', 'front_right', 'rear_left', 'rear_right'})
-        # Keep targets outside the configured 0.3 m minimum sensing range.
-        targets = [(x, y, .65) for x in np.linspace(-2.5, 2.5, 11) for y in (-1.4, 1.4, -3.2, 3.2)]
-        targets += [(-x, y, .65) for x in (4., 12., 25.) for y in (-5., 0., 5.)]
-        for target in targets:
+        # Diagonal front mounts create front overlap but retain side near-field gaps.
+        targets = [(x, y, .65) for x in np.linspace(-2.5, 2.5, 11) for y in (-12., 12.)]
+        targets += [(-x, y, .65) for x in (12., 25.) for y in (-5., 0., 5.)]
+        front_overlap = [(x, 0., .65) for x in (6.3, 10., 25.)]
+        gaps = [(0., 1.4, .65), (0., -1.4, .65), (0., 8., .65),
+                (0., -8., .65), (-4., 0., .65), (6., 0., .65)]
+        for target in targets + front_overlap + gaps:
             covered = []
             for name, spec in specs.items():
                 x, y, z, _, _, yaw = spec['pose']
@@ -31,7 +34,13 @@ class CornerRadarTests(unittest.TestCase):
                 scan = sensor.find('lidar/scan/horizontal')
                 if (.3 <= distance <= 30 and float(scan.findtext('min_angle')) <= bearing <= float(scan.findtext('max_angle'))):
                     covered.append(name)
-            self.assertTrue(covered, f'Uncovered target {target}')
+            if target in gaps:
+                self.assertFalse(covered, f'Expected near-field gap at {target}')
+            else:
+                self.assertTrue(covered, f'Uncovered target {target}')
+            if target in front_overlap:
+                self.assertTrue({'front_left', 'front_right'} <= set(covered),
+                                f'Missing two-front-radar overlap at {target}')
 
     def test_one_line_include_on_custom_vehicle(self):
         with tempfile.TemporaryDirectory(prefix='cosim-radar-') as directory:

@@ -78,14 +78,19 @@ class SurroundCameraDisplay(Node):
         transforms = []
         for name in SIDE_CAMERAS:
             x, y, z, roll, pitch, yaw = map(float, self.specs[name].findtext('pose').split())
-            if abs(roll)+abs(pitch) > 1e-9:
-                raise ValueError('Side/rear cameras currently support level mounting and yaw rotation')
             mount = TransformStamped()
             mount.header.stamp = self.get_clock().now().to_msg()
             mount.header.frame_id = f'{self.vehicle}/base_link'
             mount.child_frame_id = f'{self.vehicle}/{name}_link'
             mount.transform.translation.x, mount.transform.translation.y, mount.transform.translation.z = x, y, z
-            mount.transform.rotation.z, mount.transform.rotation.w = math.sin(yaw/2), math.cos(yaw/2)
+            # SDF uses Rz(yaw) Ry(pitch) Rx(roll); positive pitch tilts +x down.
+            cr, sr = math.cos(roll/2), math.sin(roll/2)
+            cp, sp = math.cos(pitch/2), math.sin(pitch/2)
+            cy, sy = math.cos(yaw/2), math.sin(yaw/2)
+            mount.transform.rotation.x = sr*cp*cy - cr*sp*sy
+            mount.transform.rotation.y = cr*sp*cy + sr*cp*sy
+            mount.transform.rotation.z = cr*cp*sy - sr*sp*cy
+            mount.transform.rotation.w = cr*cp*cy + sr*sp*sy
             optical = TransformStamped()
             optical.header = copy.deepcopy(mount.header)
             optical.header.frame_id = mount.child_frame_id

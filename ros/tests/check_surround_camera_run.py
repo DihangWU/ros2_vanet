@@ -71,7 +71,9 @@ try:
             assert np.allclose([transform.translation.x, transform.translation.y, transform.translation.z], pose[:3])
             q = transform.rotation
             optical_forward = [2*(q.x*q.z+q.w*q.y), 2*(q.y*q.z-q.w*q.x), 1-2*(q.x*q.x+q.y*q.y)]
-            assert np.allclose(optical_forward, [math.cos(pose[5]), math.sin(pose[5]), 0], atol=1e-6), f'{name}: incorrect viewing TF'
+            expected_forward = [math.cos(pose[4])*math.cos(pose[5]),
+                                math.cos(pose[4])*math.sin(pose[5]), -math.sin(pose[4])]
+            assert np.allclose(optical_forward, expected_forward, atol=1e-6), f'{name}: incorrect viewing TF'
     print('PASS: six independent scene images and calibrations, correct optical TFs, synchronized 2-column x 3-row preview.')
 finally:
     node.destroy_node()
