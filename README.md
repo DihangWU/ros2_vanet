@@ -4,6 +4,11 @@ Demo Videos:
 
 https://github.com/user-attachments/assets/d4d78d67-6a68-4f9a-a504-e893fb616150
 
+Demo Photo:
+
+<img width="1556" height="905" alt="iShot_2026-10-09_20 24 21" src="https://github.com/user-attachments/assets/c84a8f86-103c-4ab6-88c5-9ee289ba340f" />
+
+
 
 
 
