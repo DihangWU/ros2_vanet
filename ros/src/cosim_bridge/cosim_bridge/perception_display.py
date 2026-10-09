@@ -97,8 +97,6 @@ class PerceptionDisplay(Node):
         transforms = []
         for name, sensor in self.sensors.items():
             x, y, z, roll, pitch, yaw = map(float, sensor.findtext('pose').split())
-            if any(abs(v) > 1e-9 for v in (roll, pitch, yaw)):
-                raise ValueError('本示例传感器与车体平行；改变安装角度时需同步扩展 TF 旋转')
             frame = f'{self.vehicle}/{name}_link'
             transform = TransformStamped()
             transform.header.stamp = self.get_clock().now().to_msg()
@@ -107,7 +105,14 @@ class PerceptionDisplay(Node):
             transform.transform.translation.x = x
             transform.transform.translation.y = y
             transform.transform.translation.z = z
-            transform.transform.rotation.w = 1.0
+            # SDF uses Rz(yaw) Ry(pitch) Rx(roll); positive pitch tilts +x down.
+            cr, sr = math.cos(roll/2), math.sin(roll/2)
+            cp, sp = math.cos(pitch/2), math.sin(pitch/2)
+            cy, sy = math.cos(yaw/2), math.sin(yaw/2)
+            transform.transform.rotation.x = sr*cp*cy - cr*sp*sy
+            transform.transform.rotation.y = cr*sp*cy + sr*cp*sy
+            transform.transform.rotation.z = cr*cp*sy - sr*sp*cy
+            transform.transform.rotation.w = cr*cp*cy + sr*sp*sy
             transforms.append(transform)
             if name in CAMERAS:
                 optical = TransformStamped()

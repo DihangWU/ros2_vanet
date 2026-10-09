@@ -63,12 +63,12 @@
       </sensor>
       <!-- 车顶前缘 x=0.95、顶面 z=1.55；镜头略向前伸且高于顶面。 -->
       <sensor name="wide" type="camera">
-        <pose>1.05 0.10 1.85 0 0 0</pose>
+        <pose>1.05 0.10 1.85 0 0.1745329252 0</pose>
         <always_on>true</always_on><update_rate>15</update_rate>
-        <camera><horizontal_fov>2.0943951024</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
+        <camera><horizontal_fov>2.3561944902</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
       </sensor>
       <sensor name="standard" type="camera">
-        <pose>1.05 0 1.85 0 0 0</pose>
+        <pose>1.05 0 1.85 0 0.0872664626 0</pose>
         <always_on>true</always_on><update_rate>15</update_rate>
         <camera><horizontal_fov>1.0471975512</horizontal_fov><image><width>640</width><height>360</height><format>R8G8B8</format></image><clip><near>0.05</near><far>150</far></clip></camera>
       </sensor>

@@ -8,13 +8,13 @@ RViz2 订阅 ROS2 消息，显示车辆位置、速度、坐标系和运动轨�
 
 增加四个独立 `Corner radar` 点云显示，分别订阅 `/car_b/radar/{front_left,front_right,rear_left,rear_right}/points_colored`。左前橙色、右前粉色、左后紫色、右后蓝青色；地面回波统一亮绿色。四颗水平视场均为 120°（左右各 60°），垂直上下各 15°；前角朝左右前方各 45°，在车前中心线距前保险杠约 3.67 m 后形成水平交汇区；后角朝左右后方各 135°，近车侧 / 车尾仍有盲区。四路都是三维场景的真实射线回波，每帧替换，不累积；可分别开关。角雷达机身通过 `/demo/markers` 的 `car_b/radars` 命名空间显示，安装 TF 和机身几何均读取独立 SDF。此处展示的是毫米波距离回波的射线近似，不是射频或多普勒仿真。复用与参数见 [四角雷达模块](../gazebo/models/corner_radar_rig/README.md)。
 
-`Six cameras - front and surround` 在单个 `Image` 窗口显示六颗摄像头，订阅 `/car_b/camera/surround/image_raw`（1280×1176）。两列三行：左列从上到下为长焦、标准主摄、广角；右列从上到下为后向、左向、右向。六路原图 `/car_b/camera/{tele,standard,wide,rear,left,right}/image_raw` 和各自 CameraInfo 均独立传输；拼图仅拼接相同时间戳的六帧，缺帧时跳过该组。原三目 `camera/triple/image_raw` 仍保留，可以手动切换 Image 话题查看。两套 RViz 配置都只设置一个摄像头 Image 显示，可拖动、停靠并拉大查看。侧后相机安装与复用见 [独立侧后模组](../gazebo/models/surround_camera_rig/README.md)。
+前向广角水平视场为 135°，以车头正前方为中心，左右各 67.5°。`Six cameras - front and surround` 在单个 `Image` 窗口显示六颗摄像头，订阅 `/car_b/camera/surround/image_raw`（640×2352）。六行一列，从上到下为长焦、标准主摄、广角、后向、左向、右向。六路原图 `/car_b/camera/{tele,standard,wide,rear,left,right}/image_raw` 和各自 CameraInfo 均独立传输；拼图仅拼接相同时间戳的六帧，缺帧时跳过该组。原三目 `camera/triple/image_raw` 仍保留，可以手动切换 Image 话题查看。两套 RViz 配置都只设置一个摄像头 Image 显示，可拖动、停靠并拉大查看。侧后相机安装与复用见 [独立侧后模组](../gazebo/models/surround_camera_rig/README.md)。
 
-左右侧相机均向下俯视 10°，六路拼图右列第二、三行能看到更多路面；安装 TF 同步读取 SDF 的完整姿态。
+左右侧相机均向下俯视 15°，六路拼图第五、六行能看到更多路面；安装 TF 同步读取 SDF 的完整姿态。
 
-左右侧向相机中心 yaw 为 ±117.5°，以正侧方向为基准向前覆盖 40°、向后覆盖 95°，总水平视场 135°，向下俯视 10°。两侧机身突出车身 3 cm、光心突出 5 cm，模组 Marker 与 Gazebo 共用几何。独立 TF 随 SDF 更新，六路拼图布局保持不变。
+左右侧向相机中心 yaw 为 ±117.5°，以正侧方向为基准向前覆盖 40°、向后覆盖 95°，总水平视场 135°，向下俯视 15°。两侧机身突出车身 3 cm、光心突出 5 cm，模组 Marker 与 Gazebo 共用几何。独立 TF 随 SDF 更新，六路拼图布局保持不变。
 
-后向相机水平视场为 140°，比原先 120° 更广角，车尾近处可见范围更大；右列第一行标题和独立 CameraInfo 随 SDF 自动更新。
+后向相机水平视场为 100°，以正后方为中心左右各 50°；第四行标题和独立 CameraInfo 随 SDF 自动更新。
 
 长焦水平视场为 20°，预览标题从 SDF 自动读取；相比之前 15°，同距离目标显示尺寸约缩小四分之一，CameraInfo 同步反映新内参。
 
@@ -128,3 +128,5 @@ RViz 使用 SUMO 发布的 `/clock`。Gazebo 从暂停状态开始，由 `gazebo
 ## Gazebo 中删除车辆
 
 Gazebo 删除车辆后，展示节点对对应模型、标签与传感器机身的每个 Marker ID 发送 DELETE，保留道路和其他车辆；完整演示同时发布空 Path 清除旧轨迹。装备车辆被删时清空该车辆最后的点云，相机预览置黑。预览车体 TF 改为持续发布的动态 TF，删除后停止发布；TF 接收端可能暂时保留历史缓存，静态传感器安装 TF 仍可存在，不代表车辆仍在场景。背景车删除不影响其余车辆，删除 A/B 会结束完整制动演示。
+
+车顶前向广角向下俯视 10°、标准主摄向下俯视 5°，水平视场分别为 135°（左右各 67.5°）和 60°；安装 TF 从独立模组 SDF 的完整姿态生成，六路拼图第二行显示标准主摄、第三行显示广角。

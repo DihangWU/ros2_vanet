@@ -1,4 +1,4 @@
-"""Independent side/rear cameras and timestamp-matched 2-column camera preview."""
+"""Independent side/rear cameras and timestamp-matched single-column camera preview."""
 import copy
 import math
 from pathlib import Path
@@ -15,7 +15,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from tf2_ros import StaticTransformBroadcaster
 
 SIDE_CAMERAS = ('rear', 'left', 'right')
-PREVIEW_ROWS = (('tele', 'rear'), ('standard', 'left'), ('wide', 'right'))
+PREVIEW_ROWS = tuple((name,) for name in ('tele', 'standard', 'wide', 'rear', 'left', 'right'))
 LABELS = dict(tele='TELEPHOTO', standard='MAIN / STANDARD', wide='WIDE',
               rear='REAR', left='LEFT', right='RIGHT')
 

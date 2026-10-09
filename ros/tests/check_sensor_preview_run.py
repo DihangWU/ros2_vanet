@@ -54,7 +54,7 @@ try:
     assert all(v['id']+'/model' in namespaces for v in vehicles)
     assert {'preview/road', 'car_b/sensors', 'car_b/radars', 'car_b/side_radars', 'car_b/surround_cameras'} <= namespaces
     preview = received['/car_b/camera/surround/image_raw']
-    assert (preview.width, preview.height) == (1280,1176)
+    assert (preview.width, preview.height) == (640,2352)
     print('PASS: one advancing Gazebo clock, 11 static vehicle TFs/markers, road, six-camera preview and seven live clouds; no SUMO/control nodes.')
 finally:
     node.destroy_node()

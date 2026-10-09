@@ -35,7 +35,7 @@ ros2 launch cosim_bridge sensor_preview.launch.py playback_rate:=0.5
 
 ### 完整交通演示
 
-`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机中心 yaw ±117.5°，向前覆盖 40°、向后覆盖 95°，向下俯视 10°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（1280×1176），两列三行：左列长焦 / 主摄 / 广角，右列后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
+`surround_camera_display` 为独立侧后相机包装节点，自动读取 [侧后模组](../gazebo/models/surround_camera_rig/README.md) 的安装与光学参数，建立完整 roll/pitch/yaw 安装 TF 和 optical TF（左右相机中心 yaw ±117.5°，向前覆盖 40°、向后覆盖 95°，向下俯视 15°）。新增 `/car_b/camera/{rear,left,right}/{image_raw,camera_info}`；原 `/car_b/camera/{tele,standard,wide}/...` 独立话题保留。前向广角水平视场为 135°，以车头正前方为中心，左右各 67.5°。六路图像同时间戳时发布 `/car_b/camera/surround/image_raw`（640×2352），六行一列，从上到下为长焦 / 主摄 / 广角 / 后 / 左 / 右；拼图不发布 CameraInfo。独立通道使用传感器 Best Effort QoS，拼图使用 Reliable QoS；任何一路缺帧只影响该组预览，不阻止独立图像发布。缓存上限十组。只引用侧后模组时预览自动退为后 / 左 / 右三行一列。桥接扫描与车顶、角雷达模块分别识别，其他车辆一行 include 即可复用。
 
 运行中可执行 `python3 ros/tests/check_surround_camera_run.py` 检查六路真实图像、独立标定、光轴 TF、同步时间戳和拼图排列。
 
@@ -136,7 +136,7 @@ map 使用 SUMO 平面坐标，车头位置沿朝向减半车长得到模型中�
 | `/car_b/camera/{wide,standard,tele}/camera_info` | 三套独立标定 |
 | `/car_b/camera/triple/image_raw` | 640×1176 同时间戳竖排拼图：上长焦、中主摄、下广角 |
 | `/car_b/camera/{rear,left,right}/image_raw`、`camera_info` | 三路独立侧后图像与各自标定 |
-| `/car_b/camera/surround/image_raw` | 默认 RViz 预览，1280×1176 两列三行，左列前向三目、右列后 / 左 / 右 |
+| `/car_b/camera/surround/image_raw` | 默认 RViz 预览，640×2352 六行一列，上三行为前向三目、下三行为后 / 左 / 右 |
 
 `/car_b/sensors/raw/...` 是桥接内部话题。拼图没有统一内参，不发布拼图 CameraInfo。点云高度着色不是障碍物语义分类。通信 Marker 中发布时间与执行时间是 V2V 事件命令；每次连续雷达命令另见雷达日志和网络执行日志。
 
@@ -214,3 +214,5 @@ python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehi
 ```
 
 网络接收采用非阻塞帧缓存，SUMO 等待 Play 或 Qtenv 暂停时不会阻塞车辆删除的 ROS 回调。网络暂停时先清理显示，SUMO / Veins 删除在下一次锁步应答执行；核心车辆删除的结束请求同样在网络恢复到应答点后提交。
+
+车顶前向广角向下俯视 10°、标准主摄向下俯视 5°，水平视场分别为 135°（左右各 67.5°）和 60°；安装 TF 从独立模组 SDF 的完整姿态生成，六路拼图第二行显示标准主摄、第三行显示广角。

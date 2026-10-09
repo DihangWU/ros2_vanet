@@ -53,7 +53,7 @@ try:
             del previews[:-15]
     assert match, f'Missing synchronized preview / streams / TF: info={list(infos)}, preview={len(previews)}'
     preview, group = match
-    assert (preview.width, preview.height) == (1280, 1176)
+    assert (preview.width, preview.height) == (640, 2352)
     cv = CvBridge()
     pixels = cv.imgmsg_to_cv2(preview, 'rgb8')
     for row, pair in enumerate(PREVIEW_ROWS):
@@ -74,7 +74,7 @@ try:
             expected_forward = [math.cos(pose[4])*math.cos(pose[5]),
                                 math.cos(pose[4])*math.sin(pose[5]), -math.sin(pose[4])]
             assert np.allclose(optical_forward, expected_forward, atol=1e-6), f'{name}: incorrect viewing TF'
-    print('PASS: six independent scene images and calibrations, correct optical TFs, synchronized 2-column x 3-row preview.')
+    print('PASS: six independent scene images and calibrations, correct optical TFs, synchronized 1-column x 6-row preview.')
 finally:
     node.destroy_node()
     rclpy.shutdown()

@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/d4d78d67-6a68-4f9a-a504-e893fb616150
 
 前车急刹并通过 Veins + INET 无线网络发送警告；后车实际收包后，ROS2 生成制动命令。SUMO 是车辆运动唯一真值源，Gazebo 和 RViz2 同步三维展示。目录按组件划分，优先保持学习时的可读性。
 
-蓝色后车装有可复用传感器：三维激光雷达（水平 120°、垂直 −25°～+15°）和广角 / 标准 / 长焦三目摄像头，均安装在车顶前缘，支架与车顶相接。RViz 六路拼图的第一列保持上长焦、中标准主摄、下广角，同时绘制传感器模组，并将亮色点云叠在车体与地面；三台前向相机分别发布独立 ROS2 图像和标定。安装、话题与一行引用方式见 [传感器模块说明](gazebo/models/perception_rig/README.md)。默认制动距离反馈来自 Gazebo 原始激光点云，算法独立放在 [Algorithm/LidarBrake](Algorithm/LidarBrake/README.md)；`control_mode:=sumo` 保留旧真值反馈对照。
+蓝色后车装有可复用传感器：三维激光雷达（水平 120°、垂直 −25°～+15°）和广角 / 标准 / 长焦三目摄像头，均安装在车顶前缘，支架与车顶相接。RViz 六路拼图的前三行保持长焦、标准主摄、广角的顺序，同时绘制传感器模组，并将亮色点云叠在车体与地面；三台前向相机分别发布独立 ROS2 图像和标定。安装、话题与一行引用方式见 [传感器模块说明](gazebo/models/perception_rig/README.md)。默认制动距离反馈来自 Gazebo 原始激光点云，算法独立放在 [Algorithm/LidarBrake](Algorithm/LidarBrake/README.md)；`control_mode:=sumo` 保留旧真值反馈对照。
 
 蓝车另外安装独立的 [四角短距雷达模组](gazebo/models/corner_radar_rig/README.md)，朝向左前 / 右前 / 左后 / 右后，前角已调整为左右各 45°，车前有交汇区，近车侧仍有覆盖缺口。每颗水平 120°、垂直 ±15°、0.3～30 m、20 Hz，独立发布三维点云；Gazebo 与 RViz 显示四个机身，RViz 按四种颜色区分障碍回波。其他车辆一行 merge include 即可复用，桥接与 TF 自动建立。当前使用 GPU 射线近似毫米波距离回波，不模拟射频或多普勒，也未接入制动算法。
 
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/d4d78d67-6a68-4f9a-a504-e893fb616150
 | gazebo/ | Harmonic / Sim 8.15.0 | 三维车辆、道路与相机 / 雷达场景采样 |
 | rviz/ | ROS2 Jazzy RViz2 | 三维 Marker、TF、轨迹、通信状态、图像与点云 |
 
-后车还安装了独立 [侧后摄像头模组](gazebo/models/surround_camera_rig/README.md)：左、右各一颗 120° 相机，后向一颗 140° 相机。六颗相机的图像和标定各自独立传输，RViz 单个 Image 窗口显示两列三行：左列长焦 / 主摄 / 广角，右列后向 / 左向 / 右向。六路拼图为 `/car_b/camera/surround/image_raw`，原三目拼图话题继续保留。
+后车还安装了独立 [侧后摄像头模组](gazebo/models/surround_camera_rig/README.md)：左、右各一颗 135° 相机，后向一颗 100° 相机。六颗相机的图像和标定各自独立传输，RViz 单个 Image 窗口显示六行一列，从上到下为长焦 / 主摄 / 广角 / 后向 / 左向 / 右向。六路拼图为 `/car_b/camera/surround/image_raw`，原三目拼图话题继续保留。
 
 这些目录保存项目自己的文件，第三方安装不复制到项目中。Veins、INET 和车辆应用运行在同一个 OMNeT++ 进程中。
 
