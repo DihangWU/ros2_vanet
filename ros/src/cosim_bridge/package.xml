@@ -12,6 +12,7 @@
   <exec_depend>tf2_sensor_msgs</exec_depend>
   <exec_depend>launch</exec_depend><exec_depend>launch_ros</exec_depend>
   <exec_depend>rviz2</exec_depend>
+  <exec_depend>cosim_rviz</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>ros_gz_interfaces</exec_depend>
   <exec_depend>gz_transport_vendor</exec_depend><exec_depend>gz_msgs_vendor</exec_depend>

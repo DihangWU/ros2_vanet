@@ -6,6 +6,9 @@ Panels:
       Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 1881
+  - Class: cosim_rviz/GroundReturns
+    Name: 雷达地面回波
+    Show Ground: true
 Visualization Manager:
   Class: ""
   Displays:

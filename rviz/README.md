@@ -138,3 +138,5 @@ Gazebo 删除车辆后，展示节点对对应模型、标签与传感器机身�
 独立预览、完整交通及两车配置新增十六个 `Ultrasonic` 点云显示，分别订阅前后保险杠与左右侧面十六路 `points_colored`，可独立开关。亮黄色表示高于地面的回波，白色表示地面，使用 RGB8、5 像素点、不累积历史帧。点云已按测量时刻动态 TF 转到 map，不依赖 RViz 再等传感器变换；十六个传感器机身由 `car_b/ultrasonics` Marker 显示。配置与复用见 [超声波模块](../gazebo/models/ultrasonic_rig/README.md)。
 
 新增八个 `Ultrasonic - side left/right ...` 显示项，依车长顺序为 front / mid front / mid rear / rear，黄色障碍回波、白色地面回波；前后八路保持原布局，三个 RViz 配置现在共有 16 路超声波、23 路传感器点云。
+
+新增原生 [雷达地面回波面板](cosim_rviz/README.md)：在“显示地面回波”处一键勾选 / 取消，统一控制全部 23 路显示点云。暂停时也能即时切换，保存 RViz 配置会记住状态。当前过滤 map 中 z≤0.15 m 的点，因此也会隐藏低矮目标；原始点云和制动数据保留。预览与完整演示都已加入面板，首次需要在 ros 工作空间重新 colcon build 并 source install/setup.bash。

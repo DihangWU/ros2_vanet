@@ -7,7 +7,7 @@ from builtin_interfaces.msg import Time
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import PointField
 from sensor_msgs_py import point_cloud2
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Bool
 from tf2_ros import ExtrapolationException
 from cosim_bridge.cloud_display import CloudDisplay
 
@@ -34,6 +34,7 @@ class CloudDisplayTests(unittest.TestCase):
     def setup_display(self):
         display = object.__new__(CloudDisplay)
         display.pending, display.buffer = {}, Buffer()
+        display.latest, display.show_ground = {}, True
         fields = [PointField(name=n, offset=i*4, datatype=PointField.FLOAT32, count=1)
                   for i, n in enumerate(('x', 'y', 'z'))]
         fields.append(PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1))
@@ -70,6 +71,25 @@ class CloudDisplayTests(unittest.TestCase):
         self.assertEqual(len(publisher.messages),1)
         self.assertEqual(publisher.messages[0].width,0)
         self.assertEqual(publisher.messages[0].header.frame_id,'map')
+        display.set_ground_visibility(Bool(data=False))
+        display.set_ground_visibility(Bool(data=True))
+        self.assertTrue(all(m.width == 0 for m in publisher.messages))
+
+    def test_ground_toggle_restores_full_cloud_without_new_sensor_frame(self):
+        display, publisher, cloud = self.setup_display()
+        fields = cloud.fields
+        points = np.array([(1.,2.,0.,0xFFFFFF),(2.,3.,.2,0xFFFF00),(3.,4.,1.,0x00FFFF)],
+                          dtype=[('x','<f4'),('y','<f4'),('z','<f4'),('rgb','<u4')])
+        full = point_cloud2.create_cloud(Header(frame_id='map',stamp=cloud.header.stamp), fields,points)
+        display.latest[publisher] = full
+        display.set_ground_visibility(Bool(data=False))
+        filtered = publisher.messages[-1]
+        self.assertEqual(filtered.width,2)
+        self.assertEqual(filtered.header,full.header)
+        np.testing.assert_array_equal(point_cloud2.read_points(filtered),points[1:])
+        self.assertEqual(full.width,3)
+        display.set_ground_visibility(Bool(data=True))
+        self.assertEqual(bytes(publisher.messages[-1].data),bytes(full.data))
 
 
 if __name__ == '__main__': unittest.main()

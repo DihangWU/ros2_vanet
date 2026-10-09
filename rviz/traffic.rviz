@@ -5,7 +5,10 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 597
+    Tree Height: 528
+  - Class: cosim_rviz/GroundReturns
+    Name: 雷达地面回波
+    Show Ground: false
 Visualization Manager:
   Class: ""
   Displays:
@@ -618,52 +621,12 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        car_b/base_link:
-          Value: true
-        car_b/left_link:
-          Value: true
-        car_b/left_optical_frame:
-          Value: true
-        car_b/lidar_link:
-          Value: true
-        car_b/radar/front_left_link:
-          Value: true
-        car_b/radar/front_right_link:
-          Value: true
-        car_b/radar/rear_left_link:
-          Value: true
-        car_b/radar/rear_right_link:
-          Value: true
-        car_b/radar/side_left_link:
-          Value: true
-        car_b/radar/side_right_link:
-          Value: true
-        car_b/rear_link:
-          Value: true
-        car_b/rear_optical_frame:
-          Value: true
-        car_b/right_link:
-          Value: true
-        car_b/right_optical_frame:
-          Value: true
-        car_b/standard_link:
-          Value: true
-        car_b/standard_optical_frame:
-          Value: true
-        car_b/tele_link:
-          Value: true
-        car_b/tele_optical_frame:
-          Value: true
-        car_b/wide_link:
-          Value: true
-        car_b/wide_optical_frame:
-          Value: true
       Marker Scale: 2
       Name: TF
       Show Arrows: false
@@ -672,7 +635,7 @@ Visualization Manager:
       Tree:
         {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -1244,9 +1207,11 @@ Window Geometry:
   Height: 2293
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000855fc0200000003fb000000100044006900730070006c0061007900730100000070000003510000018600fffffffb0000003c0054007200690070006c0065002000630061006d0065007200610020002d002000740065006c00650020006d00610069006e0020007700690064006501000004b80000040d0000000000000000fb00000040005300690078002000630061006d00650072006100730020002d002000660072006f006e007400200061006e006400200073007500720072006f0075006e006401000003cd000004f80000002800ffffff000009d40000085500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000855fc0200000004fb000000100044006900730070006c00610079007301000000700000030c0000018600fffffffb0000003c0054007200690070006c0065002000630061006d0065007200610020002d002000740065006c00650020006d00610069006e0020007700690064006501000004b80000040d0000000000000000fb00000040005300690078002000630061006d00650072006100730020002d002000660072006f006e007400200061006e006400200073007500720072006f0075006e006401000003880000046d0000002800fffffffb0000000c96f78fbe5730976256de6ce20100000801000000c4000000c400ffffff000009d40000085500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Six cameras - front and surround:
     collapsed: false
   Width: 3028
   X: 1321
   Y: 79
+  雷达地面回波:
+    collapsed: false

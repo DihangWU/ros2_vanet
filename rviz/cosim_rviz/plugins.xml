@@ -1,0 +1,5 @@
+<library path="ground_panel">
+  <class name="cosim_rviz/GroundReturns" type="cosim_rviz::GroundPanel" base_class_type="rviz_common::Panel">
+    <description>Show or hide ground returns across all radar display clouds.</description>
+  </class>
+</library>

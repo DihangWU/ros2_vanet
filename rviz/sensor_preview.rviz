@@ -4,8 +4,11 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded: ~
-      Splitter Ratio: 0.5
-    Tree Height: 486
+      Splitter Ratio: 0.6325300931930542
+    Tree Height: 431
+  - Class: cosim_rviz/GroundReturns
+    Name: 雷达地面回波
+    Show Ground: false
 Visualization Manager:
   Class: ""
   Displays:
@@ -46,6 +49,7 @@ Visualization Manager:
         car_b/sensors: true
         car_b/side_radars: true
         car_b/surround_cameras: true
+        car_b/ultrasonics: true
         preview/road: true
       Topic:
         Depth: 10
@@ -300,136 +304,21 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        bg_01/base_link:
-          Value: true
-        bg_02/base_link:
-          Value: true
-        bg_03/base_link:
-          Value: true
-        bg_04/base_link:
-          Value: true
-        bg_05/base_link:
-          Value: true
-        bg_06/base_link:
-          Value: true
-        bg_07/base_link:
-          Value: true
-        bg_08/base_link:
-          Value: true
-        bg_09/base_link:
-          Value: true
-        car_a/base_link:
-          Value: true
-        car_b/base_link:
-          Value: true
-        car_b/left_link:
-          Value: true
-        car_b/left_optical_frame:
-          Value: true
-        car_b/lidar_link:
-          Value: true
-        car_b/radar/front_left_link:
-          Value: true
-        car_b/radar/front_right_link:
-          Value: true
-        car_b/radar/rear_left_link:
-          Value: true
-        car_b/radar/rear_right_link:
-          Value: true
-        car_b/radar/side_left_link:
-          Value: true
-        car_b/radar/side_right_link:
-          Value: true
-        car_b/rear_link:
-          Value: true
-        car_b/rear_optical_frame:
-          Value: true
-        car_b/right_link:
-          Value: true
-        car_b/right_optical_frame:
-          Value: true
-        car_b/standard_link:
-          Value: true
-        car_b/standard_optical_frame:
-          Value: true
-        car_b/tele_link:
-          Value: true
-        car_b/tele_optical_frame:
-          Value: true
-        car_b/wide_link:
-          Value: true
-        car_b/wide_optical_frame:
-          Value: true
-        map:
-          Value: true
       Marker Scale: 2
       Name: TF
       Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          bg_01/base_link:
-            {}
-          bg_02/base_link:
-            {}
-          bg_03/base_link:
-            {}
-          bg_04/base_link:
-            {}
-          bg_05/base_link:
-            {}
-          bg_06/base_link:
-            {}
-          bg_07/base_link:
-            {}
-          bg_08/base_link:
-            {}
-          bg_09/base_link:
-            {}
-          car_a/base_link:
-            {}
-          car_b/base_link:
-            car_b/left_link:
-              car_b/left_optical_frame:
-                {}
-            car_b/lidar_link:
-              {}
-            car_b/radar/front_left_link:
-              {}
-            car_b/radar/front_right_link:
-              {}
-            car_b/radar/rear_left_link:
-              {}
-            car_b/radar/rear_right_link:
-              {}
-            car_b/radar/side_left_link:
-              {}
-            car_b/radar/side_right_link:
-              {}
-            car_b/rear_link:
-              car_b/rear_optical_frame:
-                {}
-            car_b/right_link:
-              car_b/right_optical_frame:
-                {}
-            car_b/standard_link:
-              car_b/standard_optical_frame:
-                {}
-            car_b/tele_link:
-              car_b/tele_optical_frame:
-                {}
-            car_b/wide_link:
-              car_b/wide_optical_frame:
-                {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -975,25 +864,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 45
+      Distance: 17.86457061767578
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 52.5
-        Y: -4.800000190734863
-        Z: 1
+        X: 51.136905670166016
+        Y: -6.786747455596924
+        Z: 0.9737168550491333
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5600000023841858
+      Pitch: 1.2199995517730713
       Target Frame: map
       Value: Orbit (rviz_default_plugins)
-      Yaw: 5.675016403198242
+      Yaw: 4.436832904815674
     Saved: ~
 Window Geometry:
   Displays:
@@ -1001,9 +890,11 @@ Window Geometry:
   Height: 2322
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000872fc0200000002fb00000040005300690078002000630061006d00650072006100730020002d002000660072006f006e007400200061006e006400200073007500720072006f0075006e00640100000070000005840000002800fffffffb000000100044006900730070006c0061007900730100000600000002e20000018600ffffff000009e50000087200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001f400000872fc0200000003fb00000040005300690078002000630061006d00650072006100730020002d002000660072006f006e007400200061006e006400200073007500720072006f0075006e00640100000070000004eb0000002800fffffffb000000100044006900730070006c0061007900730100000567000002ab0000018600fffffffb0000000c96f78fbe5730976256de6ce2010000081e000000c4000000c400ffffff000009e50000087200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Six cameras - front and surround:
     collapsed: false
   Width: 3045
   X: 1249
   Y: 64
+  雷达地面回波:
+    collapsed: false

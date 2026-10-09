@@ -230,3 +230,5 @@ python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehi
 侧面新增 `/car_b/ultrasonic/side_{left,right}_{front,mid_front,mid_rear,rear}/{points,range,points_colored}` 八路独立输出；节点自动扫描同一 SDF，无需按传感器数量修改节点。原始传感器坐标系、动态车辆 TF、显示 map 变换和删除清理保持一致。
 
 ROS2 适配节点对先于仿真时钟到达的原始激光帧使用最多 20 帧的等待队列，时钟追上后按到达顺序处理，保留原测量时间戳；过期检查仍生效，删除核心车辆时清空队列。此处理避免多传感器启动时钟到达较晚造成点云丢失及同步等待超时，不改变距离算法或控制参数。
+
+RViz 原生面板包 `cosim_rviz` 源码位于 [rviz/cosim_rviz](../rviz/cosim_rviz/README.md)，通过 ros/src 下的符号链接加入构建。共享 CloudDisplay 订阅 `/display/show_ground_returns`（Bool、可靠、持久化最新值），过滤 map 显示点云并缓存最近完整帧以支持暂停时切换；清理车辆后不会恢复旧回波。原始点云、测距、动态 TF 和制动算法输入不变。
