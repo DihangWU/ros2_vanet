@@ -33,11 +33,14 @@ class MarkerHistory:
         self.retired = set()
 
     def reconcile(self, array, stamp):
+        supplied = {(m.ns, m.id) for m in array.markers}
         active = {(m.ns, m.id) for m in array.markers if m.action == Marker.ADD}
         self.retired |= self.keys-active
         self.retired -= active
         self.keys = active
-        for namespace, identifier in sorted(self.retired):
+        # Publishers may already include DELETE (for example an expired packet replay).
+        # RViz rejects duplicate keys even when both entries request deletion.
+        for namespace, identifier in sorted(self.retired-supplied):
             marker = Marker()
             marker.header.frame_id, marker.header.stamp = 'map', stamp
             marker.ns, marker.id, marker.action = namespace, identifier, Marker.DELETE

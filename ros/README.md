@@ -216,3 +216,5 @@ python3 ros/tests/check_vehicle_removal_run.py --mode preview --core --core-vehi
 网络接收采用非阻塞帧缓存，SUMO 等待 Play 或 Qtenv 暂停时不会阻塞车辆删除的 ROS 回调。网络暂停时先清理显示，SUMO / Veins 删除在下一次锁步应答执行；核心车辆删除的结束请求同样在网络恢复到应答点后提交。
 
 车顶前向广角向下俯视 10°、标准主摄向下俯视 5°，水平视场分别为 135°（左右各 67.5°）和 60°；安装 TF 从独立模组 SDF 的完整姿态生成，六路拼图第二行显示标准主摄、第三行显示广角。
+
+`MarkerHistory` 仅为当前 MarkerArray 未包含的退役标记补发 DELETE，避免与通信动画自身的删除消息重复；`python3 ros/tests/test_communication_visuals.py` 覆盖收包动画、动画结束及核心车辆移除时的标记唯一性。
